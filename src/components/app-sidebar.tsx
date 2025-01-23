@@ -24,7 +24,10 @@ import {
   SidebarFooter,
   SidebarHeader,
   SidebarRail,
+  SidebarTrigger,
 } from "@/components/ui/sidebar"
+import Image from "next/image"
+import Link from "next/link"
 
 // This is sample data.
 const data = {
@@ -155,15 +158,18 @@ const data = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader>
-        {/* <img src="@/app/favicon.ico" alt="" /> */}
-      </SidebarHeader>
+      <Link href="/">
+        <SidebarHeader>
+            <Image src="/icon.png" width={35} height={40} alt="Logo" />
+        </SidebarHeader>
+      </Link>
 
       <SidebarContent>
         <NavMain items={data.navMain} />
         <NavManagements menus={data.menus} />
       </SidebarContent>
 
+      <SidebarTrigger className="ml-2.5" />
       <SidebarFooter>
         <NavUser user={data.user} />
       </SidebarFooter>
