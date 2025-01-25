@@ -2,10 +2,6 @@
 
 import * as React from "react"
 import {
-  AudioWaveform,
-  Command,
-  GalleryVerticalEnd,
-
   Users,
   PenLine,
   Calculator,
@@ -29,30 +25,12 @@ import {
 import Image from "next/image"
 import Link from "next/link"
 
-// This is sample data.
 const data = {
   user: {
     name: "shadcn",
     email: "m@example.com",
     avatar: "",
   },
-  // teams: [
-  //   {
-  //     name: "Acme Inc",
-  //     logo: GalleryVerticalEnd,
-  //     plan: "Enterprise",
-  //   },
-  //   {
-  //     name: "Acme Corp.",
-  //     logo: AudioWaveform,
-  //     plan: "Startup",
-  //   },
-  //   {
-  //     name: "Evil Corp.",
-  //     logo: Command,
-  //     plan: "Free",
-  //   },
-  // ],
   navMain: [
     {
       title: "Registration",
@@ -62,7 +40,7 @@ const data = {
       items: [
         {
           title: "Customer",
-          url: "#",
+          url: "/customer",
         },
         {
           title: "Guarantor",
@@ -173,7 +151,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarFooter>
         <NavUser user={data.user} />
       </SidebarFooter>
-      
+
       <SidebarRail />
     </Sidebar>
   )
