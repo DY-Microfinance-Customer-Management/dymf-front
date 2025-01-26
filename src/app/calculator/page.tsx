@@ -1,26 +1,21 @@
-"use client"
+'use client';
 
+// React
 import React, { useState } from "react";
+
+// UI Components
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+
+// Icons
+import { ChevronDown } from "lucide-react";
+
+// Actions
+
 
 export default function Home() {
   const [principal, setPrincipal] = useState<number>(0);
@@ -56,13 +51,18 @@ export default function Home() {
     setSchedule(result);
   };
 
+  const [loanType, setLoanType] = useState('Equal');
+  const handleLoanType = (value: string) => {
+    setLoanType(value);
+  };
+
   return (
     <div className="flex flex-col p-10 space-y-8 min-h-screen">
       <div className="flex justify-between space-x-8">
         {/* 입력 섹션 */}
-        <Card className="w-1/3 h-[490px]">
+        <Card className="w-1/3 h-[560px]">
           <CardHeader>
-            <CardTitle>Loan Calculator</CardTitle>
+            <CardTitle className="text-green-800">Loan Calculator</CardTitle>
             <CardDescription>
               Enter the details below to calculate the repayment schedule.
             </CardDescription>
@@ -105,6 +105,23 @@ export default function Home() {
                   onChange={(e) => setRepaymentCycle(Number(e.target.value))}
                 />
               </div>
+              <div className="flex flex-col space-y-1">
+                <Label>Loan Type</Label>
+                <DropdownMenu>
+                  <input required name="loanType" value={loanType} hidden readOnly />
+                  <DropdownMenuTrigger asChild>
+                    <button className="flex items-center justify-between border rounded px-3 py-2 w-full text-left">
+                      {loanType}
+                      <ChevronDown className="ml-2 h-4 w-4 text-gray-500" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem onClick={() => handleLoanType("Equal")}>Equal</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleLoanType("Equal Principal")}>Equal Principal</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleLoanType("Bullet")}>Bullet</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
           </CardContent>
           <CardFooter>
@@ -120,7 +137,7 @@ export default function Home() {
         {/* 결과 섹션 */}
         <Card className="w-2/3">
           <CardHeader>
-            <CardTitle>Repayment Schedule</CardTitle>
+            <CardTitle className="text-green-800">Repayment Schedule</CardTitle>
             <CardDescription>View your repayment breakdown below.</CardDescription>
           </CardHeader>
           <CardContent>

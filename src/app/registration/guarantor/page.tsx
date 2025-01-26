@@ -14,10 +14,10 @@ import { Label } from "@/components/ui/label";
 import { ChevronDown } from "lucide-react";
 
 // Actions
-import { createCustomerAction } from "@/actions/create-customer.action";
+import { createGuarantorAction } from "@/actions/create-guarantor.action";
 
 export default function FormPage() {
-    const [state, formAction, isPending] = useActionState(createCustomerAction, null);
+    const [_, formAction, isPending] = useActionState(createGuarantorAction, null);
 
     const [uploadedImage, setUploadedImage] = useState<string | null>(null);
 
@@ -47,7 +47,7 @@ export default function FormPage() {
     return (
         <form action={formAction}>
             <div className="flex flex-col p-10 space-y-8 min-h-screen">
-                <h1 className="text-3xl font-bold">Customer Registration</h1>
+                <h1 className="text-3xl font-bold">Guarantor Registration</h1>
 
                 <Card>
                     <CardHeader>

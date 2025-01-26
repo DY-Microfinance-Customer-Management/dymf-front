@@ -40,15 +40,15 @@ const data = {
       items: [
         {
           title: "Customer",
-          url: "/customer",
+          url: "/registration/customer",
         },
         {
           title: "Guarantor",
-          url: "#",
+          url: "/registration/guarantor",
         },
         {
           title: "Loan",
-          url: "#",
+          url: "/registration/loan",
         },
       ],
     },
