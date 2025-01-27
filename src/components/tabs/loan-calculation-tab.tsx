@@ -22,6 +22,8 @@ export default function LoanCalculationTab() {
     const [interestRate, setInterestRate] = useState<number>(28);
     const [numberOfRepayment, setNumberOfRepayment] = useState<number>(0);
     const [repaymentMethod, setRepaymentMethod] = useState('Equal');
+    const [totalPrincipal, setTotalPrincipal] = useState(0);
+    const [totalInterest, setTotalInterest] = useState(0);
 
     const handleRepaymentMethod = (value: string) => {
         setRepaymentMethod(value);
@@ -53,6 +55,16 @@ export default function LoanCalculationTab() {
         nextDate.setDate(startDate.getDate() + cycle * index);
         return nextDate.toISOString().split("T")[0];
     };
+
+    const calculateTotals = () => {
+        const totalPrincipal = schedule.reduce((sum, row) => sum + row.principal, 0);
+        const totalInterest = schedule.reduce((sum, row) => sum + row.interest, 0);
+        const totalPayment = schedule.reduce((sum, row) => sum + row.total, 0);
+
+        return { totalPrincipal, totalInterest, totalPayment };
+    };
+
+    const totals = calculateTotals();
 
     return (
         <div className="space-y-8">
@@ -173,6 +185,22 @@ export default function LoanCalculationTab() {
                                         </TableCell>
                                     </TableRow>
                                 ))}
+                                                            {/* Totals Row */}
+                            {schedule.length > 0 && (
+                                <TableRow className="bg-gray-100 font-bold">
+                                    <TableCell>Total</TableCell>
+                                    <TableCell className="text-right">
+                                        {totals.totalPrincipal.toLocaleString()}
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        {totals.totalInterest.toLocaleString()}
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        {totals.totalPayment.toLocaleString()}
+                                    </TableCell>
+                                    <TableCell />
+                                </TableRow>
+                            )}
                             </TableBody>
                         )}
                     </Table>
