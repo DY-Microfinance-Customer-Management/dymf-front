@@ -59,23 +59,23 @@ const data = {
       items: [
         {
           title: "Customer",
-          url: "#",
+          url: "/search/customer",
         },
         {
           title: "Loan",
-          url: "#",
+          url: "/search/loan",
         },
         {
           title: "Guarantor",
-          url: "#",
+          url: "/search/guarantor",
         },
         {
           title: "Collateral",
-          url: "#",
+          url: "/search/collateral",
         },
         {
           title: "Counseling",
-          url: "#",
+          url: "/search/counseling",
         },
       ],
     },
@@ -86,11 +86,11 @@ const data = {
       items: [
         {
           title: "Single",
-          url: "#",
+          url: "/repayment/single",
         },
         {
           title: "Batch",
-          url: "#",
+          url: "/repayment/batch",
         },
       ],
     },
@@ -101,15 +101,15 @@ const data = {
       items: [
         {
           title: "Registration",
-          url: "#",
+          url: "/overdue/registration",
         },
         {
           title: "Search",
-          url: "#",
+          url: "/overdue/search",
         },
         {
           title: "Management",
-          url: "#",
+          url: "/overdue/management",
         },
       ],
     },
@@ -117,12 +117,12 @@ const data = {
   menus: [
     {
       name: "Report",
-      url: "#",
+      url: "/report",
       icon: Folders,
     },
     {
       name: "HR",
-      url: "#",
+      url: "/hr",
       icon: Users,
     },
     {
