@@ -12,6 +12,7 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination"
+import { Switch } from "@/components/ui/switch"
 
 // Icons
 import { ChevronDown } from "lucide-react";
@@ -238,9 +239,20 @@ function EmployeeRegistrationPage({ selectedEmployee, onBack }: {
                     </div>
                     <div className="space-x-4">
                         <Button variant="secondary" onClick={onBack}>Back</Button>
+                        {/* Registration일 때는 없애기 */}
+                        <Button disabled={isPending} type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">Edit</Button>
                         <Button disabled={isPending} type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">Save</Button>
                     </div>
                 </div>
+
+                <Card>
+                    <CardContent className="flex justify-between mt-6">
+                        {/* 한번 loan officer로 등록하면 delete 할 수 없게 */}
+                        <Label className="mt-1.5">Loan Officer</Label>
+                        {/* <Switch checked={field.value} onCheckedChange={field.onChange} /> */}
+                        <Switch />
+                    </CardContent>
+                </Card>
 
                 <Card>
                     <CardHeader>
