@@ -22,11 +22,16 @@ export default function LoanCalculationTab() {
     const [interestRate, setInterestRate] = useState<number>(28);
     const [numberOfRepayment, setNumberOfRepayment] = useState<number>(0);
     const [repaymentMethod, setRepaymentMethod] = useState('Equal');
-    const [totalPrincipal, setTotalPrincipal] = useState(0);
-    const [totalInterest, setTotalInterest] = useState(0);
+    const [loanOfficer, setLoanOfficer] = useState('-');
+    // const [totalPrincipal, setTotalPrincipal] = useState(0);
+    // const [totalInterest, setTotalInterest] = useState(0);
 
     const handleRepaymentMethod = (value: string) => {
         setRepaymentMethod(value);
+    };
+
+    const handleLoanOfficer = (value: string) => {
+        setLoanOfficer(value)
     };
 
     const calculateSchedule = () => {
@@ -90,12 +95,26 @@ export default function LoanCalculationTab() {
                             <Label>Contract Date</Label>
                             <Input name="contractDate" type="date" defaultValue={new Date().toISOString().split("T")[0]} />
                         </div>
-                        <div className="col-span-1 flex items-end gap-2">
-                            <div className="flex-1">
-                                <Label>Loan Officer</Label>
-                                <Input disabled name="loanOfficer" />
-                            </div>
-                            <Button className="bg-blue-600 text-white hover:bg-blue-700">Search</Button>
+                        <div className="col-span-1"></div>
+                        <div className="col-span-1">
+                            <Label>Loan Officer</Label>
+                            <DropdownMenu>
+                                <input required name="repaymentMethod" value={repaymentMethod} hidden readOnly />
+                                <DropdownMenuTrigger asChild>
+                                    <button className="flex items-center justify-between border rounded px-3 py-2 w-full text-left">
+                                        {loanOfficer}
+                                        <ChevronDown className="ml-2 h-4 w-4 text-gray-500" />
+                                    </button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent>
+                                    {['John Doe', 'Hun', 'Young'].map((officer) => (
+                                        <DropdownMenuItem key={officer} onClick={() => handleLoanOfficer(officer)}>
+                                            {officer}
+                                        </DropdownMenuItem>
+                                    ))}
+                                </DropdownMenuContent>
+
+                            </DropdownMenu>
                         </div>
                     </div>
                 </CardContent>
@@ -185,22 +204,22 @@ export default function LoanCalculationTab() {
                                         </TableCell>
                                     </TableRow>
                                 ))}
-                                                            {/* Totals Row */}
-                            {schedule.length > 0 && (
-                                <TableRow className="bg-gray-100 font-bold">
-                                    <TableCell>Total</TableCell>
-                                    <TableCell className="text-right">
-                                        {totals.totalPrincipal.toLocaleString()}
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        {totals.totalInterest.toLocaleString()}
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        {totals.totalPayment.toLocaleString()}
-                                    </TableCell>
-                                    <TableCell />
-                                </TableRow>
-                            )}
+                                {/* Totals Row */}
+                                {schedule.length > 0 && (
+                                    <TableRow className="bg-gray-100 font-bold">
+                                        <TableCell>Total</TableCell>
+                                        <TableCell className="text-right">
+                                            {totals.totalPrincipal.toLocaleString()}
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            {totals.totalInterest.toLocaleString()}
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            {totals.totalPayment.toLocaleString()}
+                                        </TableCell>
+                                        <TableCell />
+                                    </TableRow>
+                                )}
                             </TableBody>
                         )}
                     </Table>
