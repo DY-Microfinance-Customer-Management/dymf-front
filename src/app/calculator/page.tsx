@@ -14,9 +14,6 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 // Icons
 import { ChevronDown } from "lucide-react";
 
-// Actions
-
-
 export default function Home() {
   const [principal, setPrincipal] = useState<number>(0);
   const [interestRate, setInterestRate] = useState<number>(0);
@@ -60,7 +57,7 @@ export default function Home() {
     <div className="flex flex-col p-10 space-y-8 min-h-screen">
       <div className="flex justify-between space-x-8">
         {/* 입력 섹션 */}
-        <Card className="w-1/3 h-[560px]">
+        <Card className="w-1/3">
           <CardHeader>
             <CardTitle className="text-green-800">Loan Calculator</CardTitle>
             <CardDescription>
