@@ -1,27 +1,12 @@
 "use client"
 
 import * as React from "react"
-import {
-  Users,
-  PenLine,
-  Calculator,
-  Folders,
-  Search,
-  CalendarClock,
-  Calendar,
-} from "lucide-react"
+import { Users, PenLine, Calculator, Folders, Search, CalendarClock, Calendar, MapPinCheckInside, HousePlus } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
 import { NavManagements } from "@/components/nav-management"
 import { NavUser } from "@/components/nav-user"
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarHeader,
-  SidebarRail,
-  SidebarTrigger,
-} from "@/components/ui/sidebar"
+import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail, SidebarTrigger } from "@/components/ui/sidebar"
 import Image from "next/image"
 import Link from "next/link"
 
@@ -116,6 +101,11 @@ const data = {
   ],
   menus: [
     {
+      name: "Check Point",
+      url: "/cp",
+      icon: MapPinCheckInside,
+    },
+    {
       name: "Report",
       url: "/report",
       icon: Folders,
@@ -124,6 +114,11 @@ const data = {
       name: "HR",
       url: "/hr",
       icon: Users,
+    },
+    {
+      name: "Fixed Assets",
+      url: "/fixed-assets",
+      icon: HousePlus,
     },
     {
       name: "Calculator",
