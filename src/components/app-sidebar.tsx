@@ -131,7 +131,7 @@ const data = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="icon" {...props}>
-      <Link href="/">
+      <Link href="/home">
         <SidebarHeader>
             <Image src="/icon.png" width={35} height={40} alt="Logo" />
         </SidebarHeader>

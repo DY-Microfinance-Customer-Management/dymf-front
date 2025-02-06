@@ -10,7 +10,7 @@ export interface Schedule {
 export interface Customer {
   name: string;
   nrcNo: string;
-  dateOfBirth: string;
+  dob: string;
   gender: string;
   phone: string;
   email: string;
@@ -22,3 +22,18 @@ export interface Customer {
   officePostalCode: string;
   info: Record<string, string>;
 };
+
+export interface Employee {
+  name: string;
+  nrcNo: string;
+  dob: string;
+  gender: string;
+  phone: string;
+  email: string;
+  homeAddress: string;
+  homePostalCode: string;
+  salary: number;
+  ssb: number;
+  incomeTax: number;
+  bonus: number;
+}

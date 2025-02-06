@@ -1,7 +1,7 @@
 'use client';
 
 // React
-import { useActionState, useState } from "react";
+import { useState, useEffect } from "react";
 
 // UI Components
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -17,12 +17,29 @@ import { Switch } from "@/components/ui/switch"
 // Icons
 import { ChevronDown } from "lucide-react";
 
-// Actions
-import { createCustomerAction } from "@/actions/create-customer.action";
+// Types
+import { Employee } from "@/\btypes";
 
 export default function Page() {
     const [selectedEmployee, setSelectedEmployee] = useState<string | null>(null);
     const [isConfirming, setIsConfirming] = useState<boolean>(false);
+
+    // Create Employee
+    async function createEmployee(employeeData: Employee) {
+        const response = await fetch(`${process.env.SERVER_URL}/personal`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ employeeData }),
+        });
+
+        if (!response.ok) {
+            console.error('/HR: Error while creating Employee!');
+            return;
+        }
+
+        // const data = await response.json();
+        // console.log(data);
+    }
 
     const confirmSelection = (customer: string) => {
         setSelectedEmployee(customer);
@@ -206,8 +223,7 @@ function EmployeeRegistrationPage({ selectedEmployee, onBack }: {
     selectedEmployee: string;
     onBack: () => void;
 }) {
-    const [state, formAction, isPending] = useActionState(createCustomerAction, null);
-
+    const [isPending, setIsPending] = useState(false);
     const [uploadedImage, setUploadedImage] = useState<string | null>(null);
 
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -229,7 +245,8 @@ function EmployeeRegistrationPage({ selectedEmployee, onBack }: {
     };
 
     return (
-        <form action={formAction}>
+        // <form action={formAction}>
+        <form>
             <div className="flex flex-col p-10 space-y-8 min-h-screen">
                 <div className="flex justify-between items-center">
                     <div>
