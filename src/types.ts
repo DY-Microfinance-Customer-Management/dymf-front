@@ -37,6 +37,23 @@ export interface CustomerSchema {
 	image?: string;
 }
 
+export interface GuarantorSchema {
+	name: string;
+	nrc_number: string;
+	birth: Date;
+	phone_number: string;
+	email?: string;
+	gender: 0 | 1;
+	cp_number: string;
+	loan_type: string;
+	home_address: string;
+	home_postal: string;
+	office_address?: string;
+	office_postal?: string;
+	details?: string[];
+	image?: string;
+}
+
 
 
 

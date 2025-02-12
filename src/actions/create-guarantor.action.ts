@@ -1,22 +1,81 @@
 'use server';
 
-export async function createGuarantorAction(_: any, formData: FormData) {
-    console.log('image', formData.get('image'));
-    console.log('name', formData.get('name'));
-    console.log('nrcNo', formData.get('nrcNo'));
-    console.log('dateOfBirth', formData.get('dateOfBirth'));
-    console.log('gender', formData.get('gender'));
-    console.log('phone', formData.get('phone'));
-    console.log('email', formData.get('email'));
-    console.log('loanType', formData.get('loanType'));
-    console.log('cpNo', formData.get('cpNo'));
-    console.log('homeAddress', formData.get('homeAddress'));
-    console.log('homePostalCode', formData.get('homePostalCode'));
-    console.log('officeAddress', formData.get('officeAddress'));
-    console.log('officePostalCode', formData.get('officePostalCode'));
-    console.log('info1', formData.get('info1'));
-    console.log('info2', formData.get('info2'));
-    console.log('info3', formData.get('info3'));
-    console.log('info4', formData.get('info4'));
-    console.log('info5', formData.get('info5'));
+// Credentials
+import { cookies } from 'next/headers';
+
+// Types
+import { serverActionMessage } from '@/\btypes';
+import { redirect } from 'next/navigation';
+
+import { GuarantorSchema } from '@/\btypes';
+
+export async function createGuarantorAction(_: any, formData: FormData): Promise<serverActionMessage> {
+    const cookieStore = await cookies();
+    const credentials = cookieStore.get('access_token')?.value;
+    // console.log(credentials);
+
+    if (!credentials) {
+        redirect('/login');
+    }
+
+    const infos = ['info1', 'info2', 'info3', 'info4', 'info5']
+    const data: GuarantorSchema = {
+        name: formData.get("name")?.toString() ?? '',
+        nrc_number: formData.get("nrcNo")?.toString() ?? '',
+        birth: formData.get("dateOfBirth") ? new Date(formData.get("dateOfBirth")!.toString()) : new Date(),
+        phone_number: formData.get("phone")?.toString() ?? '',
+        email: formData.get("email")?.toString() ?? '',
+        gender: formData.get("gender") === 'Male' ? 0 : 1,
+        cp_number: formData.get("cpNo")?.toString() ?? '',
+        loan_type: formData.get("loanType")?.toString() ?? '',
+        home_address: formData.get("homeAddress")?.toString() ?? '',
+        home_postal: formData.get("homePostalCode")?.toString() ?? '',
+        office_address: formData.get("officeAddress")?.toString() ?? '',
+        office_postal: formData.get("officePostalCode")?.toString() ?? '',
+        details: infos.map((idx) => formData.get(idx)?.toString() ?? ''),
+    }
+
+    if (formData.has('image')) {
+        const file = formData.get('image') as File;
+        if (file && file instanceof File) {
+            data['image'] = file.name;
+        }
+    }
+
+    // console.log(JSON.stringify(data));
+
+    const response = await fetch(`${process.env.API_SERVER_URL}/guarantor`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${credentials}`
+        },
+        body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+        const status = response.status;
+        
+        if (status === 400) {
+            return {
+                status: 400,
+                message: 'Something went wrong :( Please check the values of the guarantor information.'
+            }
+        } else if (status === 409) {
+            return {
+                status: 409,
+                message: 'Guarantor already exists! Please check again.'
+            }
+        } else if (status === 401 || 403) {
+            return {
+                status: status,
+                message: 'Unauthorized request. Please Login again.'
+            }
+        }
+    }
+
+    return {
+        status: 200,
+        message: 'Guarantor successfully registered.'
+    };
 }
