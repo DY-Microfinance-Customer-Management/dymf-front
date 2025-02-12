@@ -196,7 +196,7 @@ export default function FormPage() {
                                     <div className="col-span-2 flex items-end gap-2">
                                         <div className="flex-1">
                                             <Label>CP No.</Label>
-                                            <Input name="cpNo" value={confirmData.cpNo} onClick={() => setIsCpNumberDialogOpen(true)} />
+                                            <Input name="cpNo" value={confirmData.cpNo} onClick={() => setIsCpNumberDialogOpen(true)} readOnly />
                                         </div>
                                         <CpNumberDialog
                                             open={isCpNumberDialogOpen}
