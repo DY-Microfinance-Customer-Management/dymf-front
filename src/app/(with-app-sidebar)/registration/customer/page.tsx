@@ -1,29 +1,28 @@
 'use client';
 
-// React
-import { useActionState, useEffect, useRef, useState } from "react";
-import router from "next/router";
+// Actions
+import { createCustomerAction } from "@/actions/customer.action";
 
-// UI Components
+// Componenets: Dialog
+import { CpNumberDialog } from "@/components/pop-ups/cp-number-dialog";
+
+// Components: UI
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
 import { toast } from "sonner";
 
 // Icons
 import { ChevronDown } from "lucide-react";
 
-// Actions
-import { createCustomerAction } from "@/actions/customer.action";
+// React
+import { useActionState, useEffect, useState } from "react";
+import router from "next/router";
 
 export default function FormPage() {
-    const [uploadedImage, setUploadedImage] = useState<string | null>(null);
-    // const [confirmName, setConfirmName] = useState<string>('');
-
     // Data Handler
     const [confirmData, setConfirmData] = useState({
         name: '',
@@ -93,6 +92,7 @@ export default function FormPage() {
     }, [state]);
 
     // Image Handler
+    const [uploadedImage, setUploadedImage] = useState<string | null>(null);
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
@@ -106,15 +106,8 @@ export default function FormPage() {
         }
     };
 
-    const [gender, setGender] = useState('Male');
-    const handleGender = (value: string) => {
-        setGender(value);
-    };
-
-    const [loanType, setLoanType] = useState('Special Loan');
-    const handleLoanType = (value: string) => {
-        setLoanType(value);
-    };
+    // Dialog Handler
+    const [isCpNumberDialogOpen, setIsCpNumberDialogOpen] = useState(false);
 
     return (
         <>
@@ -131,7 +124,6 @@ export default function FormPage() {
                                     <AlertDialogHeader>
                                         <AlertDialogTitle>Message</AlertDialogTitle>
                                         <AlertDialogDescription>
-                                            {/* Register <strong>{confirmName}</strong> as Customer? */}
                                             Register <strong>{confirmData.name}</strong> as Customer?
                                         </AlertDialogDescription>
                                     </AlertDialogHeader>
@@ -204,9 +196,13 @@ export default function FormPage() {
                                     <div className="col-span-2 flex items-end gap-2">
                                         <div className="flex-1">
                                             <Label>CP No.</Label>
-                                            <Input name="cpNo" value={confirmData.cpNo} onChange={handleChange} />
+                                            <Input name="cpNo" value={confirmData.cpNo} onClick={() => setIsCpNumberDialogOpen(true)} />
                                         </div>
-                                        <Button className="bg-blue-600 text-white hover:bg-blue-700">Search</Button>
+                                        <CpNumberDialog
+                                            open={isCpNumberDialogOpen}
+                                            onClose={() => setIsCpNumberDialogOpen(false)}
+                                            onSelect={(cpNo) => setConfirmData(prev => ({ ...prev, cpNo }))}
+                                        />
                                     </div>
                                     <div className="col-span-2">
                                         <Label>Loan Type</Label>
