@@ -14,7 +14,7 @@ import { NavManagements } from "@/components/nav-management"
 import { NavUser } from "@/components/nav-user"
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail, SidebarTrigger } from "@/components/ui/sidebar"
 
-import { JwtData } from "@/\btypes";
+import { JwtData } from "@/types";
 
 const data = {
 	// user: {
