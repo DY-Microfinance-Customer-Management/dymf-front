@@ -1,4 +1,4 @@
-import { Employee } from "@/\btypes";
+import { Employee } from "@/types";
 
 // API 요청 함수
 export async function fetchEmployees(page: number, searchQuery: string): Promise<{ employees: Employee[]; totalPages: number }> {

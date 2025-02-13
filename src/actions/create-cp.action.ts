@@ -4,10 +4,10 @@
 import { cookies } from 'next/headers';
 
 // Types
-import { serverActionMessage } from '@/\btypes';
+import { serverActionMessage } from '@/types';
 import { redirect } from 'next/navigation';
 
-import { CheckPointSchema } from '@/\btypes';
+import { CheckPointSchema } from '@/types';
 
 export async function createEmployeeAction(_: any, formData: FormData): Promise<serverActionMessage> {
     const cookieStore = await cookies();

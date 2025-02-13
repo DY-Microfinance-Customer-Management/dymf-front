@@ -1,5 +1,5 @@
 import { addMonths, addWeeks, format } from "date-fns";
-import { Schedule } from "@/\btypes";
+import { Schedule } from "@/types";
 
 export class LoanCalculator {
   startDate: Date;

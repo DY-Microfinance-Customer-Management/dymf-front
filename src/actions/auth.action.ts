@@ -1,7 +1,7 @@
 'use server';
 
 // Types
-import { serverActionMessage } from "@/\btypes";
+import { serverActionMessage } from "@/types";
 
 // Credentials
 import { cookies } from 'next/headers';

@@ -1,13 +1,13 @@
 'use server';
 
 // Actions
-import { serverActionMessage } from '@/\btypes';
+import { serverActionMessage } from '@/types';
 
 // Credentials
 import { cookies } from 'next/headers';
 
 // Types
-import { EmployeeSchema } from '@/\btypes';
+import { EmployeeSchema } from '@/types';
 
 // React
 import { redirect } from 'next/navigation';
@@ -21,30 +21,32 @@ export async function createEmployeeAction(_: any, formData: FormData): Promise<
         redirect('/login');
     }
 
+    const isLoanOfficer = formData.get("isLoanOfficer") === 'on' ? true : false;
+    // console.log(isLoanOfficer)
+
     const data: EmployeeSchema = {
         // POST personnel -> 생성되면 return 될때 id 값 받아와서 -> POST personnel/loan_officer/{id} -> id만 보내주면 됨
-        isLoanOfficer: false,
         name: formData.get("name")?.toString() ?? '',
         nrc_number: formData.get("nrcNo")?.toString() ?? '',
         birth: formData.get("dateOfBirth") ? new Date(formData.get("dateOfBirth")!.toString()) : new Date(),
         phone_number: formData.get("phone")?.toString() ?? '',
+        address: formData.get("homeAddress")?.toString() ?? '',
         email: formData.get("email")?.toString() ?? '',
         gender: formData.get("gender") === 'Male' ? 0 : 1,
-        home_address: formData.get("homeAddress")?.toString() ?? '',
-        home_postal: formData.get("homePostalCode")?.toString() ?? '',
-        salary: formData.get("homePostalCode")?.toString() ?? '',
-        ssb: formData.get("homePostalCode")?.toString() ?? '',
-        incomeTax: formData.get("homePostalCode")?.toString() ?? '',
-        bonus: formData.get("homePostalCode")?.toString() ?? '',
-        image: formData.get("image")?.toString() ?? '',
+        salary: Number(formData.get("salary")) ?? 0,
+        ssb: Number(formData.get("ssb")) ?? 0,
+        income_tax: Number(formData.get("incomeTax")) ?? 0,
+        bonus: Number(formData.get("bonus")) ?? 0,
+        working_status: 0,
+        image: 'test.jpg',
     }
 
-    if (formData.has('image')) {
-        const file = formData.get('image') as File;
-        if (file && file instanceof File) {
-            data['image'] = file.name;
-        }
-    }
+    // if (formData.has('image')) {
+    //     const file = formData.get('image') as File;
+    //     if (file && file instanceof File) {
+    //         data['image'] = file.name;
+    //     }
+    // }
 
     // console.log(JSON.stringify(data));
 
@@ -56,6 +58,9 @@ export async function createEmployeeAction(_: any, formData: FormData): Promise<
         },
         body: JSON.stringify(data),
     });
+    const responseData = await response.json();
+    const createdId = responseData.id;
+    console.log(`personnel fetch response id: ${createdId}`)
 
     if (!response.ok) {
         const status = response.status;
@@ -76,6 +81,21 @@ export async function createEmployeeAction(_: any, formData: FormData): Promise<
                 message: 'Unauthorized request. Please Login again.'
             }
         }
+    }
+
+    if (response.ok && isLoanOfficer) {
+        const response = await fetch(`${process.env.API_SERVER_URL}/personnel/loan_officer/${createdId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${credentials}`
+            },
+        });
+
+        return {
+            status: 200,
+            message: 'Employee successfully registered.'
+        };
     }
 
     return {

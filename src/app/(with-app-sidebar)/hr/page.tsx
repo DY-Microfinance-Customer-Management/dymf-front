@@ -4,6 +4,7 @@
 import { useActionState, useEffect, useState } from "react";
 
 // UI Components
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -251,7 +252,7 @@ function EmployeeRegistrationPage({ selectedEmployee, onBack }: { selectedEmploy
         if (state === null) return;
 
         if (state?.status === 200) {
-            toast.success(`Customer ${confirmData.name} is successfully registered!`);
+            toast.success(`Employee ${confirmData.name} is successfully registered!`);
             setConfirmData({
                 isLoanOfficer: false,
                 name: '',
@@ -291,17 +292,33 @@ function EmployeeRegistrationPage({ selectedEmployee, onBack }: { selectedEmploy
     };
 
     return (
-        <form action={formAction}>
+        <form id="employeeForm" action={formAction}>
             <div className="flex flex-col p-10 space-y-8 min-h-screen">
                 <div className="flex justify-between items-center">
                     {selectedEmployee === null ?
                         <>
-                            <div>
-                                <h1 className="text-3xl font-bold">Employee Registration</h1>
-                            </div>
+                            <h1 className="text-3xl font-bold">Employee Registration</h1>
                             <div className="space-x-4">
                                 <Button variant="secondary" onClick={onBack}>Back</Button>
-                                <Button disabled={isPending} type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">Save</Button>
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <Button disabled={isPending} className="bg-blue-600 hover:bg-blue-700 text-white">Save</Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>Message</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                Register <strong>{confirmData.name}</strong> as Employee?
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                            <AlertDialogAction asChild>
+                                                <Button type="submit" form="employeeForm">Confirm</Button>
+                                            </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
                             </div>
                         </>
                         :
@@ -314,7 +331,25 @@ function EmployeeRegistrationPage({ selectedEmployee, onBack }: { selectedEmploy
                             <div className="space-x-4">
                                 <Button variant="secondary" onClick={onBack}>Back</Button>
                                 <Button disabled={isPending} type="button" className="bg-blue-600 hover:bg-blue-700 text-white">Edit</Button>
-                                <Button disabled={isPending} type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">Save</Button>
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <Button disabled={isPending} className="bg-blue-600 hover:bg-blue-700 text-white">Save</Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>Message</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                Register <strong>{confirmData.name}</strong> as Employee?
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                            <AlertDialogAction asChild>
+                                                <Button type="submit" form="employeeForm">Confirm</Button>
+                                            </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
                             </div>
                         </>
                     }
@@ -325,7 +360,7 @@ function EmployeeRegistrationPage({ selectedEmployee, onBack }: { selectedEmploy
                         {/* 한번 loan officer로 등록하면 delete 할 수 없게 */}
                         <Label className="mt-1.5">Loan Officer</Label>
                         {/* <Switch checked={field.value} onCheckedChange={field.onChange} /> */}
-                        <Switch />
+                        <Switch name="isLoanOfficer" />
                     </CardContent>
                 </Card>
 
@@ -417,28 +452,28 @@ function EmployeeRegistrationPage({ selectedEmployee, onBack }: { selectedEmploy
                             <div className="col-span-1">
                                 <Label>Salary</Label>
                                 <div className="flex items-end space-x-2">
-                                    <Input name="salary" value={confirmData.salary} onChange={handleChange} disabled={isPending} type="text" required />
+                                    <Input name="salary" value={confirmData.salary} onChange={handleChange} disabled={isPending} type="number" required />
                                     <Label>MMK</Label>
                                 </div>
                             </div>
                             <div className="col-span-1">
                                 <Label>SSB</Label>
                                 <div className="flex items-end space-x-2">
-                                    <Input name="ssb" value={confirmData.ssb} onChange={handleChange} disabled={isPending} type="text" required />
+                                    <Input name="ssb" value={confirmData.ssb} onChange={handleChange} disabled={isPending} type="number" required />
                                     <Label>MMK</Label>
                                 </div>
                             </div>
                             <div className="col-span-1">
                                 <Label>Income Tax</Label>
                                 <div className="flex items-end space-x-2">
-                                    <Input name="incomeTax" value={confirmData.incomeTax} onChange={handleChange} disabled={isPending} type="text" required />
+                                    <Input name="incomeTax" value={confirmData.incomeTax} onChange={handleChange} disabled={isPending} type="number" required />
                                     <Label>MMK</Label>
                                 </div>
                             </div>
                             <div className="col-span-1">
                                 <Label>Bonus</Label>
                                 <div className="flex items-end space-x-2">
-                                    <Input name="bonus" value={confirmData.bonus} onChange={handleChange} disabled={isPending} type="text" />
+                                    <Input name="bonus" value={confirmData.bonus} onChange={handleChange} disabled={isPending} type="number" />
                                     <Label>MMK</Label>
                                 </div>
                             </div>
