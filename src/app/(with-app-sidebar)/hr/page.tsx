@@ -1,45 +1,34 @@
 'use client';
 
 // React
-import { useState, useEffect } from "react";
+import { useActionState, useEffect, useState } from "react";
 
 // UI Components
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination"
-import { Switch } from "@/components/ui/switch"
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import { Switch } from "@/components/ui/switch";
 
 // Icons
 import { ChevronDown } from "lucide-react";
-
-// Types
-import { Employee } from "@/\btypes";
+import { toast } from "sonner";
+import { createEmployeeAction } from "@/actions/create-personnel.action";
+import { useRouter } from "next/navigation";
 
 export default function Page() {
     const [selectedEmployee, setSelectedEmployee] = useState<string | null>(null);
     const [isConfirming, setIsConfirming] = useState<boolean>(false);
+    const [isNewEmployee, setIsNewEmployee] = useState<boolean>(false);
 
-    // Create Employee
-    async function createEmployee(employeeData: Employee) {
-        const response = await fetch(`${process.env.SERVER_URL}/personal`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ employeeData }),
-        });
-
-        if (!response.ok) {
-            console.error('/HR: Error while creating Employee!');
-            return;
-        }
-
-        // const data = await response.json();
-        // console.log(data);
-    }
+    const handleNewEmployee = () => {
+        setSelectedEmployee(null);
+        setIsNewEmployee(true);
+    };
 
     const confirmSelection = (customer: string) => {
         setSelectedEmployee(customer);
@@ -55,19 +44,21 @@ export default function Page() {
         setSelectedEmployee(null);
     };
 
-    const goBackToSelectCustomer = () => {
+    const goBackToSelectEmployee = () => {
         setSelectedEmployee(null);
+        setIsNewEmployee(false);
     };
 
     return (
         <div className="flex flex-col min-h-screen">
             {selectedEmployee && !isConfirming ? (
-                <EmployeeRegistrationPage selectedEmployee={selectedEmployee} onBack={goBackToSelectCustomer} />
+                <EmployeeRegistrationPage selectedEmployee={selectedEmployee} onBack={goBackToSelectEmployee} />
+            ) : isNewEmployee ? (
+                <EmployeeRegistrationPage selectedEmployee={null} onBack={goBackToSelectEmployee} />
             ) : (
-                <SelectEmployeePage onConfirm={confirmSelection} />
+                <SelectEmployeePage onConfirm={confirmSelection} onNew={handleNewEmployee} />
             )}
 
-            {/* Confirmation Dialog */}
             {isConfirming && (
                 <Dialog open={isConfirming}>
                     <DialogContent>
@@ -90,7 +81,7 @@ export default function Page() {
     );
 }
 
-function SelectEmployeePage({ onConfirm }: { onConfirm: (employee: string) => void }) {
+function SelectEmployeePage({ onConfirm, onNew }: { onConfirm: (employee: string) => void, onNew: () => void }) {
     const [searchQuery, setSearchQuery] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const employeesPerPage = 5; // 한 페이지당 표시할 직원 수
@@ -126,7 +117,10 @@ function SelectEmployeePage({ onConfirm }: { onConfirm: (employee: string) => vo
 
     return (
         <div className="flex flex-col items-center p-6 space-y-6 min-h-screen">
-            <h1 className="text-2xl font-bold">Select Employee</h1>
+            <div className="flex justify-between w-full max-w-3xl mt-4">
+                <h1 className="text-3xl font-bold">Employee Registration</h1>
+                <Button onClick={onNew} className="bg-green-600 hover:bg-green-700 text-white">New</Button>
+            </div>
             <Card className="w-full max-w-3xl">
                 <CardContent>
                     <div className="space-y-4">
@@ -219,13 +213,70 @@ function SelectEmployeePage({ onConfirm }: { onConfirm: (employee: string) => vo
     );
 }
 
-function EmployeeRegistrationPage({ selectedEmployee, onBack }: {
-    selectedEmployee: string;
-    onBack: () => void;
-}) {
-    const [isPending, setIsPending] = useState(false);
-    const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+function EmployeeRegistrationPage({ selectedEmployee, onBack }: { selectedEmployee: string | null; onBack: () => void; }) {
+    // Router
+    const router = useRouter();
 
+    // Data Handler
+    const [confirmData, setConfirmData] = useState({
+        isLoanOfficer: false,
+        name: '',
+        nrcNo: '',
+        dateOfBirth: new Date("2000-01-01").toISOString().split("T")[0],
+        phone: '',
+        email: '',
+        gender: "Male",
+        homeAddress: '',
+        homePostalCode: '',
+        salary: '',
+        ssb: '',
+        incomeTax: '',
+        bonus: '',
+    });
+    // Input Value Handler
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setConfirmData({ ...confirmData, [e.target.name]: e.target.value });
+    };
+    // Dropdown Value Handler
+    const handleDropdownChange = (key: "gender" | "loanType", value: string) => {
+        setConfirmData(prev => ({
+            ...prev,
+            [key]: value
+        }));
+    };
+
+    // Server Action
+    const [state, formAction, isPending] = useActionState(createEmployeeAction, null);
+    useEffect(() => {
+        if (state === null) return;
+
+        if (state?.status === 200) {
+            toast.success(`Customer ${confirmData.name} is successfully registered!`);
+            setConfirmData({
+                isLoanOfficer: false,
+                name: '',
+                nrcNo: '',
+                dateOfBirth: new Date("2000-01-01").toISOString().split("T")[0],
+                phone: '',
+                email: '',
+                gender: "Male",
+                homeAddress: '',
+                homePostalCode: '',
+                salary: '',
+                ssb: '',
+                incomeTax: '',
+                bonus: '',
+            });
+        } else if (state?.status === 400) {
+            toast.error(state?.message);
+        } else if (state?.status === 401 || 403) {
+            toast.error(state?.message);
+            router.push('/login');
+        }
+    }, [state]);
+
+    // Image Handler
+    const [uploadedImage, setUploadedImage] = useState<string | null>(null);
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
@@ -239,27 +290,34 @@ function EmployeeRegistrationPage({ selectedEmployee, onBack }: {
         }
     };
 
-    const [gender, setGender] = useState('Male');
-    const handleGender = (value: string) => {
-        setGender(value);
-    };
-
     return (
-        // <form action={formAction}>
-        <form>
+        <form action={formAction}>
             <div className="flex flex-col p-10 space-y-8 min-h-screen">
                 <div className="flex justify-between items-center">
-                    <div>
-                        <h1 className="text-3xl font-bold">Employee Registration</h1>
-                        <p className="text-gray-600">Selected Employee: {selectedEmployee}</p>
-                        <p className="text-gray-600">Status: Working</p>
-                    </div>
-                    <div className="space-x-4">
-                        <Button variant="secondary" onClick={onBack}>Back</Button>
-                        {/* Registration일 때는 없애기 */}
-                        <Button disabled={isPending} type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">Edit</Button>
-                        <Button disabled={isPending} type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">Save</Button>
-                    </div>
+                    {selectedEmployee === null ?
+                        <>
+                            <div>
+                                <h1 className="text-3xl font-bold">Employee Registration</h1>
+                            </div>
+                            <div className="space-x-4">
+                                <Button variant="secondary" onClick={onBack}>Back</Button>
+                                <Button disabled={isPending} type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">Save</Button>
+                            </div>
+                        </>
+                        :
+                        <>
+                            <div>
+                                <h1 className="text-3xl font-bold">Employee</h1>
+                                <p className="text-gray-600">Selected Employee: {selectedEmployee}</p>
+                                <p className="text-gray-600">Status: Working</p>
+                            </div>
+                            <div className="space-x-4">
+                                <Button variant="secondary" onClick={onBack}>Back</Button>
+                                <Button disabled={isPending} type="button" className="bg-blue-600 hover:bg-blue-700 text-white">Edit</Button>
+                                <Button disabled={isPending} type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">Save</Button>
+                            </div>
+                        </>
+                    }
                 </div>
 
                 <Card>
@@ -293,37 +351,37 @@ function EmployeeRegistrationPage({ selectedEmployee, onBack }: {
                             <div className="col-span-3 grid grid-cols-4 gap-4">
                                 <div className="col-span-2">
                                     <Label>Name</Label>
-                                    <Input disabled={isPending} required name="name" type="text" />
+                                    <Input name="name" value={confirmData.name} onChange={handleChange} disabled={isPending} type="text" required />
                                 </div>
                                 <div className="col-span-2">
                                     <Label>NRC No.</Label>
-                                    <Input disabled={isPending} required name="nrcNo" type="text" />
+                                    <Input name="nrcNo" value={confirmData.nrcNo} onChange={handleChange} disabled={isPending} type="text" required />
                                 </div>
                                 <div className="col-span-2">
                                     <Label>Date of Birth</Label>
-                                    <Input disabled={isPending} required name="dateOfBirth" type="date" />
+                                    <Input name="dateOfBirth" value={confirmData.dateOfBirth} onChange={handleChange} disabled={isPending} type="date" required />
                                 </div>
                                 <div className="col-span-2">
                                     <Label>Phone</Label>
-                                    <Input disabled={isPending} required name="phone" type="text" />
+                                    <Input name="phone" value={confirmData.phone} onChange={handleChange} disabled={isPending} type="text" required />
                                 </div>
                                 <div className="col-span-2">
                                     <Label>Email</Label>
-                                    <Input disabled={isPending} required name="email" type="email" />
+                                    <Input name="email" value={confirmData.email} onChange={handleChange} disabled={isPending} type="email" required />
                                 </div>
                                 <div className="col-span-2">
                                     <Label>Gender</Label>
                                     <DropdownMenu>
-                                        <input required name="gender" value={gender} hidden readOnly />
+                                        <input name="gender" value={confirmData.gender} hidden readOnly />
                                         <DropdownMenuTrigger asChild>
                                             <button className="flex items-center justify-between border rounded px-3 py-2 w-full text-left">
-                                                {gender}
+                                                {confirmData.gender}
                                                 <ChevronDown className="ml-2 h-4 w-4 text-gray-500" />
                                             </button>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent>
-                                            <DropdownMenuItem onClick={() => handleGender("Male")}>Male</DropdownMenuItem>
-                                            <DropdownMenuItem onClick={() => handleGender("Female")}>Female</DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => handleDropdownChange("gender", "Male")}>Male</DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => handleDropdownChange("gender", "Female")}>Female</DropdownMenuItem>
                                         </DropdownMenuContent>
                                     </DropdownMenu>
                                 </div>
@@ -340,11 +398,11 @@ function EmployeeRegistrationPage({ selectedEmployee, onBack }: {
                         <div className="grid grid-cols-4 gap-4">
                             <div className="col-span-3">
                                 <Label>Home Address</Label>
-                                <Input name="homeAddress" type="text" required disabled={isPending} />
+                                <Input name="homeAddress" value={confirmData.homeAddress} onChange={handleChange} disabled={isPending} type="text" required />
                             </div>
                             <div className="col-span-1">
                                 <Label>Home Postal Code</Label>
-                                <Input name="homePostalCode" type="text" required disabled={isPending} />
+                                <Input name="homePostalCode" value={confirmData.homePostalCode} onChange={handleChange} disabled={isPending} type="text" required />
                             </div>
                         </div>
                     </CardContent>
@@ -359,28 +417,28 @@ function EmployeeRegistrationPage({ selectedEmployee, onBack }: {
                             <div className="col-span-1">
                                 <Label>Salary</Label>
                                 <div className="flex items-end space-x-2">
-                                    <Input name="info1" type="text" disabled={isPending} />
+                                    <Input name="salary" value={confirmData.salary} onChange={handleChange} disabled={isPending} type="text" required />
                                     <Label>MMK</Label>
                                 </div>
                             </div>
                             <div className="col-span-1">
                                 <Label>SSB</Label>
                                 <div className="flex items-end space-x-2">
-                                    <Input name="info1" type="text" disabled={isPending} />
+                                    <Input name="ssb" value={confirmData.ssb} onChange={handleChange} disabled={isPending} type="text" required />
                                     <Label>MMK</Label>
                                 </div>
                             </div>
                             <div className="col-span-1">
                                 <Label>Income Tax</Label>
                                 <div className="flex items-end space-x-2">
-                                    <Input name="info1" type="text" disabled={isPending} />
+                                    <Input name="incomeTax" value={confirmData.incomeTax} onChange={handleChange} disabled={isPending} type="text" required />
                                     <Label>MMK</Label>
                                 </div>
                             </div>
                             <div className="col-span-1">
                                 <Label>Bonus</Label>
                                 <div className="flex items-end space-x-2">
-                                    <Input name="info1" type="text" disabled={isPending} />
+                                    <Input name="bonus" value={confirmData.bonus} onChange={handleChange} disabled={isPending} type="text" />
                                     <Label>MMK</Label>
                                 </div>
                             </div>

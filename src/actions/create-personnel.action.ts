@@ -1,15 +1,18 @@
 'use server';
 
+// Actions
+import { serverActionMessage } from '@/\btypes';
+
 // Credentials
 import { cookies } from 'next/headers';
 
 // Types
-import { serverActionMessage } from '@/\btypes';
+import { EmployeeSchema } from '@/\btypes';
+
+// React
 import { redirect } from 'next/navigation';
 
-import { CustomerSchema } from '@/\btypes';
-
-export async function createCustomerAction(_: any, formData: FormData): Promise<serverActionMessage> {
+export async function createEmployeeAction(_: any, formData: FormData): Promise<serverActionMessage> {
     const cookieStore = await cookies();
     const credentials = cookieStore.get('access_token')?.value;
     // console.log(credentials);
@@ -18,26 +21,22 @@ export async function createCustomerAction(_: any, formData: FormData): Promise<
         redirect('/login');
     }
 
-    // 사진 있나 확인
-    // 있으면: url 요청 -> uuid를 const imageName
-    // 없으면: 그냥 넘어가
-
-    const infos = ['info1', 'info2', 'info3', 'info4', 'info5']
-    const data: CustomerSchema = {
+    const data: EmployeeSchema = {
+        // POST personnel -> 생성되면 return 될때 id 값 받아와서 -> POST personnel/loan_officer/{id} -> id만 보내주면 됨
+        isLoanOfficer: false,
         name: formData.get("name")?.toString() ?? '',
         nrc_number: formData.get("nrcNo")?.toString() ?? '',
         birth: formData.get("dateOfBirth") ? new Date(formData.get("dateOfBirth")!.toString()) : new Date(),
         phone_number: formData.get("phone")?.toString() ?? '',
         email: formData.get("email")?.toString() ?? '',
         gender: formData.get("gender") === 'Male' ? 0 : 1,
-        cp_number: formData.get("cpNo")?.toString() ?? '',
-        loan_type: formData.get("loanType")?.toString() ?? '',
         home_address: formData.get("homeAddress")?.toString() ?? '',
         home_postal: formData.get("homePostalCode")?.toString() ?? '',
-        office_address: formData.get("officeAddress")?.toString() ?? '',
-        office_postal: formData.get("officePostalCode")?.toString() ?? '',
-        details: infos.map((idx) => formData.get(idx)?.toString() ?? ''),
-        // iamge: imageName
+        salary: formData.get("homePostalCode")?.toString() ?? '',
+        ssb: formData.get("homePostalCode")?.toString() ?? '',
+        incomeTax: formData.get("homePostalCode")?.toString() ?? '',
+        bonus: formData.get("homePostalCode")?.toString() ?? '',
+        image: formData.get("image")?.toString() ?? '',
     }
 
     if (formData.has('image')) {
@@ -47,9 +46,9 @@ export async function createCustomerAction(_: any, formData: FormData): Promise<
         }
     }
 
-    console.log(JSON.stringify(data));
+    // console.log(JSON.stringify(data));
 
-    const response = await fetch(`${process.env.API_SERVER_URL}/customer`, {
+    const response = await fetch(`${process.env.API_SERVER_URL}/personnel`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -64,12 +63,12 @@ export async function createCustomerAction(_: any, formData: FormData): Promise<
         if (status === 400) {
             return {
                 status: 400,
-                message: 'Something went wrong :( Please check the values of the customer information.'
+                message: 'Something went wrong :( Please check the values of Employee information.'
             }
         } else if (status === 409) {
             return {
                 status: 409,
-                message: 'Customer already exists! Please check again.'
+                message: 'Employee already exists! Please check again.'
             }
         } else if (status === 401 || 403) {
             return {
@@ -81,7 +80,6 @@ export async function createCustomerAction(_: any, formData: FormData): Promise<
 
     return {
         status: 200,
-        message: 'Customer successfully registered.'
-        // presignedURL에 이미지 전송
+        message: 'Employee successfully registered.'
     };
 }

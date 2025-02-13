@@ -20,6 +20,7 @@ export interface JwtData extends JwtPayload {
 	username: string;
 }
 
+// Shemas
 export interface CustomerSchema {
 	name: string;
 	nrc_number: string;
@@ -54,45 +55,24 @@ export interface GuarantorSchema {
 	image?: string;
 }
 
-
-
-
-export interface Schedule {
-	Period: number;
-	PaymentDate: string;
-	Principal: number;
-	Interest: number;
-	Total: number;
-	RemainingBalance: number;
+export interface EmployeeSchema {
+	isLoanOfficer: boolean;
+	name: string;
+	nrc_number: string;
+	birth: Date;
+	phone_number: string;
+	email: string;
+	gender: 0 | 1;
+	home_address: string;
+	home_postal: string;
+	salary: string;
+	ssb: string;
+	incomeTax: string;
+	bonus?: string;
+	image?: string;
 }
 
-export interface Customer {
-	name: string;
-	nrcNo: string;
-	dob: string;
-	gender: string;
-	phone: string;
-	email: string;
-	loanType: string;
-	cpNo: string;
-	homeAddress: string;
-	homePostalCode: string;
-	officeAddress: string;
-	officePostalCode: string;
-	info: Record<string, string>;
-};
-
-export interface Employee {
-	name: string;
-	nrcNo: string;
-	dob: string;
-	gender: string;
-	phone: string;
-	email: string;
-	homeAddress: string;
-	homePostalCode: string;
-	salary: number;
-	ssb: number;
-	incomeTax: number;
-	bonus: number;
+export interface CheckPointSchema {
+	area_number: string;
+	description: string;
 }
