@@ -92,10 +92,12 @@ export async function createEmployeeAction(_: any, formData: FormData): Promise<
             },
         });
 
-        return {
-            status: 200,
-            message: 'Employee successfully registered.'
-        };
+        if (!response.ok) {
+            return {
+                status: 200,
+                message: 'Employee successfully registered.\nBut Loan Officer has not been assigned successfully. Please check in the HR Search Page.'
+            };
+        }
     }
 
     return {

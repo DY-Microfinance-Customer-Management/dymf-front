@@ -1,7 +1,7 @@
 'use client';
 
 // React
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useState, useTransition } from "react";
 
 // UI Components
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
@@ -20,6 +20,8 @@ import { ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { createEmployeeAction } from "@/actions/create-personnel.action";
 import { useRouter } from "next/navigation";
+import { getEmployeesAction } from "@/actions/get-employees.action";
+import { EmployeeSchema } from "@/types";
 
 export default function Page() {
     const [selectedEmployee, setSelectedEmployee] = useState<string | null>(null);
@@ -82,38 +84,42 @@ export default function Page() {
     );
 }
 
-function SelectEmployeePage({ onConfirm, onNew }: { onConfirm: (employee: string) => void, onNew: () => void }) {
+export function SelectEmployeePage({ onConfirm, onNew }: { onConfirm: (employee: string) => void, onNew: () => void }) {
     const [searchQuery, setSearchQuery] = useState("");
-    const [currentPage, setCurrentPage] = useState(1);
-    const employeesPerPage = 5; // 한 페이지당 표시할 직원 수
+    const [employees, setEmployees] = useState<EmployeeSchema[]>([]);
+    const [cursor, setCursor] = useState(1);
+    const [loading, startTransition] = useTransition();
+    const [error, setError] = useState("");
 
-    // 샘플 직원 데이터 (실제로는 API에서 불러와야 함)
-    const allEmployees = [
-        { name: "John Doe", nrc: "123456", dob: "1990-01-01", phone: "+123456789" },
-        { name: "Jane Smith", nrc: "7891011", dob: "1985-05-15", phone: "+987654321" },
-        { name: "Alice Brown", nrc: "456789", dob: "1993-07-21", phone: "+234567890" },
-        { name: "Bob White", nrc: "654321", dob: "1995-09-10", phone: "+345678901" },
-        { name: "Charlie Black", nrc: "987654", dob: "1992-04-25", phone: "+456789012" },
-        { name: "David Green", nrc: "321789", dob: "1988-12-15", phone: "+567890123" },
-    ];
+    // Fetch Employees using Server Action
+    const fetchEmployees = async (search: string, cursorValue: number) => {
+        startTransition(async () => {
+            setError("");
+            try {
+                const data = await getEmployeesAction(search, cursorValue);
+                console.log('data: ', data)
+                setEmployees(data);
+            } catch (err) {
+                setError("Error loading employees.");
+                setEmployees([]);
+            }
+        });
+    };
 
-    // 검색 적용 (검색어가 있을 경우 필터링)
-    const filteredEmployees = searchQuery
-        ? allEmployees.filter(employee =>
-            employee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            employee.nrc.includes(searchQuery) ||
-            employee.phone.includes(searchQuery)
-        )
-        : allEmployees;
+    // Handle Search
+    const handleSearch = () => {
+        fetchEmployees(searchQuery, 1);
+    };
 
-    // 현재 페이지에 해당하는 직원 목록 추출
-    const indexOfLastEmployee = currentPage * employeesPerPage;
-    const indexOfFirstEmployee = indexOfLastEmployee - employeesPerPage;
-    const currentEmployees = filteredEmployees.slice(indexOfFirstEmployee, indexOfLastEmployee);
+    // Handle Pagination
+    const nextPage = () => {
+        setCursor((prev) => prev + 1);
+        fetchEmployees("", cursor + 5);
+    };
 
-    // 페이지 변경 핸들러
-    const handlePageChange = (newPage: number) => {
-        setCurrentPage(newPage);
+    const prevPage = () => {
+        setCursor((prev) => Math.max(1, prev - 1));
+        fetchEmployees("", Math.max(1, cursor - 5));
     };
 
     return (
@@ -133,13 +139,15 @@ function SelectEmployeePage({ onConfirm, onNew }: { onConfirm: (employee: string
                         />
                         <Button
                             className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                            onClick={() => setCurrentPage(1)} // 검색 후 첫 페이지로 이동
+                            onClick={handleSearch}
+                            disabled={loading}
                         >
-                            Search
+                            {loading ? "Searching..." : "Search"}
                         </Button>
                     </div>
                 </CardContent>
                 <CardContent>
+                    {error && <p className="text-red-500">{error}</p>}
                     <Table>
                         <TableHeader>
                             <TableRow>
@@ -150,69 +158,189 @@ function SelectEmployeePage({ onConfirm, onNew }: { onConfirm: (employee: string
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {currentEmployees.map((employee, index) => (
-                                <TableRow
-                                    key={index}
-                                    onClick={() => onConfirm(employee.name)}
-                                    className="cursor-pointer hover:bg-gray-100"
-                                >
-                                    <TableCell>{employee.name}</TableCell>
-                                    <TableCell>{employee.nrc}</TableCell>
-                                    <TableCell>{employee.dob}</TableCell>
-                                    <TableCell>{employee.phone}</TableCell>
+                            {employees.length > 0 ? (
+                                employees.map((employee) => (
+                                    <TableRow
+                                        // key={employee.id}
+                                        onClick={() => onConfirm(employee.name)}
+                                        className="cursor-pointer hover:bg-gray-100"
+                                    >
+                                        <TableCell>{employee.name}</TableCell>
+                                        <TableCell>{employee.nrc_number}</TableCell>
+                                        {/* <TableCell>{employee.birth.split("T")[0]}</TableCell> */}
+                                        <TableCell>{employee.phone_number}</TableCell>
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={4} className="text-center">
+                                        No employees found.
+                                    </TableCell>
                                 </TableRow>
-                            ))}
-
-                            {/* 항상 5개의 행이 유지되도록 빈 행 추가 */}
-                            {Array.from({ length: Math.max(0, 5 - currentEmployees.length) }).map((_, index) => (
-                                <TableRow key={`empty-${index}`} className="h-[53px]">
-                                    <TableCell colSpan={4}></TableCell>
-                                </TableRow>
-                            ))}
+                            )}
                         </TableBody>
                     </Table>
 
-
                     {/* Pagination */}
-                    <Pagination className="mt-4">
-                        <PaginationContent>
-                            <PaginationItem>
-                                <PaginationPrevious
-                                    href="#"
-                                    onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-                                    aria-disabled={currentPage === 1}
-                                    className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
-                                />
-                            </PaginationItem>
-
-                            {[...Array(Math.ceil(filteredEmployees.length / employeesPerPage))].map((_, index) => (
-                                <PaginationItem key={index}>
-                                    <PaginationLink
+                    {!searchQuery && (
+                        <Pagination className="mt-4">
+                            <PaginationContent>
+                                <PaginationItem>
+                                    <PaginationPrevious
                                         href="#"
-                                        isActive={currentPage === index + 1}
-                                        onClick={() => handlePageChange(index + 1)}
-                                    >
-                                        {index + 1}
+                                        onClick={prevPage}
+                                        aria-disabled={cursor === 1}
+                                        className={cursor === 1 ? "pointer-events-none opacity-50" : ""}
+                                    />
+                                </PaginationItem>
+                                <PaginationItem>
+                                    <PaginationLink href="#" isActive>
+                                        {cursor}
                                     </PaginationLink>
                                 </PaginationItem>
-                            ))}
-
-                            <PaginationItem>
-                                <PaginationNext
-                                    href="#"
-                                    onClick={() => handlePageChange(Math.min(currentPage + 1, Math.ceil(filteredEmployees.length / employeesPerPage)))}
-                                    aria-disabled={currentPage === Math.ceil(filteredEmployees.length / employeesPerPage)}
-                                    className={currentPage === Math.ceil(filteredEmployees.length / employeesPerPage) ? "pointer-events-none opacity-50" : ""}
-                                />
-                            </PaginationItem>
-
-                        </PaginationContent>
-                    </Pagination>
+                                <PaginationItem>
+                                    <PaginationNext href="#" onClick={nextPage} />
+                                </PaginationItem>
+                            </PaginationContent>
+                        </Pagination>
+                    )}
                 </CardContent>
             </Card>
         </div>
     );
 }
+
+// function SelectEmployeePage({ onConfirm, onNew }: { onConfirm: (employee: string) => void, onNew: () => void }) {
+//     const [searchQuery, setSearchQuery] = useState("");
+//     const [currentPage, setCurrentPage] = useState(1);
+//     const employeesPerPage = 5; // 한 페이지당 표시할 직원 수
+
+//     // 샘플 직원 데이터 (실제로는 API에서 불러와야 함)
+//     const allEmployees = [
+//         { name: "John Doe", nrc: "123456", dob: "1990-01-01", phone: "+123456789" },
+//         { name: "Jane Smith", nrc: "7891011", dob: "1985-05-15", phone: "+987654321" },
+//         { name: "Alice Brown", nrc: "456789", dob: "1993-07-21", phone: "+234567890" },
+//         { name: "Bob White", nrc: "654321", dob: "1995-09-10", phone: "+345678901" },
+//         { name: "Charlie Black", nrc: "987654", dob: "1992-04-25", phone: "+456789012" },
+//         { name: "David Green", nrc: "321789", dob: "1988-12-15", phone: "+567890123" },
+//     ];
+
+//     // 검색 적용 (검색어가 있을 경우 필터링)
+//     const filteredEmployees = searchQuery
+//         ? allEmployees.filter(employee =>
+//             employee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+//             employee.nrc.includes(searchQuery) ||
+//             employee.phone.includes(searchQuery)
+//         )
+//         : allEmployees;
+
+//     // 현재 페이지에 해당하는 직원 목록 추출
+//     const indexOfLastEmployee = currentPage * employeesPerPage;
+//     const indexOfFirstEmployee = indexOfLastEmployee - employeesPerPage;
+//     const currentEmployees = filteredEmployees.slice(indexOfFirstEmployee, indexOfLastEmployee);
+
+//     // 페이지 변경 핸들러
+//     const handlePageChange = (newPage: number) => {
+//         setCurrentPage(newPage);
+//     };
+
+//     return (
+//         <div className="flex flex-col items-center p-6 space-y-6 min-h-screen">
+//             <div className="flex justify-between w-full max-w-3xl mt-4">
+//                 <h1 className="text-3xl font-bold">Employee Registration</h1>
+//                 <Button onClick={onNew} className="bg-green-600 hover:bg-green-700 text-white">New</Button>
+//             </div>
+//             <Card className="w-full max-w-3xl">
+//                 <CardContent>
+//                     <div className="space-y-4">
+//                         <Input
+//                             className="w-full mt-6"
+//                             placeholder="Search by Employee Name"
+//                             value={searchQuery}
+//                             onChange={(e) => setSearchQuery(e.target.value)}
+//                         />
+//                         <Button
+//                             className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+//                             onClick={() => setCurrentPage(1)} // 검색 후 첫 페이지로 이동
+//                         >
+//                             Search
+//                         </Button>
+//                     </div>
+//                 </CardContent>
+//                 <CardContent>
+//                     <Table>
+//                         <TableHeader>
+//                             <TableRow>
+//                                 <TableHead>Name</TableHead>
+//                                 <TableHead>NRC No.</TableHead>
+//                                 <TableHead>Date of Birth</TableHead>
+//                                 <TableHead>Phone No.</TableHead>
+//                             </TableRow>
+//                         </TableHeader>
+//                         <TableBody>
+//                             {currentEmployees.map((employee, index) => (
+//                                 <TableRow
+//                                     key={index}
+//                                     onClick={() => onConfirm(employee.name)}
+//                                     className="cursor-pointer hover:bg-gray-100"
+//                                 >
+//                                     <TableCell>{employee.name}</TableCell>
+//                                     <TableCell>{employee.nrc}</TableCell>
+//                                     <TableCell>{employee.dob}</TableCell>
+//                                     <TableCell>{employee.phone}</TableCell>
+//                                 </TableRow>
+//                             ))}
+
+//                             {/* 항상 5개의 행이 유지되도록 빈 행 추가 */}
+//                             {Array.from({ length: Math.max(0, 5 - currentEmployees.length) }).map((_, index) => (
+//                                 <TableRow key={`empty-${index}`} className="h-[53px]">
+//                                     <TableCell colSpan={4}></TableCell>
+//                                 </TableRow>
+//                             ))}
+//                         </TableBody>
+//                     </Table>
+
+
+//                     {/* Pagination */}
+//                     <Pagination className="mt-4">
+//                         <PaginationContent>
+//                             <PaginationItem>
+//                                 <PaginationPrevious
+//                                     href="#"
+//                                     onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+//                                     aria-disabled={currentPage === 1}
+//                                     className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+//                                 />
+//                             </PaginationItem>
+
+//                             {[...Array(Math.ceil(filteredEmployees.length / employeesPerPage))].map((_, index) => (
+//                                 <PaginationItem key={index}>
+//                                     <PaginationLink
+//                                         href="#"
+//                                         isActive={currentPage === index + 1}
+//                                         onClick={() => handlePageChange(index + 1)}
+//                                     >
+//                                         {index + 1}
+//                                     </PaginationLink>
+//                                 </PaginationItem>
+//                             ))}
+
+//                             <PaginationItem>
+//                                 <PaginationNext
+//                                     href="#"
+//                                     onClick={() => handlePageChange(Math.min(currentPage + 1, Math.ceil(filteredEmployees.length / employeesPerPage)))}
+//                                     aria-disabled={currentPage === Math.ceil(filteredEmployees.length / employeesPerPage)}
+//                                     className={currentPage === Math.ceil(filteredEmployees.length / employeesPerPage) ? "pointer-events-none opacity-50" : ""}
+//                                 />
+//                             </PaginationItem>
+
+//                         </PaginationContent>
+//                     </Pagination>
+//                 </CardContent>
+//             </Card>
+//         </div>
+//     );
+// }
 
 function EmployeeRegistrationPage({ selectedEmployee, onBack }: { selectedEmployee: string | null; onBack: () => void; }) {
     // Router
@@ -430,14 +558,10 @@ function EmployeeRegistrationPage({ selectedEmployee, onBack }: { selectedEmploy
                         <CardTitle className="text-green-800">Address Information</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="grid grid-cols-4 gap-4">
+                        <div className="grid grid-cols-3 gap-4">
                             <div className="col-span-3">
                                 <Label>Home Address</Label>
                                 <Input name="homeAddress" value={confirmData.homeAddress} onChange={handleChange} disabled={isPending} type="text" required />
-                            </div>
-                            <div className="col-span-1">
-                                <Label>Home Postal Code</Label>
-                                <Input name="homePostalCode" value={confirmData.homePostalCode} onChange={handleChange} disabled={isPending} type="text" required />
                             </div>
                         </div>
                     </CardContent>
