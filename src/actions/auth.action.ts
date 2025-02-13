@@ -1,7 +1,7 @@
 'use server';
 
 // Types
-import { serverActionMessage } from "@/\btypes";
+import { serverActionMessage } from "@/types";
 
 // Credentials
 import { cookies } from 'next/headers';
@@ -13,6 +13,7 @@ export async function login(_: any, formData: FormData): Promise<serverActionMes
 
     const credentials = btoa(`${id}:${password}`);
 
+
     // Fetch API 요청
     const response = await fetch(`${process.env.API_SERVER_URL}/auth/login`, {
         method: 'POST',
@@ -22,6 +23,8 @@ export async function login(_: any, formData: FormData): Promise<serverActionMes
         },
         credentials: 'include',
     });
+
+    console.log(response)
 
     if (!response.ok) {
         throw new Error('Login Failed! Please try again');

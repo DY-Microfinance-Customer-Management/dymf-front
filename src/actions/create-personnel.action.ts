@@ -1,13 +1,14 @@
 'use server';
 
+import { EmployeeSchema, serverActionMessage } from '@/types';
 // Actions
-import { serverActionMessage } from '@/\btypes';
+
 
 // Credentials
 import { cookies } from 'next/headers';
 
 // Types
-import { EmployeeSchema } from '@/\btypes';
+
 
 // React
 import { redirect } from 'next/navigation';

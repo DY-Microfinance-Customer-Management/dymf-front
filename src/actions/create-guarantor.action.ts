@@ -4,10 +4,10 @@
 import { cookies } from 'next/headers';
 
 // Types
-import { serverActionMessage } from '@/\btypes';
+import { serverActionMessage } from '@/types';
 import { redirect } from 'next/navigation';
 
-import { GuarantorSchema } from '@/\btypes';
+import { GuarantorSchema } from '@/types';
 
 export async function createGuarantorAction(_: any, formData: FormData): Promise<serverActionMessage> {
     const cookieStore = await cookies();

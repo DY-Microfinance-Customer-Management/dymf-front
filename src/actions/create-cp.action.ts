@@ -1,13 +1,14 @@
 'use server';
 
+import { CheckPointSchema, serverActionMessage } from '@/types';
 // Credentials
 import { cookies } from 'next/headers';
 
 // Types
-import { serverActionMessage } from '@/\btypes';
+
 import { redirect } from 'next/navigation';
 
-import { CheckPointSchema } from '@/\btypes';
+
 
 export async function createEmployeeAction(_: any, formData: FormData): Promise<serverActionMessage> {
     const cookieStore = await cookies();
