@@ -1,7 +1,7 @@
 'use client';
 
 // Actions
-import { createCustomerAction } from "@/actions/customer.action";
+import { createCustomerAction } from "@/actions/create-customer.action";
 
 // Componenets: Dialog
 import { CpNumberDialog } from "@/components/pop-ups/cp-number-dialog";
