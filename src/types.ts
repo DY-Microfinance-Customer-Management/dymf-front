@@ -61,19 +61,18 @@ export interface GuarantorSchema {
 }
 
 export interface EmployeeSchema {
-	isLoanOfficer: boolean;
 	name: string;
 	nrc_number: string;
 	birth: Date;
 	phone_number: string;
 	email: string;
 	gender: 0 | 1;
-	home_address: string;
-	home_postal: string;
-	salary: string;
-	ssb: string;
-	incomeTax: string;
-	bonus?: string;
+	address: string;
+	salary: number;
+	ssb: number;
+	income_tax: number;
+	bonus?: number;
+	working_status: 0 | 1;
 	image?: string;
 }
 
