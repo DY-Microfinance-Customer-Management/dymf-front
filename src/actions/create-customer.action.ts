@@ -4,7 +4,7 @@
 import { cookies } from 'next/headers';
 
 // Types
-import { CustomerLoanType, CustomerSchema, Gender, serverActionMessage } from '@/types';
+import { CustomerSchema, Gender, LoanType, serverActionMessage } from '@/types';
 
 export async function createCustomerAction(_: any, formData: FormData): Promise<serverActionMessage> {
     const cookieStore = await cookies();
@@ -20,7 +20,7 @@ export async function createCustomerAction(_: any, formData: FormData): Promise<
         gender: formData.get("gender") === 'Male' ? Gender.man : Gender.woman,
         // area_number: formData.get("cpNo")?.toString() ?? '',
         area_number: 'A123',
-        loan_type: formData.get("loanType")?.toString()=== 'Special Loan' ? CustomerLoanType.special_loan : CustomerLoanType.group_loan,
+        loan_type: formData.get("loanType")?.toString()=== 'Special Loan' ? LoanType.special_loan : LoanType.group_loan,
         home_address: formData.get("homeAddress")?.toString() ?? '',
         home_postal_code: formData.get("homePostalCode")?.toString() ?? '',
         office_address: formData.get("officeAddress")?.toString() ?? '',

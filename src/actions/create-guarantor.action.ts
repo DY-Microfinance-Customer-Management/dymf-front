@@ -1,39 +1,32 @@
 'use server';
 
-import { GuarantorSchema, serverActionMessage } from '@/types';
 // Credentials
 import { cookies } from 'next/headers';
 
 // Types
-
-import { redirect } from 'next/navigation';
-
-
+import { GuarantorSchema, Gender, LoanType, serverActionMessage } from '@/types';
 
 export async function createGuarantorAction(_: any, formData: FormData): Promise<serverActionMessage> {
     const cookieStore = await cookies();
     const credentials = cookieStore.get('access_token')?.value;
-    // console.log(credentials);
-
-    if (!credentials) {
-        redirect('/login');
-    }
 
     const infos = ['info1', 'info2', 'info3', 'info4', 'info5']
     const data: GuarantorSchema = {
         name: formData.get("name")?.toString() ?? '',
         nrc_number: formData.get("nrcNo")?.toString() ?? '',
-        birth: formData.get("dateOfBirth") ? new Date(formData.get("dateOfBirth")!.toString()) : new Date(),
-        phone_number: formData.get("phone")?.toString() ?? '',
+        birth: formData.get("dateOfBirth")?.toString() ?? '',
+        phone_number: formData.get("phone")?.toString() ?? '', 
         email: formData.get("email")?.toString() ?? '',
-        gender: formData.get("gender") === 'Male' ? 0 : 1,
-        cp_number: formData.get("cpNo")?.toString() ?? '',
-        loan_type: formData.get("loanType")?.toString() ?? '',
+        gender: formData.get("gender") === 'Male' ? Gender.man : Gender.woman,
+        // area_number: formData.get("cpNo")?.toString() ?? '',
+        area_number: 'A123',
+        loan_type: formData.get("loanType")?.toString()=== 'Special Loan' ? CustomerLoanType.special_loan : CustomerLoanType.group_loan,
         home_address: formData.get("homeAddress")?.toString() ?? '',
-        home_postal: formData.get("homePostalCode")?.toString() ?? '',
+        home_postal_code: formData.get("homePostalCode")?.toString() ?? '',
         office_address: formData.get("officeAddress")?.toString() ?? '',
-        office_postal: formData.get("officePostalCode")?.toString() ?? '',
+        office_postal_code: formData.get("officePostalCode")?.toString() ?? '',
         details: infos.map((idx) => formData.get(idx)?.toString() ?? ''),
+        image: "undefined"
     }
 
     if (formData.has('image')) {
