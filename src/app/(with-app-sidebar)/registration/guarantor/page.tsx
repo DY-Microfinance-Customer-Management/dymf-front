@@ -20,7 +20,10 @@ import { ChevronDown } from "lucide-react";
 
 // React
 import { useActionState, useEffect, useState } from "react";
-import router from "next/router";
+import { useRouter } from "next/navigation";
+
+// Util
+import { delay } from "@/util/delay";
 
 export default function FormPage() {
     // Data Handler
@@ -56,6 +59,7 @@ export default function FormPage() {
     };
 
     // Server Action
+    const router = useRouter();
     const [state, formAction, isPending] = useActionState(createGuarantorAction, null);
     useEffect(() => {
         if (state === null) return;
@@ -81,11 +85,14 @@ export default function FormPage() {
                 info4: '',
                 info5: '',
             });
+            setUploadedImage(null);
         } else if (state?.status === 400) {
             toast.error(state?.message);
         } else if (state?.status === 401 || 403) {
             toast.error(state?.message);
             router.push('/login');
+        } else if (state?.status === 404) {
+            toast.error(state?.message);
         }
     }, [state]);
 
@@ -94,12 +101,18 @@ export default function FormPage() {
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
-            const reader = new FileReader();
 
+            if (file.size > 1024 * 1024) {
+                toast.warning('File size exceeds 1MB. Please retry after compressing the image.')
+                delay(2500)
+                setUploadedImage(null);
+                return;
+            }
+
+            const reader = new FileReader();
             reader.onload = () => {
                 setUploadedImage(reader.result as string);
             };
-
             reader.readAsDataURL(file);
         }
     };
@@ -196,11 +209,11 @@ export default function FormPage() {
                                             <Label>CP No.</Label>
                                             <Input name="cpNo" value={confirmData.cpNo} onClick={() => setIsCpNumberDialogOpen(true)} readOnly />
                                         </div>
-                                        <CpNumberDialog
+                                        {/* <CpNumberDialog
                                             open={isCpNumberDialogOpen}
                                             onClose={() => setIsCpNumberDialogOpen(false)}
                                             onSelect={(cpNo) => setConfirmData(prev => ({ ...prev, cpNo }))}
-                                        />
+                                        /> */}
                                     </div>
                                     <div className="col-span-2">
                                         <Label>Loan Type</Label>

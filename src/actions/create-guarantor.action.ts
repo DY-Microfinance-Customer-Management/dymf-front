@@ -31,12 +31,40 @@ export async function createGuarantorAction(_: any, formData: FormData): Promise
 
     if (formData.has('image')) {
         const file = formData.get('image') as File;
+
         if (file && file instanceof File) {
-            data['image'] = file.name;
+            const response = await fetch(`${process.env.API_SERVER_URL}/common`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${credentials}`
+                },
+            })
+            const responseData = await response.json();
+            const image_address = responseData.url;
+            
+            const extractFileName = (image_address: string): string | null => {
+                const regex = /\/([^\/?]+\.jpg)/;
+                const match = image_address.match(regex)
+                return match ? match[1] : null
+            }
+            
+            const imageName = extractFileName(String(image_address));
+            
+            if (imageName) {
+                data.image = imageName;
+                
+                await fetch(`${image_address}`, {
+                    method: 'PUT',
+                    body: file,
+                    headers: {
+                        'Content-Type': file.type
+                    }
+                })
+            }
+
         }
     }
-
-    // console.log(JSON.stringify(data));
 
     const response = await fetch(`${process.env.API_SERVER_URL}/guarantor`, {
         method: 'POST',
@@ -64,6 +92,11 @@ export async function createGuarantorAction(_: any, formData: FormData): Promise
             return {
                 status: status,
                 message: 'Unauthorized request. Please Login again.'
+            }
+        } else if (status === 404) {
+            return {
+                status: status,
+                message: 'Not Found: 404'
             }
         }
     }
