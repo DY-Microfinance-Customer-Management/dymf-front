@@ -20,21 +20,26 @@ export interface JwtData extends JwtPayload {
 	username: string;
 }
 
-export enum Customer_Loan_Type {
+// Shemas
+export enum CustomerLoanType {
     special_loan,
     group_loan,
     etc
 }
-// Shemas
+export enum Gender {
+    man,
+    woman,
+    notdefinded
+}
 export interface CustomerSchema {
 	name: string;
 	nrc_number: string;
 	birth: string;
 	phone_number: string;
 	email?: string;
-	gender: 0 | 1;
+	gender: Gender;
 	area_number: string;
-	loan_type: Customer_Loan_Type;
+	loan_type: CustomerLoanType;
 	home_address: string;
 	home_postal_code: string;
 	office_address?: string;
@@ -49,7 +54,7 @@ export interface GuarantorSchema {
 	birth: Date;
 	phone_number: string;
 	email?: string;
-	gender: 0 | 1;
+	gender: Gender;
 	cp_number: string;
 	loan_type: string;
 	home_address: string;
