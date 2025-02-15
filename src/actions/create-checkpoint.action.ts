@@ -1,29 +1,22 @@
 'use server';
-import { CheckPointSchema, serverActionMessage } from '@/types';
+
 // Credentials
 import { cookies } from 'next/headers';
 
+// React
+import { revalidatePath } from 'next/cache';
+
 // Types
+import { CheckPointSchema, serverActionMessage } from '@/types';
 
-import { redirect } from 'next/navigation';
-
-
-
-export async function createEmployeeAction(_: any, formData: FormData): Promise<serverActionMessage> {
+export async function createCheckPointAction(_: any, formData: FormData): Promise<serverActionMessage> {
     const cookieStore = await cookies();
     const credentials = cookieStore.get('access_token')?.value;
-    // console.log(credentials);
-
-    if (!credentials) {
-        redirect('/login');
-    }
 
     const data: CheckPointSchema = {
         area_number: formData.get("area_number")?.toString() ?? '',
         description: formData.get("description")?.toString() ?? '',
     }
-
-    // console.log(JSON.stringify(data));
 
     const response = await fetch(`${process.env.API_SERVER_URL}/personnel/cpnumber`, {
         method: 'POST',
@@ -55,8 +48,10 @@ export async function createEmployeeAction(_: any, formData: FormData): Promise<
         }
     }
 
+    revalidatePath('/cp');
+    
     return {
         status: 200,
-        message: 'CP No. successfully registered.'
+        message: data.area_number,
     };
 }

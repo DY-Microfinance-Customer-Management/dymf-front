@@ -1,143 +1,232 @@
-"use client";
+'use client';
 
-import React, { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+// Actions
+import { createCheckPointAction } from "@/actions/create-checkpoint.action";
+
+// Components: UI
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Switch } from "@/components/ui/switch";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+// import { Checkbox } from "@/components/ui/checkbox";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Switch } from "@/components/ui/switch";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+
+// React
+import { useActionState, useEffect, useState, Fragment } from "react";
+import { useRouter } from "next/navigation";
+
+// Types
+import { FetchedCheckPoint } from "@/types";
 
 export default function Page() {
-    const [cpList, setCpList] = useState<{ id: number; cpNo: string; assignedOfficers: string[] }[]>([]);
-    const [newCp, setNewCp] = useState("");
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [selectedCp, setSelectedCp] = useState<number | null>(null);
+    const [cpNumbers, setCpNumbers] = useState<FetchedCheckPoint[]>([]);
+    const [isLoading, setLoading] = useState(true);
+    const [loanOfficers, setLoanOfficers] = useState<string[]>([]);
 
-    const loanOfficers = ["John Doe", "Jane Smith", "Michael Lee", "Sarah Kim"];
+    // Server Action
+    const router = useRouter();
+    const [state, formAction, isPending] = useActionState(createCheckPointAction, null);
+    useEffect(() => {
+        // Fetch all registered CP No.s
+        fetch('/api/cpNumbers')
+            .then((res) => res.json())
+            .then((data) => {
+                setCpNumbers(data.cpNumbers);
+            });
 
-    // CP No. 추가
-    const addCpNo = () => {
-        if (newCp.trim() !== "") {
-            setCpList([...cpList, { id: Date.now(), cpNo: newCp.trim(), assignedOfficers: [] }]);
-            setNewCp("");
-            setIsDialogOpen(false);
+        // Fetch all Loan Officers
+        fetch('/api/loanOfficers')
+            .then((res) => res.json())
+            .then((data) => {
+                setLoanOfficers(data);
+            });
+
+        setLoading(false);
+
+        if (state === null) return;
+
+        if (state?.status === 200) {
+            toast.success(`CP No. ${state.message} is successfully registered!`);
+        } else if (state?.status === 400) {
+            toast.error(state?.message);
+        } else if (state?.status === 401 || 403) {
+            toast.error(state?.message);
+            router.push('/login');
+        } else if (state?.status === 404) {
+            toast.error(state?.message);
+        }
+    }, [state]);
+
+    // // Delete Handler (TODO: Delete Function 추후 업데이트)
+    // const [selectedCP, setSelectedCP] = useState<number | null>(null);
+    // const handleCheckboxChange = (cpId: number) => {
+    //     setSelectedCP((prevSelected) => (prevSelected === cpId ? null : cpId));
+    //     console.log(`selectedCP: ${selectedCP}`);
+    // };
+    // const handleDelete = async () => {
+    //     if (!selectedCP) return;
+
+    //     const remainingCPs = cpNumbers.filter((cp) => cp.id !== selectedCP);
+    //     setCpNumbers(remainingCPs);
+    //     setSelectedCP(null);
+
+    //     toast.success(`CP No. ${selectedCP} deleted successfully!`);
+    // };
+
+    // Loan Officer Assign Handler
+    const [expandedCP, setExpandedCP] = useState<number | null>(null); // 선택된 CP No.
+    const [assignedLoanOfficer, setAssignedLoanOfficer] = useState<{ [key: number]: string[] }>({}); // 각 CP별 Loan Officer 정보
+    const fetchLoanOfficers = async (cpId: number) => {
+        if (assignedLoanOfficer[cpId]) {
+            setExpandedCP(expandedCP === cpId ? null : cpId); // 이미 있으면 toggle
+            return;
+        }
+
+        try {
+            fetch(`/api/cpNumbers/loanOfficer?id=${cpId}`)
+                .then((res) => res.json())
+                .then((data) => {
+                    console.log(data)
+                    setAssignedLoanOfficer((prev) => ({ ...prev, [cpId]: data.loanOfficers }));
+                    setExpandedCP(cpId);
+                });
+        } catch (error) {
+            console.error(`Error fetching Loan Officers for CP ${cpId}:`, error);
         }
     };
-
-    // 선택된 CP No. 삭제
-    const deleteSelectedCp = () => {
-        if (selectedCp !== null) {
-            setCpList(cpList.filter((cp) => cp.id !== selectedCp));
-            setSelectedCp(null);
-        }
-    };
-
-    // Loan Officer 배정
     const toggleOfficerAssignment = (cpId: number, officer: string) => {
-        setCpList((prevCpList) =>
-            prevCpList.map((cp) =>
-                cp.id === cpId
-                    ? {
-                        ...cp,
-                        assignedOfficers: cp.assignedOfficers.includes(officer)
-                            ? cp.assignedOfficers.filter((o) => o !== officer)
-                            : [...cp.assignedOfficers, officer],
-                    }
-                    : cp
-            )
-        );
+        setAssignedLoanOfficer((prev) => {
+            const updatedList = prev[cpId]?.includes(officer)
+                ? prev[cpId].filter((o) => o !== officer)
+                : [...(prev[cpId] || []), officer];
+
+            return { ...prev, [cpId]: updatedList };
+        });
     };
 
     return (
-        <div className="flex flex-col p-6 space-y-8">
-            {/* Header */}
-            <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold">Check Point Management</h1>
-                <div className="space-x-4">
-                    {/* Add CP No. 버튼 */}
-                    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                        <DialogTrigger asChild>
-                            <Button className="bg-blue-600 hover:bg-blue-700 text-white">Add</Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                            <DialogHeader>
-                                <DialogTitle>Add CP No.</DialogTitle>
-                            </DialogHeader>
-                            <Input
-                                placeholder="Enter CP No."
-                                value={newCp}
-                                onChange={(e) => setNewCp(e.target.value)}
-                            />
-                            <DialogFooter>
-                                <Button variant="secondary" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
-                                <Button onClick={addCpNo}>Confirm</Button>
-                            </DialogFooter>
-                        </DialogContent>
-                    </Dialog>
-
-                    {/* Delete 버튼 (선택된 CP No.가 있을 때만 활성화) */}
-                    <Button
-                        className="bg-red-600 hover:bg-red-700 text-white"
-                        disabled={selectedCp === null}
-                        onClick={deleteSelectedCp}
-                    >
-                        Delete
-                    </Button>
+        <>
+            <div className="flex flex-col p-6 space-y-8">
+                <div className="flex justify-between items-center">
+                    <h1 className="text-2xl font-bold">Check Point Management</h1>
+                    <div className="space-x-4">
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Button className="bg-blue-600 hover:bg-blue-700 text-white">Add</Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>Add CP No.</DialogTitle>
+                                </DialogHeader>
+                                <form id="createCheckPointForm" action={formAction}>
+                                    <div className="space-y-2">
+                                        <Input name="area_number" disabled={isPending} type="text" placeholder="Enter CP No." required />
+                                        <Input name="description" disabled={isPending} type="text" placeholder="Enter Description" required />
+                                    </div>
+                                </form>
+                                <DialogFooter>
+                                    <Button type="submit" form="createCheckPointForm">Save</Button>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
+                        {/* TODO: Delete Function 추후 업데이트 */}
+                        {/* <Button className="bg-red-600 hover:bg-red-700 text-white" disabled={!selectedCP} onClick={handleDelete}>Delete</Button> */}
+                    </div>
                 </div>
-            </div>
-
-            <Card>
-                <CardHeader>
-                    <CardTitle className="text-green-900">CP No. List</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead className="w-1/2">CP No.</TableHead>
-                                <TableHead className="w-1/2">Assigned Officers</TableHead>
-                                <TableHead className="w-10"></TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {cpList.map((cp) => (
-                                <React.Fragment key={cp.id}>
-                                    <TableRow className="cursor-pointer hover:bg-gray-100">
-                                        <TableCell>{cp.cpNo}</TableCell>
-                                        <TableCell>
-                                            {cp.assignedOfficers.length > 0 ? cp.assignedOfficers.join(", ") : "None"}
-                                        </TableCell>
-                                        <TableCell onClick={() => setSelectedCp(selectedCp === cp.id ? null : cp.id)} className="text-center cursor-pointer">
-                                            {selectedCp === cp.id ? ( <ChevronUp className="w-5 h-5 text-gray-500" /> ) : ( <ChevronDown className="w-5 h-5 text-gray-500" /> )}
-                                        </TableCell>
+                {
+                    isLoading ?
+                        <>
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead className="w-[100px]">CP No.</TableHead>
+                                        <TableHead className="w-[150px]">Description</TableHead>
+                                        <TableHead className="text-right">Loan Officers</TableHead>
                                     </TableRow>
-                                    {selectedCp === cp.id && (
-                                        <TableRow className="bg-gray-50">
-                                            <TableCell colSpan={3}>
-                                                <div className="p-4">
-                                                    <h3 className="text-lg font-semibold mb-2">Assign Loan Officers</h3>
-                                                    {loanOfficers.map((officer) => (
-                                                        <div key={officer} className="flex justify-between items-center py-2 border-b">
-                                                            <span>{officer}</span>
-                                                            <Switch
-                                                                checked={cp.assignedOfficers.includes(officer)}
-                                                                onCheckedChange={() => toggleOfficerAssignment(cp.id, officer)}
-                                                            />
-                                                        </div>
-                                                    ))}
-                                                </div>
+                                </TableHeader>
+                            </Table>
+                            <div className="space-y-3">
+                                <Skeleton className="h-12 w-full rounded-lg" />
+                                <Skeleton className="h-12 w-full rounded-lg" />
+                                <Skeleton className="h-12 w-full rounded-lg" />
+                                <Skeleton className="h-12 w-full rounded-lg" />
+                            </div>
+                        </>
+                        :
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    {/* <TableHead className="w-[50px]"></TableHead> */}
+                                    <TableHead className="w-[100px]">CP No.</TableHead>
+                                    <TableHead className="w-[150px]">Description</TableHead>
+                                    <TableHead className="text-right">Loan Officers</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {cpNumbers.map((cp, index) => (
+                                    <Fragment key={cp.id}>
+                                        <TableRow className="cursor-pointer hover:bg-gray-100">
+                                            <TableCell>{cp.area_number}</TableCell>
+                                            <TableCell>{cp.description}</TableCell>
+                                            <TableCell
+                                                className="text-right cursor-pointer flex justify-between items-center"
+                                                onClick={() => fetchLoanOfficers(cp.id)}
+                                            >
+                                                {assignedLoanOfficer[cp.id]?.length ? assignedLoanOfficer[cp.id].join(", ") : "Not Assigned"}
+                                                {expandedCP === cp.id ? (
+                                                    <ChevronUp className="w-5 h-5 text-gray-500" />
+                                                ) : (
+                                                    <ChevronDown className="w-5 h-5 text-gray-500" />
+                                                )}
                                             </TableCell>
                                         </TableRow>
-                                    )}
-                                </React.Fragment>
-                            ))}
-                        </TableBody>
+                                        {expandedCP === cp.id && (
+                                            <TableRow className="bg-gray-50">
+                                                <TableCell colSpan={3}>
+                                                    <div className="p-4">
+                                                        <h3 className="text-lg font-semibold mb-2">Assign Loan Officers</h3>
+                                                        {assignedLoanOfficer[cp.id]?.map((officer) => (
+                                                            <div key={officer} className="flex justify-between items-center py-2 border-b">
+                                                                <span>{officer}</span>
+                                                                <Switch
+                                                                    checked={assignedLoanOfficer[cp.id]?.includes(officer)}
+                                                                    onCheckedChange={() => toggleOfficerAssignment(cp.id, officer)}
+                                                                />
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        )}
+                                    </Fragment>
 
-                    </Table>
-                </CardContent>
-            </Card>
-        </div>
+
+                                    // <Fragment key={cp.id}>
+                                    //     <TableRow key={cp.id ?? `cp-${index}`}>
+                                    //         {/* TODO: Delete Function 추후 업데이트 */}
+                                    //         {/* <TableCell>
+                                    //         <Checkbox checked={selectedCP === cp.id} onCheckedChange={() => handleCheckboxChange(cp.id)} />
+                                    //     </TableCell> */}
+                                    //         <TableCell>{cp.area_number}</TableCell>
+                                    //         <TableCell>{cp.description}</TableCell>
+                                    //         <TableCell className="text-right">
+                                    //             {
+                                    //                 cp.loan_officers === undefined ?
+                                    //                     "Not Assigned" :
+                                    //                     cp.loan_officers
+                                    //             }
+                                    //         </TableCell>
+                                    //     </TableRow>
+                                    // </Fragment>
+                                ))}
+                            </TableBody>
+                        </Table>
+                }
+            </div>
+        </>
     );
 }

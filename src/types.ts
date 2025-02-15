@@ -20,6 +20,13 @@ export interface JwtData extends JwtPayload {
 	username: string;
 }
 
+export interface FetchedCheckPoint {
+	id: number;
+	area_number: string;
+	description: string;
+	loan_officers: string[];
+}
+
 // Shemas
 export enum LoanType {
     special_loan,
@@ -83,5 +90,5 @@ export interface EmployeeSchema {
 
 export interface CheckPointSchema {
 	area_number: string;
-	description: string;
+	description?: string;
 }
