@@ -26,11 +26,11 @@ export async function createGuarantorAction(_: any, formData: FormData): Promise
         office_address: formData.get("officeAddress")?.toString() ?? '',
         office_postal_code: formData.get("officePostalCode")?.toString() ?? '',
         details: infos.map((idx) => formData.get(idx)?.toString() ?? ''),
-        image: "undefined"
+        image: "empty"
     }
 
-    if (formData.has('image')) {
-        const file = formData.get('image') as File;
+    const file = formData.get('image') as File;
+    if (file.size !== 0) {
 
         if (file && file instanceof File) {
             const response = await fetch(`${process.env.API_SERVER_URL}/common`, {

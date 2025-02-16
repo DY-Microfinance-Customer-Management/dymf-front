@@ -6,17 +6,10 @@ import { cookies } from 'next/headers';
 // Types
 import { EmployeeSchema, serverActionMessage } from '@/types';
 
-// React
-import { redirect } from 'next/navigation';
-
 export async function createEmployeeAction(_: any, formData: FormData): Promise<serverActionMessage> {
     const cookieStore = await cookies();
     const credentials = cookieStore.get('access_token')?.value;
     // console.log(credentials);
-
-    if (!credentials) {
-        redirect('/login');
-    }
 
     const isLoanOfficer = formData.get("isLoanOfficer") === 'on' ? true : false;
     // console.log(isLoanOfficer)
@@ -35,18 +28,49 @@ export async function createEmployeeAction(_: any, formData: FormData): Promise<
         income_tax: Number(formData.get("incomeTax")) ?? 0,
         bonus: Number(formData.get("bonus")) ?? 0,
         working_status: 0,
-        image: 'test.jpg',
+        image: 'empty',
     }
 
-    // if (formData.has('image')) {
-    //     const file = formData.get('image') as File;
-    //     if (file && file instanceof File) {
-    //         data['image'] = file.name;
-    //     }
-    // }
+    // image 안들어가면 s3 에러 뜸 - Postman 참조
+    // 로직 변경 create customer action / create guarantor action - TODO
+    const file = formData.get('image') as File;
+    if (file.size !== 0) {
 
-    // console.log(JSON.stringify(data));
+        if (file && file instanceof File) {
+            const response = await fetch(`${process.env.API_SERVER_URL}/common`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${credentials}`
+                },
+            })
+            const responseData = await response.json();
+            const image_address = responseData.url;
+            
+            const extractFileName = (image_address: string): string | null => {
+                const regex = /\/([^\/?]+\.jpg)/;
+                const match = image_address.match(regex)
+                return match ? match[1] : null
+            }
+            
+            const imageName = extractFileName(String(image_address));
+            
+            if (imageName) {
+                data.image = imageName;
+                
+                await fetch(`${image_address}`, {
+                    method: 'PUT',
+                    body: file,
+                    headers: {
+                        'Content-Type': file.type
+                    }
+                })
+            }
 
+        }
+    }
+
+    console.log(`Fetch Data: ${JSON.stringify(data)}`)
     const response = await fetch(`${process.env.API_SERVER_URL}/personnel`, {
         method: 'POST',
         headers: {
@@ -56,6 +80,7 @@ export async function createEmployeeAction(_: any, formData: FormData): Promise<
         body: JSON.stringify(data),
     });
     const responseData = await response.json();
+    console.log(`responseData: ${responseData}`)
     const createdId = responseData.id;
     console.log(`personnel fetch response id: ${createdId}`)
 
