@@ -29,14 +29,14 @@ export interface FetchedCheckPoint {
 
 // Shemas
 export enum LoanType {
-    special_loan,
-    group_loan,
-    etc
+	special_loan,
+	group_loan,
+	etc
 }
 export enum Gender {
-    man,
-    woman,
-    notdefinded
+	man,
+	woman,
+	notdefinded
 }
 export interface CustomerSchema {
 	name: string;
@@ -72,13 +72,13 @@ export interface GuarantorSchema {
 	image?: string;
 }
 
-export interface EmployeeSchema {
+export interface PostEmployeeSchema {
 	name: string;
 	nrc_number: string;
-	birth: Date;
+	birth: string;
 	phone_number: string;
 	email: string;
-	gender: 0 | 1;
+	gender: Gender;
 	address: string;
 	salary: number;
 	ssb: number;
@@ -86,6 +86,41 @@ export interface EmployeeSchema {
 	bonus?: number;
 	working_status: 0 | 1;
 	image?: string;
+}
+
+export interface PatchEmployeeSchema {
+	id: number;
+	name: string;
+	nrc_number: string;
+	birth: string;
+	phone_number: string;
+	email: string;
+	gender: Gender;
+	address: string;
+	salary: number;
+	ssb: number;
+	income_tax: number;
+	bonus?: number;
+	working_status: 0 | 1;
+	image?: string;
+}
+
+export interface GetEmployeeSchema {
+	id: number;
+	name: string;
+	nrc_number: string;
+	birth: string;
+	phone_number: string;
+	email: string;
+	gender: Gender;
+	address: string;
+	salary: number;
+	ssb: number;
+	income_tax: number;
+	bonus?: number;
+	working_status: 0 | 1;
+	image?: string;
+	loan_officer: { id: number } | null;
 }
 
 export interface CheckPointSchema {
