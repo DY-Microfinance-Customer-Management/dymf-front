@@ -8,7 +8,6 @@ import { PostEmployeeSchema, Gender, serverActionMessage, GetEmployeeSchema, Pat
 import { revalidatePath } from 'next/cache';
 
 export async function createEmployeeAction(_: any, formData: FormData): Promise<serverActionMessage> {
-    // TODO: id가 formData에 있으면 update, 없으면 create
     const cookieStore = await cookies();
     const credentials = cookieStore.get('access_token')?.value;
 
