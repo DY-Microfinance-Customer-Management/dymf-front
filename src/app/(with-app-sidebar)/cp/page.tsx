@@ -5,14 +5,10 @@ import { createCheckPointAction } from "@/actions/create-checkpoint.action";
 
 // Components: UI
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-// import { Checkbox } from "@/components/ui/checkbox";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Input } from "@/components/ui/input";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
 
 // React
@@ -21,31 +17,36 @@ import { useRouter } from "next/navigation";
 
 // Types
 import { FetchedCheckPoint } from "@/types";
+import { Input } from "@/components/ui/input";
 
 export default function Page() {
     const [cpNumbers, setCpNumbers] = useState<FetchedCheckPoint[]>([]);
-    const [isLoading, setLoading] = useState(true);
-    const [loanOfficers, setLoanOfficers] = useState<string[]>([]);
+    const [tempCpNumbers, setTempCpNumbers] = useState<FetchedCheckPoint[]>([]);
+    const [loanOfficers, setLoanOfficers] = useState<{ id: number; name: string; cp_numbers: { id: number, area_number: string, description: string }[] }[]>([]);
+    const [expandedCP, setExpandedCP] = useState<number | null>(null);
+    const [modifiedMap, setModifiedMap] = useState<{ [cpId: number]: boolean }>({});
+    const [dialogOpenCP, setDialogOpenCP] = useState<number | null>(null);
 
     // Server Action
     const router = useRouter();
     const [state, formAction, isPending] = useActionState(createCheckPointAction, null);
+
+    // Init
     useEffect(() => {
         // Fetch all registered CP No.s
-        fetch('/api/cpNumbers')
+        fetch('/api/getCpNumbers')
             .then((res) => res.json())
             .then((data) => {
                 setCpNumbers(data.cpNumbers);
+                setTempCpNumbers(data.cpNumbers);
             });
 
         // Fetch all Loan Officers
-        fetch('/api/loanOfficers')
+        fetch('/api/getLoanOfficers')
             .then((res) => res.json())
             .then((data) => {
-                setLoanOfficers(data);
+                setLoanOfficers(data.loanOfficers);
             });
-
-        setLoading(false);
 
         if (state === null) return;
 
@@ -61,51 +62,75 @@ export default function Page() {
         }
     }, [state]);
 
-    // // Delete Handler (TODO: Delete Function 추후 업데이트)
-    // const [selectedCP, setSelectedCP] = useState<number | null>(null);
-    // const handleCheckboxChange = (cpId: number) => {
-    //     setSelectedCP((prevSelected) => (prevSelected === cpId ? null : cpId));
-    //     console.log(`selectedCP: ${selectedCP}`);
-    // };
-    // const handleDelete = async () => {
-    //     if (!selectedCP) return;
-
-    //     const remainingCPs = cpNumbers.filter((cp) => cp.id !== selectedCP);
-    //     setCpNumbers(remainingCPs);
-    //     setSelectedCP(null);
-
-    //     toast.success(`CP No. ${selectedCP} deleted successfully!`);
-    // };
-
-    // Loan Officer Assign Handler
-    const [expandedCP, setExpandedCP] = useState<number | null>(null); // 선택된 CP No.
-    const [assignedLoanOfficer, setAssignedLoanOfficer] = useState<{ [key: number]: string[] }>({}); // 각 CP별 Loan Officer 정보
-    const fetchLoanOfficers = async (cpId: number) => {
-        if (assignedLoanOfficer[cpId]) {
-            setExpandedCP(expandedCP === cpId ? null : cpId); // 이미 있으면 toggle
-            return;
-        }
-
-        try {
-            fetch(`/api/cpNumbers/loanOfficer?id=${cpId}`)
-                .then((res) => res.json())
-                .then((data) => {
-                    console.log(data)
-                    setAssignedLoanOfficer((prev) => ({ ...prev, [cpId]: data.loanOfficers }));
-                    setExpandedCP(cpId);
-                });
-        } catch (error) {
-            console.error(`Error fetching Loan Officers for CP ${cpId}:`, error);
-        }
-    };
-    const toggleOfficerAssignment = (cpId: number, officer: string) => {
-        setAssignedLoanOfficer((prev) => {
-            const updatedList = prev[cpId]?.includes(officer)
-                ? prev[cpId].filter((o) => o !== officer)
-                : [...(prev[cpId] || []), officer];
-
-            return { ...prev, [cpId]: updatedList };
+    // Assign Switch Handler
+    const handleSwitchChange = (cpId: number, officerId: number, checked: boolean) => {
+        setCpNumbers(prev => {
+            return prev.map(cp => {
+                if (cp.id !== cpId) return cp;
+    
+                const updatedLoanOfficers = checked
+                    ? [...cp.loan_officers, { id: officerId }]
+                    : cp.loan_officers.filter(officer => officer.id !== officerId);
+    
+                return {
+                    ...cp,
+                    loan_officers: updatedLoanOfficers
+                };
+            });
         });
+    
+        // Save Button disable Handler
+        setModifiedMap(prev => {
+            const updatedLoanOfficers = checked
+                ? [...cpNumbers.find(cp => cp.id === cpId)?.loan_officers || [], { id: officerId }]
+                : cpNumbers.find(cp => cp.id === cpId)?.loan_officers.filter(officer => officer.id !== officerId) || [];
+    
+            const originalLoanOfficers = tempCpNumbers.find(cp => cp.id === cpId)?.loan_officers || [];
+            const isSameAsOriginal = JSON.stringify(updatedLoanOfficers) === JSON.stringify(originalLoanOfficers);
+    
+            return {
+                ...prev,
+                [cpId]: !isSameAsOriginal
+            };
+        });
+    };
+
+    // Dialog Confirm Handler
+    const handleSaveChanges = (cpId: number) => {
+        setDialogOpenCP(cpId);
+    };
+
+    // Dialog Cancel Handler
+    const handleCancelChanges = (cpId: number) => {
+        setCpNumbers(tempCpNumbers);
+        setModifiedMap(prev => ({
+            ...prev,
+            [cpId]: false
+        }));
+        setDialogOpenCP(null);
+    };
+
+    // Assign Loan Officer Handler
+    const confirmSaveChanges = async (cpId: number) => {
+        const updatedCP = cpNumbers.find(cp => cp.id === cpId);
+        if (!updatedCP) return;
+
+        const response = await fetch(`/api/assignLoanOfficer?cpNumber=${cpId}&data=${JSON.stringify(updatedCP?.loan_officers)}`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+        });
+
+        if (response.ok) {
+            toast.success("Changes saved successfully!");
+            setModifiedMap(prev => ({
+                ...prev,
+                [cpId]: false
+            }));
+            setDialogOpenCP(null);
+            setTempCpNumbers(cpNumbers);
+        } else {
+            toast.error("Failed to save changes.");
+        }
     };
 
     return (
@@ -133,100 +158,88 @@ export default function Page() {
                                 </DialogFooter>
                             </DialogContent>
                         </Dialog>
-                        {/* TODO: Delete Function 추후 업데이트 */}
+                        {/* TODO: Delete Function Update - Check if loan officer is assigned to that certain cp number and also if cp number is assigned to a Loan */}
                         {/* <Button className="bg-red-600 hover:bg-red-700 text-white" disabled={!selectedCP} onClick={handleDelete}>Delete</Button> */}
                     </div>
                 </div>
-                {
-                    isLoading ?
-                        <>
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead className="w-[100px]">CP No.</TableHead>
-                                        <TableHead className="w-[150px]">Description</TableHead>
-                                        <TableHead className="text-right">Loan Officers</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                            </Table>
-                            <div className="space-y-3">
-                                <Skeleton className="h-12 w-full rounded-lg" />
-                                <Skeleton className="h-12 w-full rounded-lg" />
-                                <Skeleton className="h-12 w-full rounded-lg" />
-                                <Skeleton className="h-12 w-full rounded-lg" />
-                            </div>
-                        </>
-                        :
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    {/* <TableHead className="w-[50px]"></TableHead> */}
-                                    <TableHead className="w-[100px]">CP No.</TableHead>
-                                    <TableHead className="w-[150px]">Description</TableHead>
-                                    <TableHead className="text-right">Loan Officers</TableHead>
+
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead className="w-[100px]">CP No.</TableHead>
+                            <TableHead className="w-[150px]">Description</TableHead>
+                            <TableHead className="text-right">Loan Officers</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {cpNumbers.map(cp => (
+                            <Fragment key={cp.id}>
+                                <TableRow className="cursor-pointer hover:bg-gray-100">
+                                    <TableCell>{cp.area_number}</TableCell>
+                                    <TableCell>{cp.description}</TableCell>
+                                    <TableCell className="text-right flex justify-between items-center">
+                                        {cp.loan_officers.length > 0
+                                            ? loanOfficers
+                                                .filter(officer => cp.loan_officers.some(lo => lo.id === officer.id))
+                                                .map(officer => officer.name)
+                                                .join(", ")
+                                            : "Not Assigned"}
+                                        <button onClick={() => setExpandedCP(expandedCP === cp.id ? null : cp.id)}>
+                                            {expandedCP === cp.id ? <ChevronUp /> : <ChevronDown />}
+                                        </button>
+                                    </TableCell>
                                 </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {cpNumbers.map((cp, index) => (
-                                    <Fragment key={cp.id}>
-                                        <TableRow className="cursor-pointer hover:bg-gray-100">
-                                            <TableCell>{cp.area_number}</TableCell>
-                                            <TableCell>{cp.description}</TableCell>
-                                            <TableCell
-                                                className="text-right cursor-pointer flex justify-between items-center"
-                                                onClick={() => fetchLoanOfficers(cp.id)}
-                                            >
-                                                {assignedLoanOfficer[cp.id]?.length ? assignedLoanOfficer[cp.id].join(", ") : "Not Assigned"}
-                                                {expandedCP === cp.id ? (
-                                                    <ChevronUp className="w-5 h-5 text-gray-500" />
-                                                ) : (
-                                                    <ChevronDown className="w-5 h-5 text-gray-500" />
-                                                )}
-                                            </TableCell>
-                                        </TableRow>
-                                        {expandedCP === cp.id && (
-                                            <TableRow className="bg-gray-50">
-                                                <TableCell colSpan={3}>
-                                                    <div className="p-4">
-                                                        <h3 className="text-lg font-semibold mb-2">Assign Loan Officers</h3>
-                                                        {assignedLoanOfficer[cp.id]?.map((officer) => (
-                                                            <div key={officer} className="flex justify-between items-center py-2 border-b">
-                                                                <span>{officer}</span>
-                                                                <Switch
-                                                                    checked={assignedLoanOfficer[cp.id]?.includes(officer)}
-                                                                    onCheckedChange={() => toggleOfficerAssignment(cp.id, officer)}
-                                                                />
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                </TableCell>
-                                            </TableRow>
-                                        )}
-                                    </Fragment>
+                                {expandedCP === cp.id && (
+                                    <TableRow className="bg-gray-50">
+                                        <TableCell colSpan={3}>
+                                            <div className="p-4 space-y-2">
+                                                {loanOfficers.map(officer => {
+                                                    const isInitiallyAssigned = tempCpNumbers
+                                                        .find(c => c.id === cp.id)
+                                                        ?.loan_officers.some(lo => lo.id === officer.id) ?? false;
 
-
-                                    // <Fragment key={cp.id}>
-                                    //     <TableRow key={cp.id ?? `cp-${index}`}>
-                                    //         {/* TODO: Delete Function 추후 업데이트 */}
-                                    //         {/* <TableCell>
-                                    //         <Checkbox checked={selectedCP === cp.id} onCheckedChange={() => handleCheckboxChange(cp.id)} />
-                                    //     </TableCell> */}
-                                    //         <TableCell>{cp.area_number}</TableCell>
-                                    //         <TableCell>{cp.description}</TableCell>
-                                    //         <TableCell className="text-right">
-                                    //             {
-                                    //                 cp.loan_officers === undefined ?
-                                    //                     "Not Assigned" :
-                                    //                     cp.loan_officers
-                                    //             }
-                                    //         </TableCell>
-                                    //     </TableRow>
-                                    // </Fragment>
-                                ))}
-                            </TableBody>
-                        </Table>
-                }
+                                                    return (
+                                                        <div key={officer.id} className="flex justify-between items-center py-2 border-b">
+                                                            <span>{officer.name}</span>
+                                                            <Switch
+                                                                checked={cp.loan_officers.some(lo => lo.id === officer.id)}
+                                                                onCheckedChange={checked => handleSwitchChange(cp.id, officer.id, checked)}
+                                                                disabled={isInitiallyAssigned}
+                                                            />
+                                                        </div>
+                                                    );
+                                                })}
+                                                <Button
+                                                    onClick={() => handleSaveChanges(cp.id)}
+                                                    disabled={!modifiedMap[cp.id]}
+                                                    className="bg-blue-600 hover:bg-blue-700 text-white flex justify-self-end"
+                                                >
+                                                    Save
+                                                </Button>
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                            </Fragment>
+                        ))}
+                    </TableBody>
+                </Table>
             </div>
+
+            {dialogOpenCP !== null && (
+                <Dialog open={true} onOpenChange={() => setDialogOpenCP(null)}>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Confirm Changes</DialogTitle>
+                            <p>Once assigned, loan officers cannot be removed. Are you sure you want to proceed?</p>
+                        </DialogHeader>
+                        <DialogFooter>
+                            <Button variant="secondary" onClick={() => handleCancelChanges(dialogOpenCP)}>Cancel</Button>
+                            <Button onClick={() => confirmSaveChanges(dialogOpenCP)} className="bg-blue-600 hover:bg-blue-700 text-white">Confirm</Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+            )}
         </>
     );
 }

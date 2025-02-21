@@ -24,7 +24,7 @@ export interface FetchedCheckPoint {
 	id: number;
 	area_number: string;
 	description: string;
-	loan_officers: string[];
+	loan_officers: { id: number }[];
 }
 
 // Shemas
