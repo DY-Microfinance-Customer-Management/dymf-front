@@ -148,7 +148,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 				const data = await response.json();
 				if (data.token) {
 					const decoded: JwtData = jwtDecode(data.token);
-					console.log(decoded)
+					console.log(`App Sidebar Console: ${decoded}`)
 					setUsername(decoded.username);
 					setUserRole(decoded.role);
 				}
