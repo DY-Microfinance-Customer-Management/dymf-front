@@ -4,23 +4,23 @@
 import { cookies } from 'next/headers';
 
 // Types
-import { GuarantorSchema, Gender, LoanType, serverActionMessage } from '@/types';
+import { PostGuarantorSchema, GenderEnum, LoanTypeEnum, serverActionMessage } from '@/types';
 
 export async function createGuarantorAction(_: any, formData: FormData): Promise<serverActionMessage> {
     const cookieStore = await cookies();
     const credentials = cookieStore.get('access_token')?.value;
 
     const infos = ['info1', 'info2', 'info3', 'info4', 'info5']
-    const data: GuarantorSchema = {
+    const data: PostGuarantorSchema = {
         name: formData.get("name")?.toString() ?? '',
         nrc_number: formData.get("nrcNo")?.toString() ?? '',
         birth: formData.get("dateOfBirth")?.toString() ?? '',
         phone_number: formData.get("phone")?.toString() ?? '', 
         email: formData.get("email")?.toString() ?? '',
-        gender: formData.get("gender") === 'Male' ? Gender.man : Gender.woman,
+        gender: formData.get("gender") === 'Male' ? GenderEnum.man : GenderEnum.woman,
         // area_number: formData.get("cpNo")?.toString() ?? '',
         area_number: 'A123',
-        loan_type: formData.get("loanType")?.toString()=== 'Special Loan' ? LoanType.special_loan : LoanType.group_loan,
+        loan_type: formData.get("loanType")?.toString()=== 'Special Loan' ? LoanTypeEnum.special_loan : LoanTypeEnum.group_loan,
         home_address: formData.get("homeAddress")?.toString() ?? '',
         home_postal_code: formData.get("homePostalCode")?.toString() ?? '',
         office_address: formData.get("officeAddress")?.toString() ?? '',

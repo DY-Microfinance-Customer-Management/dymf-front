@@ -7,13 +7,13 @@ import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 
 // Types
-import { CheckPointSchema, serverActionMessage } from '@/types';
+import { PostCheckPointSchema, serverActionMessage } from '@/types';
 
 export async function createCheckPointAction(_: any, formData: FormData): Promise<serverActionMessage> {
     const cookieStore = await cookies();
     const credentials = cookieStore.get('access_token')?.value;
 
-    const data: CheckPointSchema = {
+    const data: PostCheckPointSchema = {
         area_number: formData.get("area_number")?.toString() ?? '',
         description: formData.get("description")?.toString() ?? '',
     }

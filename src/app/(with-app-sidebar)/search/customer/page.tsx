@@ -1,72 +1,56 @@
-"use client";
+'use client';
 
-// React
-import React, { useActionState, useState } from "react";
+// Actions
+import { createEmployeeAction } from "@/actions/employee.action";
 
-// UI Components
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+// Components: UI
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Switch } from "@/components/ui/switch";
+import { toast } from "sonner";
 
 // Icons
 import { ChevronDown } from "lucide-react";
 
-// Actions
-import { createLoanAction } from "@/actions/create-loan.action";
+// React
+import { useActionState, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
-// Main Component
-export default function LoanManagementApp() {
-    const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null);
-    const [isConfirming, setIsConfirming] = useState<boolean>(false);
+// Types
+import { CustomerSchema } from "@/types";
 
-    const confirmSelection = (customer: string) => {
-        setSelectedCustomer(customer);
-        setIsConfirming(true);
-    };
+// Util
+import { delay } from "@/util/delay";
 
-    const proceedToLoanManagement = () => {
-        setIsConfirming(false);
-    };
+export default function Page() {
+    const [selectedCustomer, setSelectedCustomer] = useState(null);
+    const [isConfirming, setIsConfirming] = useState<boolean>(true);
 
-    const cancelSelection = () => {
-        setIsConfirming(false);
+    const handleNewEmployee = () => {
         setSelectedCustomer(null);
     };
 
-    const goBackToSelectCustomer = () => {
+    const confirmSelection = (employee) => {
+        setSelectedCustomer(employee);
+        setIsConfirming(false);
+    };
+
+    const goBackToSelectEmployee = () => {
         setSelectedCustomer(null);
     };
 
     return (
         <div className="flex flex-col min-h-screen">
             {selectedCustomer && !isConfirming ? (
-                <LoanManagementPage selectedCustomer={selectedCustomer} onBack={goBackToSelectCustomer} />
+                <CustomerEditPage selectedCustomer={selectedCustomer} onBack={goBackToSelectEmployee} />
             ) : (
-                <SelectCustomerPage onConfirm={confirmSelection} />
-            )}
-
-            {/* Confirmation Dialog */}
-            {isConfirming && (
-                <Dialog open={isConfirming}>
-                    <DialogContent>
-                        <DialogHeader>
-                            <DialogTitle>Confirm Customer</DialogTitle>
-                            <DialogDescription>
-                                Are you sure you want to select <strong>{selectedCustomer}</strong> as the customer?
-                            </DialogDescription>
-                        </DialogHeader>
-                        <DialogFooter>
-                            <Button variant="secondary" onClick={cancelSelection}>
-                                Cancel
-                            </Button>
-                            <Button onClick={proceedToLoanManagement}>Confirm</Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
+                <SelectCustomerPage onConfirm={confirmSelection} onNew={handleNewEmployee} />
             )}
         </div>
     );
@@ -88,7 +72,6 @@ function SelectCustomerPage({ onConfirm }: { onConfirm: (customer: string) => vo
                 </CardContent>
                 <CardContent>
                     <Table>
-                        <TableCaption>Search Results</TableCaption>
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Name</TableHead>
@@ -120,7 +103,7 @@ function SelectCustomerPage({ onConfirm }: { onConfirm: (customer: string) => vo
 }
 
 // Loan Management Page
-function LoanManagementPage({ selectedCustomer, onBack }: {
+function CustomerEditPage({ selectedCustomer, onBack }: {
     selectedCustomer: string;
     onBack: () => void;
 }) {

@@ -4,7 +4,7 @@
 import { cookies } from 'next/headers';
 
 // Types
-import { PostEmployeeSchema, Gender, serverActionMessage, GetEmployeeSchema, PatchEmployeeSchema } from '@/types';
+import { PostEmployeeSchema, GenderEnum, serverActionMessage, GetEmployeeSchema, PatchEmployeeSchema } from '@/types';
 import { revalidatePath } from 'next/cache';
 
 export async function createEmployeeAction(_: any, formData: FormData): Promise<serverActionMessage> {
@@ -48,7 +48,7 @@ export async function createEmployeeAction(_: any, formData: FormData): Promise<
             phone_number: formData.get("phone")?.toString() ?? '',
             address: formData.get("address")?.toString() ?? '',
             email: formData.get("email")?.toString() ?? '',
-            gender: formData.get("gender") === 'Male' ? Gender.man : Gender.woman,
+            gender: formData.get("gender") === 'Male' ? GenderEnum.man : GenderEnum.woman,
             salary: Number(formData.get("salary")) ?? 0,
             ssb: Number(formData.get("ssb")) ?? 0,
             income_tax: Number(formData.get("incomeTax")) ?? 0,
@@ -152,7 +152,7 @@ export async function createEmployeeAction(_: any, formData: FormData): Promise<
             phone_number: formData.get("phone")?.toString() ?? '',
             address: formData.get("address")?.toString() ?? '',
             email: formData.get("email")?.toString() ?? '',
-            gender: formData.get("gender") === 'Male' ? Gender.man : Gender.woman,
+            gender: formData.get("gender") === 'Male' ? GenderEnum.man : GenderEnum.woman,
             salary: Number(formData.get("salary")) ?? 0,
             ssb: Number(formData.get("ssb")) ?? 0,
             income_tax: Number(formData.get("incomeTax")) ?? 0,

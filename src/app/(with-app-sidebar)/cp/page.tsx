@@ -16,13 +16,14 @@ import { useActionState, useEffect, useState, Fragment } from "react";
 import { useRouter } from "next/navigation";
 
 // Types
-import { FetchedCheckPoint } from "@/types";
+import { GetCheckPointSchema, GetLoanOfficerSchema } from "@/types";
 import { Input } from "@/components/ui/input";
 
 export default function Page() {
-    const [cpNumbers, setCpNumbers] = useState<FetchedCheckPoint[]>([]);
-    const [tempCpNumbers, setTempCpNumbers] = useState<FetchedCheckPoint[]>([]);
-    const [loanOfficers, setLoanOfficers] = useState<{ id: number; name: string; cp_numbers: { id: number, area_number: string, description: string }[] }[]>([]);
+    const [cpNumbers, setCpNumbers] = useState<GetCheckPointSchema[]>([]);
+    const [tempCpNumbers, setTempCpNumbers] = useState<GetCheckPointSchema[]>([]);
+    // const [loanOfficers, setLoanOfficers] = useState<{ id: number; name: string; cp_numbers: { id: number, area_number: string, description: string }[] }[]>([]);
+    const [loanOfficers, setLoanOfficers] = useState<GetLoanOfficerSchema[]>([]);
     const [expandedCP, setExpandedCP] = useState<number | null>(null);
     const [modifiedMap, setModifiedMap] = useState<{ [cpId: number]: boolean }>({});
     const [dialogOpenCP, setDialogOpenCP] = useState<number | null>(null);
@@ -69,7 +70,7 @@ export default function Page() {
                 if (cp.id !== cpId) return cp;
     
                 const updatedLoanOfficers = checked
-                    ? [...cp.loan_officers, { id: officerId }]
+                    ? [...cp.loan_officers, { id: officerId } as GetLoanOfficerSchema]
                     : cp.loan_officers.filter(officer => officer.id !== officerId);
     
                 return {
@@ -82,8 +83,8 @@ export default function Page() {
         // Save Button disable Handler
         setModifiedMap(prev => {
             const updatedLoanOfficers = checked
-                ? [...cpNumbers.find(cp => cp.id === cpId)?.loan_officers || [], { id: officerId }]
-                : cpNumbers.find(cp => cp.id === cpId)?.loan_officers.filter(officer => officer.id !== officerId) || [];
+                ? [...(cpNumbers.find(cp => cp.id === cpId)?.loan_officers || []), { id: officerId } as GetLoanOfficerSchema]
+                : (cpNumbers.find(cp => cp.id === cpId)?.loan_officers.filter(officer => officer.id !== officerId) || []);
     
             const originalLoanOfficers = tempCpNumbers.find(cp => cp.id === cpId)?.loan_officers || [];
             const isSameAsOriginal = JSON.stringify(updatedLoanOfficers) === JSON.stringify(originalLoanOfficers);
