@@ -13,8 +13,6 @@ export async function login(_: any, formData: FormData): Promise<serverActionMes
 
     const credentials = btoa(`${id}:${password}`);
 
-
-    // Fetch API 요청
     const response = await fetch(`${process.env.API_SERVER_URL}/auth/login`, {
         method: 'POST',
         headers: {
@@ -29,8 +27,6 @@ export async function login(_: any, formData: FormData): Promise<serverActionMes
     if (!response.ok) {
         throw new Error('Login Failed! Please try again');
     }
-
-    // const data = await response.json();
 
     // 'use server'; 때문에 쿠키가 client로 저장되지 않음
     const cookieList = response.headers.getSetCookie().map((v) => v.slice(0, v.indexOf(' ') - 1).split('='));

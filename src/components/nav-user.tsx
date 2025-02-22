@@ -26,8 +26,7 @@ export function NavUser({ username, userRole }: {
 	// Logout Handler
 	const handleLogout = async () => {
 		try {
-			// TODO: 로그아웃 로직
-			
+			fetch('/api/auth/logout');
             router.push('/login');
         } catch (error) {
 			console.error("Logout failed:", error);
