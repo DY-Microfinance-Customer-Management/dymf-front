@@ -70,7 +70,7 @@ export function SelectEmployeePage({ onConfirm, onNew }: { onConfirm: (employee:
 
     const fetchEmployee = (cursor: string, query: string = "") => {
         setLoading(true);
-        let apiUrl = `/api/personnel?cursor=${cursor}`;
+        let apiUrl = `/api/getPersonnels?cursor=${cursor}`;
         if (query.trim()) {
             apiUrl += `&name=${encodeURIComponent(query)}`;
         }
