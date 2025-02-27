@@ -49,7 +49,8 @@ export enum RepaymentMethodEnum {
 
 // Shemas
 export type PostCustomerSchema = Omit<CustomerSchema, 'id'>;
-export interface GetCustomerSchema extends Omit<CustomerSchema, 'area_number'> { loans: []; cp_number: CheckPointSchema; }
+export type PatchCustomerSchema = Omit<CustomerSchema, 'id'>;
+export interface GetCustomerSchema extends Omit<CustomerSchema, 'area_number'> { loans: []; cp_number: string; }
 export interface CustomerSchema {
 	id: number;
 	name: string;
@@ -69,7 +70,7 @@ export interface CustomerSchema {
 }
 
 export type PostGuarantorSchema = Omit<GuarantorSchema, 'id'>;
-export interface GetGuarantorSchema extends Omit<GuarantorSchema, 'area_number'> { loans: []; cp_number: CheckPointSchema; }
+export interface GetGuarantorSchema extends Omit<GuarantorSchema, 'area_number'> { loans: []; cp_number: string; }
 export interface GuarantorSchema {
 	id: number;
 	name: string;

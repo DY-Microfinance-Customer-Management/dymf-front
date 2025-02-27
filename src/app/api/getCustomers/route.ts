@@ -9,11 +9,11 @@ export async function GET(request: NextRequest) {
     const nextCursor = searchParams.get('cursor');
     const name = searchParams.get('name');
 
-    let apiUrl = `${process.env.API_SERVER_URL}/personnel`;
+    let apiUrl = `${process.env.API_SERVER_URL}/customer`;
 
     // name이 있을 경우 검색 필터 적용
     if (name) {
-        apiUrl += `?name=${encodeURIComponent(name)}`;
+        apiUrl += `?name=${encodeURIComponent(name)}&take=100`;
     } else if (nextCursor === "") {
         apiUrl += `?order[]=id_ASC&take=6`;
     } else {
@@ -30,13 +30,13 @@ export async function GET(request: NextRequest) {
     });
 
     if (!response.ok) {
-        throw new Error(`Failed to fetch Employees`);
+        return NextResponse.json(null);
     }
 
     const data = await response.json();
-    const employees = data.data;
+    const customers = data.data;
     const count = data.count;
     const returnCursor = data.nextCursor;
 
-    return NextResponse.json({ employees, returnCursor, count });
+    return NextResponse.json({ customers, returnCursor, count });
 }
