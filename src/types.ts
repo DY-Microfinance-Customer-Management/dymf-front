@@ -70,6 +70,7 @@ export interface CustomerSchema {
 }
 
 export type PostGuarantorSchema = Omit<GuarantorSchema, 'id'>;
+export type PatchGuarantorSchema = Omit<GuarantorSchema, 'id'>;
 export interface GetGuarantorSchema extends Omit<GuarantorSchema, 'area_number'> { loans: []; cp_number: string; }
 export interface GuarantorSchema {
 	id: number;
