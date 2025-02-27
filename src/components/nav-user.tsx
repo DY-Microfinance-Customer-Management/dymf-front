@@ -3,7 +3,7 @@
 // Components: UI
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger, DialogDescription } from "@/components/ui/dialog"
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar"
 
 // Components: Icon
@@ -59,7 +59,7 @@ export function NavUser({ username, userRole }: {
                         <DialogContent>
                             <DialogHeader>
                                 <DialogTitle>Logout</DialogTitle>
-                                <p>Are you sure you want to log out?</p>
+                                <DialogDescription>Are you sure you want to log out?</DialogDescription>
                             </DialogHeader>
                             <DialogFooter>
                                 <Button variant="secondary" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
