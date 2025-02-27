@@ -189,7 +189,7 @@ export default function FormPage() {
                                     </div>
                                     <div className="col-span-2">
                                         <Label>Phone</Label>
-                                        <Input name="phone" value={confirmData.phone} onChange={handlePhoneChange} disabled={isPending} type="text" required />
+                                        <Input name="phone" value={confirmData.phone} onChange={handlePhoneChange} disabled={isPending} type="text" size={11} required />
                                     </div>
                                     <div className="col-span-2">
                                         <Label>Email</Label>
