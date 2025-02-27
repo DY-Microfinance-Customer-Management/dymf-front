@@ -17,15 +17,12 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail, Sid
 import { JwtData } from "@/types";
 
 const data = {
-	// user: {
-	// 	name: "shadcn",
-	// },
 	navMain: [
 		{
 			title: "Registration",
 			url: "#",
 			icon: PenLine,
-			isActive: true,
+			// isActive: true, // Always Open 
 			items: [
 				{
 					title: "Customer",
@@ -148,7 +145,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 				const data = await response.json();
 				if (data.token) {
 					const decoded: JwtData = jwtDecode(data.token);
-					console.log(`App Sidebar Console: ${decoded}`)
+					console.log(`App Sidebar Console: ${JSON.stringify(decoded)}`)
 					setUsername(decoded.username);
 					setUserRole(decoded.role);
 				}
@@ -163,8 +160,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	return (
 		<Sidebar collapsible="icon" {...props}>
 			<Link href="/home">
-				<SidebarHeader>
-					<Image src="/icon.png" width={35} height={40} alt="Logo" />
+				<SidebarHeader className="pb-0">
+					<Image src="/icon.png" priority={true} width={35} height={40} alt="Logo" style={{ width: 40, height: "auto" }} />
 				</SidebarHeader>
 			</Link>
 
