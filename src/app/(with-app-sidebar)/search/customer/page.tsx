@@ -12,7 +12,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 
 // Icons
@@ -23,7 +22,7 @@ import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 // Types
-import { CustomerSchema, GetCustomerSchema, LoanTypeEnum } from "@/types";
+import { GetCustomerSchema, LoanTypeEnum } from "@/types";
 
 // Util
 import { delay } from "@/util/delay";
