@@ -78,18 +78,22 @@ export function SelectEmployeePage({ onConfirm, onNew }: { onConfirm: (employee:
         fetch(apiUrl)
             .then((res) => res.json())
             .then((data) => {
-                const fetchedEmployees = data.employees;
-                const returnCursor = data.returnCursor;
-                const count = data.count;
-
-                setEmployees((prev) => {
-                    const existingIds = new Set(prev.map(emp => emp.id));
-                    const newEmployees = fetchedEmployees.filter((emp: { id: number }) => !existingIds.has(emp.id));
-                    return [...prev, ...newEmployees];
-                });
-
-                setNextCursor(returnCursor);
-                setRemainingEmployeeCnt(count);
+                if (data === null) {
+                    setEmployees([]);
+                } else {
+                    const fetchedEmployees = data.employees;
+                    const returnCursor = data.returnCursor;
+                    const count = data.count;
+    
+                    setEmployees((prev) => {
+                        const existingIds = new Set(prev.map(emp => emp.id));
+                        const newEmployees = fetchedEmployees.filter((emp: { id: number }) => !existingIds.has(emp.id));
+                        return [...prev, ...newEmployees];
+                    });
+    
+                    setNextCursor(returnCursor);
+                    setRemainingEmployeeCnt(count);
+                }
             })
             .finally(() => setLoading(false));
     }
