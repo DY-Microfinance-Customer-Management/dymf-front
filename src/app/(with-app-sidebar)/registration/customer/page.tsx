@@ -90,7 +90,7 @@ export default function FormPage() {
             toast.error(state?.message);
         } else if (state?.status === 401 || 403) {
             toast.error(state?.message);
-            router.push('/login');
+            router.refresh();
         } else if (state?.status === 404) {
             toast.error(state?.message);
         }
