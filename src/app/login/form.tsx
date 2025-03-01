@@ -7,6 +7,7 @@ import { useActionState } from "react";
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { PasswordInput } from "@/components/ui/password-input";
 
 // Action
 import { login } from "@/actions/auth.action";
@@ -25,7 +26,7 @@ export function LoginForm() {
                     <div className="flex items-center">
                         <Label htmlFor="password">Password</Label>
                     </div>
-                    <Input disabled={isPending} name="password" type="password" required />
+                    <PasswordInput disabled={isPending} name="password" required />
                 </div>
                 <Button type="submit" className="w-full">Login</Button>
             </div>
