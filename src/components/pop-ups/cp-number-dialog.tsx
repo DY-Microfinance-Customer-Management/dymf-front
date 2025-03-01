@@ -3,9 +3,9 @@ import { useEffect, useState } from "react";
 
 // UI Components
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { GetCheckPointSchema } from "@/types";
 
 export function CpNumberDialog({ open, onClose, onSelect }: { open: boolean, onClose: () => void, onSelect: (cpNo: string) => void }) {
     const [cpNumbers, setCpNumbers] = useState<string[]>([]);
@@ -14,7 +14,6 @@ export function CpNumberDialog({ open, onClose, onSelect }: { open: boolean, onC
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
-    // ✅ Dialog가 열릴 때 모든 CP 번호 가져오기
     useEffect(() => {
         if (open) {
             fetchCpNumbers();
@@ -26,17 +25,17 @@ export function CpNumberDialog({ open, onClose, onSelect }: { open: boolean, onC
         setError("");
 
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_SERVER_URL}/cp`, {
+            const response = await fetch('/api/getCpNumbers', {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
                 },
             });
 
-            if (!response.ok) throw new Error("Failed to fetch CP Numbers.");
-
             const data = await response.json();
-            setCpNumbers(data);
+            const cpNumbers: GetCheckPointSchema[] = data.cpNumbers;
+            const areaNames = cpNumbers.map(cp => cp.area_number)
+            setCpNumbers(areaNames);
             setFilteredCpNumbers(data);
         } catch (err) {
             setError("Failed to fetch CP Numbers.");
@@ -45,7 +44,6 @@ export function CpNumberDialog({ open, onClose, onSelect }: { open: boolean, onC
         }
     };
 
-    // ✅ 입력값에 따라 CP 번호 필터링
     useEffect(() => {
         if (!cpNo) {
             setFilteredCpNumbers(cpNumbers);
@@ -64,9 +62,6 @@ export function CpNumberDialog({ open, onClose, onSelect }: { open: boolean, onC
 
                 <div className="grid gap-4 py-4">
                     <div className="grid grid-cols-4 items-center gap-4">
-                        {/* <Label htmlFor="cpNo" className="text-right">
-                            CP No.
-                        </Label> */}
                         <Input
                             id="cpNo"
                             value={cpNo}
@@ -76,11 +71,9 @@ export function CpNumberDialog({ open, onClose, onSelect }: { open: boolean, onC
                         />
                     </div>
 
-                    {/* ✅ 로딩 상태 */}
                     {loading && <p>Loading...</p>}
                     {error && <p className="text-red-500">{error}</p>}
 
-                    {/* ✅ CP 번호 리스트 출력 */}
                     {!loading && filteredCpNumbers.length > 0 && (
                         <div className="border p-3 rounded-md max-h-60 overflow-auto space-y-2">
                             {filteredCpNumbers.map((num, index) => (
@@ -89,8 +82,8 @@ export function CpNumberDialog({ open, onClose, onSelect }: { open: boolean, onC
                                     variant="outline"
                                     className="w-full flex justify-between"
                                     onClick={() => {
-                                        onSelect(num); // 부모 컴포넌트에 선택된 값 전달
-                                        onClose(); // Dialog 닫기
+                                        onSelect(num);
+                                        onClose();
                                     }}
                                 >
                                     {num}
@@ -99,8 +92,7 @@ export function CpNumberDialog({ open, onClose, onSelect }: { open: boolean, onC
                         </div>
                     )}
 
-                    {/* ✅ 검색 결과 없음 */}
-                    {/* {!loading && filteredCpNumbers.length === 0 && <p className="text-gray-500">No CP Numbers found.</p>} */}
+                    {!loading && filteredCpNumbers.length === 0 && <p className="text-gray-500">No CP Numbers found.<br/>Please register Check Point first.</p>}
                 </div>
             </DialogContent>
         </Dialog>

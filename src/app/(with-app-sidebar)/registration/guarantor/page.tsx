@@ -209,11 +209,11 @@ export default function FormPage() {
                                             <Label>CP No.</Label>
                                             <Input name="cpNo" value={confirmData.cpNo} onClick={() => setIsCpNumberDialogOpen(true)} readOnly />
                                         </div>
-                                        {/* <CpNumberDialog
+                                        <CpNumberDialog
                                             open={isCpNumberDialogOpen}
                                             onClose={() => setIsCpNumberDialogOpen(false)}
                                             onSelect={(cpNo) => setConfirmData(prev => ({ ...prev, cpNo }))}
-                                        /> */}
+                                        />
                                     </div>
                                     <div className="col-span-2">
                                         <Label>Loan Type</Label>
