@@ -48,12 +48,16 @@ const data = {
 					url: "/search/customer",
 				},
 				{
+					title: "Guarantor",
+					url: "/search/guarantor",
+				},
+				{
 					title: "Loan",
 					url: "/search/loan",
 				},
 				{
-					title: "Guarantor",
-					url: "/search/guarantor",
+					title: "Guarantors",
+					url: "/search/guarantors",
 				},
 				{
 					title: "Collateral",
