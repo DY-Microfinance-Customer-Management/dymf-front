@@ -47,13 +47,31 @@ export default function Page() {
                         <CardContent>
                             <div className="space-y-4">
                                 <div className="flex flex-col space-y-1">
-                                    <Label>Name</Label>
-                                    <Input name="name" disabled={isPending} className="w-full" type="text" />
+                                    <Label>Item Name</Label>
+                                    <Input name="itemName" disabled={isPending} className="w-full" type="text" />
                                 </div>
                                 <div className="flex flex-col space-y-1">
-                                    <Label>Price</Label>
-                                    <PasswordInput name="password" disabled={isPending} className="w-full" />
+                                    <Label>Purchase Date</Label>
+                                    <Input name="purchaseDate" disabled={isPending} className="w-full" type="date" />
                                 </div>
+                                <div className="flex flex-col space-y-1">
+                                    <Label>Value</Label>
+                                    <Input name="value" disabled={isPending} className="w-full" type="text" />
+                                </div>
+                                <div className="col-span-1">
+                                <Label>Depreciation Period</Label>
+                                <div className="flex items-end space-x-2">
+                                    <Input name="bonus" type="text" />
+                                    <Label>years</Label>
+                                </div>
+                            </div>
+                            <div className="col-span-1">
+                                <Label>Depriciation Ratio</Label>
+                                <div className="flex items-end space-x-2">
+                                    <Input name="bonus" type="text" />
+                                    <Label>%</Label>
+                                </div>
+                            </div>
                             </div>
                         </CardContent>
                         <CardFooter>
