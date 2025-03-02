@@ -1,14 +1,14 @@
 'use client';
 
 // Actions
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useState } from "react";
 
 // UI Components
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { PasswordInput } from "@/components/ui/password-input";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 
 // React
@@ -18,7 +18,7 @@ import { useRouter } from "next/navigation";
 export default function Page() {
     // Router
     const router = useRouter();
-    
+
     // Server Action
     const [state, formAction, isPending] = useActionState(createUserAction, null);
     useEffect(() => {
@@ -33,6 +33,20 @@ export default function Page() {
             toast.error(state?.message);
         }
     }, [state]);
+
+    // Depreciation Handler
+    const [isDecliningBalance, setIsDecliningBalance] = useState(false);
+    const [depreciationPeriod, setDepreciationPeriod] = useState('');
+    const [depreciationRatio, setDepreciationRatio] = useState('');
+    const handleSwitchChange = (checked: boolean) => {
+        setIsDecliningBalance(checked);
+
+        if (checked) {
+            setDepreciationPeriod('');
+        } else {
+            setDepreciationRatio('');
+        }
+    };
 
     return (
         <div className="flex flex-col p-10 space-y-8 min-h-screen">
@@ -58,20 +72,34 @@ export default function Page() {
                                     <Label>Value</Label>
                                     <Input name="value" disabled={isPending} className="w-full" type="text" />
                                 </div>
+                                <div className="col-span-1 flex items-center space-x-4">
+                                    <Switch checked={isDecliningBalance} onCheckedChange={handleSwitchChange} />
+                                    <Label>{isDecliningBalance ? "Declining Balance method" : "Straight-Line method"}</Label>
+                                </div>
                                 <div className="col-span-1">
-                                <Label>Depreciation Period</Label>
-                                <div className="flex items-end space-x-2">
-                                    <Input name="bonus" type="text" />
-                                    <Label>years</Label>
+                                    <Label className={isDecliningBalance ? "text-gray-400" : "text-black"}>
+                                        Depreciation Period
+                                    </Label>
+                                    <div className="flex items-end space-x-2">
+                                        <Input name="depreciationPeriod" type="text" disabled={isDecliningBalance} value={depreciationPeriod} onChange={(e) => setDepreciationPeriod(e.target.value)} />
+                                        <Label className={isDecliningBalance ? "text-gray-400" : "text-black"}>years</Label>
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="col-span-1">
-                                <Label>Depriciation Ratio</Label>
-                                <div className="flex items-end space-x-2">
-                                    <Input name="bonus" type="text" />
-                                    <Label>%</Label>
+                                <div className="col-span-1">
+                                    <Label className={!isDecliningBalance ? "text-gray-400" : "text-black"}>
+                                        Depreciation Ratio
+                                    </Label>
+                                    <div className="flex items-end space-x-2">
+                                        <Input
+                                            name="depreciationRatio"
+                                            type="text"
+                                            disabled={!isDecliningBalance}
+                                            value={depreciationRatio}
+                                            onChange={(e) => setDepreciationRatio(e.target.value)}
+                                        />
+                                        <Label className={!isDecliningBalance ? "text-gray-400" : "text-black"}>%</Label>
+                                    </div>
                                 </div>
-                            </div>
                             </div>
                         </CardContent>
                         <CardFooter>
