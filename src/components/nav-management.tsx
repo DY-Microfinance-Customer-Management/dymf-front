@@ -69,7 +69,7 @@ export function NavManagements({
                 </div>
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="center" className="w-full bg-sidebar-background rounded-md shadow-md" style={{ minWidth: '16rem' }}>
+            <DropdownMenuContent align="center" className="w-full rounded-md shadow-md" style={{ minWidth: '16rem' }}>
               <DropdownMenuItem className="cursor-pointer hover:bg-sidebar-hover" onClick={() => setTheme("light")}>Light</DropdownMenuItem>
               <DropdownMenuItem className="cursor-pointer hover:bg-sidebar-hover" onClick={() => setTheme("dark")}>Dark</DropdownMenuItem>
               <DropdownMenuItem className="cursor-pointer hover:bg-sidebar-hover" onClick={() => setTheme("system")}>System</DropdownMenuItem>
