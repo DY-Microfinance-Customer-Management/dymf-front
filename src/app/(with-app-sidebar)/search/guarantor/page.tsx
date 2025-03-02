@@ -3,6 +3,9 @@
 // Actions
 import { updateGuarantorAction } from "@/actions/update-guarantor.action";
 
+// Componenets: Dialog
+import { CpNumberDialog } from "@/components/pop-ups/cp-number-dialog";
+
 // Components: UI
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
@@ -22,7 +25,7 @@ import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 // Types
-import { GetGuarantorSchema, LoanTypeEnum } from "@/types";
+import { GetGuarantorSchema } from "@/types";
 
 // Util
 import { delay } from "@/util/delay";
@@ -184,7 +187,7 @@ function GuarantorEditPage({ selectedGuarantor, onBack }: { selectedGuarantor: G
         email: selectedGuarantor?.email ?? '',
         gender: selectedGuarantor?.gender === 1 ? "Female" : "Male",
         cpNo: selectedGuarantor?.cp_number ?? '',
-        loanType: selectedGuarantor?.loan_type ?? '',
+        loanType: selectedGuarantor?.loan_type === 1 ? "Group Loan" : "Special Loan",
         homeAddress: selectedGuarantor?.home_address ?? '',
         homePostalCode: selectedGuarantor?.home_postal_code ?? '',
         officeAddress: selectedGuarantor?.office_address ?? '',
@@ -222,9 +225,9 @@ function GuarantorEditPage({ selectedGuarantor, onBack }: { selectedGuarantor: G
                 dateOfBirth: new Date("2000-01-01").toISOString().split("T")[0],
                 phone: '',
                 email: '',
-                gender: "Male",
+                gender: 'Male',
                 cpNo: '',
-                loanType: LoanTypeEnum.special_loan,
+                loanType: 'Special Loan',
                 homeAddress: '',
                 homePostalCode: '',
                 officeAddress: '',
@@ -247,6 +250,9 @@ function GuarantorEditPage({ selectedGuarantor, onBack }: { selectedGuarantor: G
             router.refresh();
         }
     }, [state]);
+
+    // Dialog Handler
+    const [isCpNumberDialogOpen, setIsCpNumberDialogOpen] = useState(false);
 
     // Image Handler
     const [uploadedImage, setUploadedImage] = useState<string | null>(null);
@@ -378,66 +384,93 @@ function GuarantorEditPage({ selectedGuarantor, onBack }: { selectedGuarantor: G
                                         </DropdownMenuContent>
                                     </DropdownMenu>
                                 </div>
+                                <div className="col-span-2 flex items-end gap-2">
+                                    <div className="flex-1">
+                                        <Label>CP No.</Label>
+                                        <Input name="cpNo" value={confirmData.cpNo} onClick={() => setIsCpNumberDialogOpen(true)} disabled={isPending || !isEditing} readOnly />
+                                    </div>
+                                    <CpNumberDialog
+                                        open={isCpNumberDialogOpen}
+                                        onClose={() => setIsCpNumberDialogOpen(false)}
+                                        onSelect={(cpNo) => setConfirmData(prev => ({ ...prev, cpNo }))}
+                                    />
+                                </div>
+                                <div className="col-span-2">
+                                    <Label>Loan Type</Label>
+                                    <DropdownMenu>
+                                        <input name="loanType" value={confirmData.loanType} hidden readOnly />
+                                        <DropdownMenuTrigger asChild disabled={isPending || !isEditing}>
+                                            <button className="flex items-center justify-between border rounded px-3 py-2 w-full text-left">
+                                                {confirmData.loanType}
+                                                <ChevronDown className="ml-2 h-4 w-4 text-gray-500" />
+                                            </button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent>
+                                            <DropdownMenuItem onClick={() => handleDropdownChange("loanType", "Special Loan")}>Special Loan</DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => handleDropdownChange("loanType", "Group Loan")}>Group Loan</DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+                                </div>
                             </div>
                         </div>
                     </CardContent>
                 </Card>
 
                 <Card>
-                        <CardHeader>
-                            <CardTitle className="text-green-800">Address Information</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="grid grid-cols-4 gap-4">
-                                <div className="col-span-3">
-                                    <Label>Home Address</Label>
-                                    <Input name="homeAddress" value={confirmData.homeAddress} onChange={handleChange} disabled={isPending || !isEditing} type="text" required />
-                                </div>
-                                <div className="col-span-1">
-                                    <Label>Home Postal Code</Label>
-                                    <Input name="homePostalCode" value={confirmData.homePostalCode} onChange={handleChange} disabled={isPending || !isEditing} type="text" required />
-                                </div>
-                                <div className="col-span-3">
-                                    <Label>Office Address</Label>
-                                    <Input name="officeAddress" value={confirmData.officeAddress} onChange={handleChange} disabled={isPending || !isEditing} type="text" />
-                                </div>
-                                <div className="col-span-1">
-                                    <Label>Office Postal Code</Label>
-                                    <Input name="officePostalCode" value={confirmData.officePostalCode} onChange={handleChange} disabled={isPending || !isEditing} type="text" />
-                                </div>
+                    <CardHeader>
+                        <CardTitle className="text-green-800">Address Information</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="grid grid-cols-4 gap-4">
+                            <div className="col-span-3">
+                                <Label>Home Address</Label>
+                                <Input name="homeAddress" value={confirmData.homeAddress} onChange={handleChange} disabled={isPending || !isEditing} type="text" required />
                             </div>
-                        </CardContent>
-                    </Card>
+                            <div className="col-span-1">
+                                <Label>Home Postal Code</Label>
+                                <Input name="homePostalCode" value={confirmData.homePostalCode} onChange={handleChange} disabled={isPending || !isEditing} type="text" required />
+                            </div>
+                            <div className="col-span-3">
+                                <Label>Office Address</Label>
+                                <Input name="officeAddress" value={confirmData.officeAddress} onChange={handleChange} disabled={isPending || !isEditing} type="text" />
+                            </div>
+                            <div className="col-span-1">
+                                <Label>Office Postal Code</Label>
+                                <Input name="officePostalCode" value={confirmData.officePostalCode} onChange={handleChange} disabled={isPending || !isEditing} type="text" />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
 
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="text-green-800">Additional Information</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="col-span-2">
-                                    <Label>Info 1</Label>
-                                    <Input name="info1" value={confirmData.info1} onChange={handleChange} disabled={isPending || !isEditing} type="text" />
-                                </div>
-                                <div className="col-span-2">
-                                    <Label>Info 2</Label>
-                                    <Input name="info2" value={confirmData.info2} onChange={handleChange} disabled={isPending || !isEditing} type="text" />
-                                </div>
-                                <div className="col-span-2">
-                                    <Label>Info 3</Label>
-                                    <Input name="info3" value={confirmData.info3} onChange={handleChange} disabled={isPending || !isEditing} type="text" />
-                                </div>
-                                <div className="col-span-2">
-                                    <Label>Info 4</Label>
-                                    <Input name="info4" value={confirmData.info4} onChange={handleChange} disabled={isPending || !isEditing} type="text" />
-                                </div>
-                                <div className="col-span-2">
-                                    <Label>Info 5</Label>
-                                    <Input name="info5" value={confirmData.info5} onChange={handleChange} disabled={isPending || !isEditing} type="text" />
-                                </div>
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="text-green-800">Additional Information</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="col-span-2">
+                                <Label>Info 1</Label>
+                                <Input name="info1" value={confirmData.info1} onChange={handleChange} disabled={isPending || !isEditing} type="text" />
                             </div>
-                        </CardContent>
-                    </Card>
+                            <div className="col-span-2">
+                                <Label>Info 2</Label>
+                                <Input name="info2" value={confirmData.info2} onChange={handleChange} disabled={isPending || !isEditing} type="text" />
+                            </div>
+                            <div className="col-span-2">
+                                <Label>Info 3</Label>
+                                <Input name="info3" value={confirmData.info3} onChange={handleChange} disabled={isPending || !isEditing} type="text" />
+                            </div>
+                            <div className="col-span-2">
+                                <Label>Info 4</Label>
+                                <Input name="info4" value={confirmData.info4} onChange={handleChange} disabled={isPending || !isEditing} type="text" />
+                            </div>
+                            <div className="col-span-2">
+                                <Label>Info 5</Label>
+                                <Input name="info5" value={confirmData.info5} onChange={handleChange} disabled={isPending || !isEditing} type="text" />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
             </div>
         </form>
     );
