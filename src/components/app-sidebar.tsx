@@ -165,7 +165,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 		<Sidebar collapsible="icon" {...props}>
 			<Link href="/home">
 				<SidebarHeader className="pb-0">
-					<Image src="/icon.png" priority={true} width={35} height={40} alt="Logo" style={{ width: 40, height: "auto" }} />
+					<Image src="/icon.png" width={35} height={40} alt="Logo" style={{ width: 40, height: "auto" }} />
 				</SidebarHeader>
 			</Link>
 
