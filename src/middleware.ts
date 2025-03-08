@@ -115,5 +115,6 @@ export const config = {
         "/fixed-asset/:path*",
         "/calculator/:path*",
         "/user/:path*",
+        "/api/:path*",
     ],
 };
