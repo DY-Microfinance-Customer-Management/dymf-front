@@ -5,34 +5,39 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger, DialogDescription } from "@/components/ui/dialog"
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar"
+import { toast } from "sonner"
 
 // Components: Icon
 import { LogOut } from "lucide-react"
 
 // React
-import { useRouter } from "next/navigation"
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 
 export function NavUser({ username, userRole }: {
 	username: string;
 	userRole: number;
 }) {
-	// Router
+	// Router Handler
 	const router = useRouter();
 
 	// Dialog Handler
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
-	
+
 	// Logout Handler
 	const handleLogout = async () => {
-		try {
-			fetch('/api/auth/logout');
-            router.push('/login');
-        } catch (error) {
-			console.error("Logout failed:", error);
-        }
-    };
-	
+		fetch('/api/auth/logout')
+			.then(res => res.json())
+			.then(data => {
+				if (data.ok) {
+					router.push('/login');
+				} else {
+					toast.error("Logout failed. Please try again later.");
+					setIsDialogOpen(false);
+				}
+			})
+	};
+
 	return (
 		<SidebarMenu>
 			<SidebarMenuItem>
@@ -53,20 +58,20 @@ export function NavUser({ username, userRole }: {
 						<span className="truncate font-semibold">{username}</span>
 					</div>
 					<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                        <DialogTrigger asChild>
-                            <LogOut type="button" className="cursor-pointer" onClick={() => setIsDialogOpen(true)} />
-                        </DialogTrigger>
-                        <DialogContent>
-                            <DialogHeader>
-                                <DialogTitle>Logout</DialogTitle>
-                                <DialogDescription>Are you sure you want to log out?</DialogDescription>
-                            </DialogHeader>
-                            <DialogFooter>
-                                <Button variant="secondary" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
-                                <Button onClick={handleLogout} className="bg-red-600 text-white hover:bg-red-700">Confirm</Button>
-                            </DialogFooter>
-                        </DialogContent>
-                    </Dialog>
+						<DialogTrigger asChild>
+							<LogOut type="button" className="cursor-pointer" onClick={() => setIsDialogOpen(true)} />
+						</DialogTrigger>
+						<DialogContent>
+							<DialogHeader>
+								<DialogTitle>Logout</DialogTitle>
+								<DialogDescription>Are you sure you want to log out?</DialogDescription>
+							</DialogHeader>
+							<DialogFooter>
+								<Button variant="secondary" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
+								<Button onClick={handleLogout} className="bg-red-600 text-white hover:bg-red-700">Confirm</Button>
+							</DialogFooter>
+						</DialogContent>
+					</Dialog>
 				</SidebarMenuButton>
 			</SidebarMenuItem>
 		</SidebarMenu>

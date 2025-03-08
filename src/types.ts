@@ -17,7 +17,9 @@ export interface serverActionMessage {
 import { JwtPayload } from "jwt-decode";
 export interface JwtData extends JwtPayload {
 	role: number;
-	username: string;
+	userName: string;
+	exp: number;
+	iat: number;
 }
 
 // Enum

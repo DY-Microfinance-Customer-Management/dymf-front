@@ -1,7 +1,8 @@
 'use server';
 
 // Types
-import { serverActionMessage } from "@/types";
+import { JwtData, serverActionMessage } from "@/types";
+import { jwtDecode } from "jwt-decode";
 
 // Credentials
 import { cookies } from 'next/headers';
@@ -22,15 +23,22 @@ export async function login(_: any, formData: FormData): Promise<serverActionMes
         credentials: 'include',
     });
 
-    console.log(response)
-
     if (!response.ok) {
         throw new Error('Login Failed! Please try again');
     }
 
     // 'use server'; 때문에 쿠키가 client로 저장되지 않음
     const cookieList = response.headers.getSetCookie().map((v) => v.slice(0, v.indexOf(' ') - 1).split('='));
-    cookieList.forEach(async (v) => (await cookies()).set(v[0], decodeURIComponent(v[1])));
+
+    const cookieStore = await cookies();
+    for (const cookieInfo of cookieList) {
+        const decoded: JwtData = jwtDecode(cookieInfo[1]);
+        cookieStore.set({
+            name: cookieInfo[0],
+            value: decodeURIComponent(cookieInfo[1]),
+            expires: new Date((decoded.exp + 9 * 60 * 60) * 1000) // 한국: GMT +9 = 9*60*60
+        }); 
+    }
 
     redirect('/home');
 }
