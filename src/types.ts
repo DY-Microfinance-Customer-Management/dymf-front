@@ -48,6 +48,10 @@ export enum RepaymentMethodEnum {
     Equal_Principal,
     Bullet
 }
+export enum CollateralTypeEnum {
+	Property,
+    Car
+}
 
 // Shemas
 export type PostCustomerSchema = Omit<CustomerSchema, 'id'>;
@@ -73,7 +77,7 @@ export interface CustomerSchema {
 
 export type PostGuarantorSchema = Omit<GuarantorSchema, 'id'>;
 export type PatchGuarantorSchema = Omit<GuarantorSchema, 'id'>;
-export interface GetGuarantorSchema extends Omit<GuarantorSchema, 'area_number'> { loans: []; cp_number: string; }
+export interface GetGuarantorSchema extends Omit<GuarantorSchema, 'area_number'> { loans: []; cp_number: GetCheckPointSchema; }
 export interface GuarantorSchema {
 	id: number;
 	name: string;
@@ -90,6 +94,16 @@ export interface GuarantorSchema {
 	office_postal_code?: string;
 	details?: string[];
 	image?: string;
+}
+
+export type PostCollateralSchema = Omit<CollateralSchema, 'id' | 'loan'>;
+export interface CollateralSchema {
+	id: number;
+	type: CollateralTypeEnum;
+	name: string;
+	detail: string;
+	price?: number;
+	loan: GetLoanSchema;
 }
 
 export type GetCheckPointSchema = Omit<CheckPointSchema, 'customers' | 'guarantors'>;

@@ -1,7 +1,7 @@
 'use client';
 
 // React
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 // UI Components
 import { Button } from "@/components/ui/button";
@@ -9,33 +9,80 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 // Icons
 import { ChevronDown } from "lucide-react";
 
+// Types
+import { GetCustomerSchema } from "@/types";
+
 // Loan Calculation Component
-export default function LoanCalculationTab() {
+export default function LoanCalculationTab({ selectedCustomer, setIsCalculated, confirmData, setConfirmData }:
+    {
+        selectedCustomer: GetCustomerSchema;
+        setIsCalculated: (value: boolean) => void;
+        confirmData: {
+            loanAmount: number | null;
+            repaymentCycle: number | null;
+            interestRate: number;
+            numberOfRepayment: number | null;
+            repaymentMethod: string;
+        };
+        setConfirmData: (data: any) => void;
+    }) {
     const [schedule, setSchedule] = useState<{ date: string; principal: number; interest: number; total: number; balance: number }[]>([]);
-    const [loanAmount, setLoanAmount] = useState<number>(0);
-    const [repaymentCycle, setRepaymentCycle] = useState<number>(0);
-    const [interestRate, setInterestRate] = useState<number>(28);
-    const [numberOfRepayment, setNumberOfRepayment] = useState<number>(0);
-    const [repaymentMethod, setRepaymentMethod] = useState('Equal');
     const [loanOfficer, setLoanOfficer] = useState('-');
-    // const [totalPrincipal, setTotalPrincipal] = useState(0);
-    // const [totalInterest, setTotalInterest] = useState(0);
+    const [assignedLoanOfficer, setAssignedLoanOfficer] = useState<number | null>(null);
+
+    // Calculate Button Handler
+    const isCalculateDisabled =
+        confirmData.loanAmount === null ||
+        confirmData.repaymentCycle === null ||
+        confirmData.interestRate === null ||
+        confirmData.numberOfRepayment === null ||
+        confirmData.repaymentMethod === "";
+
+    // confirmData 값이 변경될 때 `isCalculated`를 false로 초기화하여 Save 버튼 비활성화
+    useEffect(() => {
+        setIsCalculated(false);
+    }, [confirmData]);
+
+    // Loan Officer Data Handler
+    const [availableLoanOfficers, setAvailableLoanOfficers] = useState<{ id: number, name: string }[]>([]);
+    useEffect(() => {
+        fetch(`/api/getAvailableLoanOfficers?cpNumber=${selectedCustomer.cp_number.id}`)
+            .then((res) => res.json())
+            .then((data) => {
+                setAvailableLoanOfficers(data.availableLoanOfficers);
+            });
+    }, []);
 
     const handleRepaymentMethod = (value: string) => {
-        setRepaymentMethod(value);
+        setConfirmData({ ...confirmData, repaymentMethod: value });
     };
 
-    const handleLoanOfficer = (value: string) => {
-        setLoanOfficer(value)
+    const handleLoanOfficer = (id: number, name: string) => {
+        setLoanOfficer(name);
+        setAssignedLoanOfficer(id);
     };
 
     const calculateSchedule = () => {
+        if (
+            confirmData.loanAmount === null ||
+            confirmData.repaymentCycle === null ||
+            confirmData.numberOfRepayment === null ||
+            confirmData.interestRate === null
+        ) return;
+
         const result = [];
+        const loanAmount = confirmData.loanAmount;
+        const numberOfRepayment = confirmData.numberOfRepayment;
+        const interestRate = confirmData.interestRate;
+        const repaymentCycle = confirmData.repaymentCycle;
+
+        if (loanAmount <= 0 || numberOfRepayment <= 0 || interestRate <= 0 || repaymentCycle <= 0) return;
+
         const monthlyPrincipal = Math.floor(loanAmount / numberOfRepayment);
         let remainingBalance = loanAmount;
 
@@ -52,7 +99,9 @@ export default function LoanCalculationTab() {
                 balance: remainingBalance,
             });
         }
+
         setSchedule(result);
+        setIsCalculated(true);
     };
 
     const calculateDate = (startDate: Date, cycle: number, index: number) => {
@@ -84,22 +133,22 @@ export default function LoanCalculationTab() {
                             <Input disabled name="loanNumber" type="text" />
                         </div>
                         <div className="col-span-1">
-                            <Label>Loan Type</Label>
-                            <Input disabled name="loanType" type="text" />
+                            <Label>Contract Date</Label>
+                            <Input name="contractDate" type="date" defaultValue={new Date().toISOString().split("T")[0]} />
                         </div>
                         <div className="col-span-1">
                             <Label>CP No.</Label>
-                            <Input disabled name="cpNumber" type="text" />
+                            <Input disabled name="cpNumber" value={selectedCustomer.cp_number.area_number} type="text" />
                         </div>
                         <div className="col-span-1">
-                            <Label>Contract Date</Label>
-                            <Input name="contractDate" type="date" defaultValue={new Date().toISOString().split("T")[0]} />
+                            <Label>Loan Type</Label>
+                            <Input disabled name="loanType" value={selectedCustomer.loan_type ? 'Special Loan' : 'Group Loan'} type="text" />
                         </div>
                         <div className="col-span-1"></div>
                         <div className="col-span-1">
                             <Label>Loan Officer</Label>
                             <DropdownMenu>
-                                <input required name="repaymentMethod" value={repaymentMethod} hidden readOnly />
+                                <input required name="loanOfficer" value={assignedLoanOfficer ? assignedLoanOfficer : ''} hidden readOnly />
                                 <DropdownMenuTrigger asChild>
                                     <button className="flex items-center justify-between border rounded px-3 py-2 w-full text-left">
                                         {loanOfficer}
@@ -107,13 +156,12 @@ export default function LoanCalculationTab() {
                                     </button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent>
-                                    {['John Doe', 'Hun', 'Young'].map((officer) => (
-                                        <DropdownMenuItem key={officer} onClick={() => handleLoanOfficer(officer)}>
-                                            {officer}
+                                    {availableLoanOfficers.map((officer) => (
+                                        <DropdownMenuItem key={officer.id} onClick={() => handleLoanOfficer(officer.id, officer.name)}>
+                                            {officer.name}
                                         </DropdownMenuItem>
                                     ))}
                                 </DropdownMenuContent>
-
                             </DropdownMenu>
                         </div>
                     </div>
@@ -129,35 +177,35 @@ export default function LoanCalculationTab() {
                         <div className="col-span-1 flex items-end gap-2">
                             <div className="flex-1">
                                 <Label>Loan Amount</Label>
-                                <Input name="loanAmount" type="number" onChange={(e) => setLoanAmount(Number(e.target.value))} />
+                                <Input type="number" name="loanAmount" value={confirmData.loanAmount ?? ""} onChange={(e) => setConfirmData({ ...confirmData, loanAmount: e.target.value ? Number(e.target.value) : null })} />
                             </div>
                             <Label>MMK</Label>
                         </div>
                         <div className="col-span-1 flex items-end gap-2">
                             <div className="flex-1">
                                 <Label>Repayment Cycle</Label>
-                                <Input name="repaymentCycle" type="number" onChange={(e) => setRepaymentCycle(Number(e.target.value))} />
+                                <Input type="number" name="repaymentCycle" value={confirmData.repaymentCycle ?? ""} onChange={(e) => setConfirmData({ ...confirmData, repaymentCycle: e.target.value ? Number(e.target.value) : null })} />
                             </div>
                             <Label>days</Label>
                         </div>
                         <div className="col-span-1 flex items-end gap-2">
                             <div className="flex-1">
                                 <Label>Interest Rate</Label>
-                                <Input name="interestRate" type="number" defaultValue={28} onChange={(e) => setInterestRate(Number(e.target.value))} />
+                                <Input type="number" name="interestRate" value={confirmData.interestRate} onChange={(e) => setConfirmData({ ...confirmData, interestRate: Number(e.target.value) })} />
                             </div>
                             <Label>%</Label>
                         </div>
                         <div className="col-span-1">
                             <Label>Number of Repayment</Label>
-                            <Input name="numberOfRepayment" type="number" onChange={(e) => setNumberOfRepayment(Number(e.target.value))} />
+                            <Input type="number" name="numberOfRepayment" value={confirmData.numberOfRepayment ?? ""} onChange={(e) => setConfirmData({ ...confirmData, numberOfRepayment: e.target.value ? Number(e.target.value) : null })} />
                         </div>
                         <div className="col-span-1">
                             <Label>Repayment Method</Label>
                             <DropdownMenu>
-                                <input required name="repaymentMethod" value={repaymentMethod} hidden readOnly />
+                                <input required name="repaymentMethod" value={confirmData.repaymentMethod} hidden readOnly />
                                 <DropdownMenuTrigger asChild>
                                     <button className="flex items-center justify-between border rounded px-3 py-2 w-full text-left">
-                                        {repaymentMethod}
+                                        {confirmData.repaymentMethod}
                                         <ChevronDown className="ml-2 h-4 w-4 text-gray-500" />
                                     </button>
                                 </DropdownMenuTrigger>
@@ -169,13 +217,11 @@ export default function LoanCalculationTab() {
                             </DropdownMenu>
                         </div>
                         <div className="col-span-1 flex items-end justify-self-end">
-                            <Button type="button" onClick={calculateSchedule} className="bg-blue-600 text-white hover:bg-blue-700">Calculate</Button>
+                            <Button type="button" disabled={isCalculateDisabled} onClick={calculateSchedule} className="bg-blue-600 text-white hover:bg-blue-700">Calculate</Button>
                         </div>
                     </div>
 
-                    {/* Table Headers Always Visible */}
                     <Table className="mt-8">
-                        <TableCaption>Enter details to calculate the repayment schedule</TableCaption>
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Payment Date</TableHead>
@@ -204,7 +250,6 @@ export default function LoanCalculationTab() {
                                         </TableCell>
                                     </TableRow>
                                 ))}
-                                {/* Totals Row */}
                                 {schedule.length > 0 && (
                                     <TableRow className="bg-gray-100 font-bold">
                                         <TableCell>Total</TableCell>
