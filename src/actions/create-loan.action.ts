@@ -5,6 +5,7 @@ import { cookies } from 'next/headers';
 
 // Types
 import { serverActionMessage, PostCollateralSchema, LoanStateEnum, RepaymentMethodEnum } from "@/types";
+import { revalidatePath } from 'next/cache';
 
 export async function createLoanAction(_: any, formData: FormData): Promise<serverActionMessage> {
     const cookieStore = await cookies();
@@ -138,9 +139,8 @@ export async function createLoanAction(_: any, formData: FormData): Promise<serv
             body: JSON.stringify(data),
         });
 
+        const responseData = await response.json();
         if (!response.ok) {
-            const responseData = await response.json();
-
             if (collateralIds.length > 0) {
                 await Promise.all(
                     collateralIds.map(async (collateralId) => {
@@ -160,9 +160,10 @@ export async function createLoanAction(_: any, formData: FormData): Promise<serv
             };
         }
 
+        const createdLoanId = responseData.id.toString().padStart(8, '0');
         return {
             status: 200,
-            message: "Loan successfully created."
+            message: `Loan successfully created.\nLoan No.: ${createdLoanId}`
         };
     } catch (error) {
         console.error("Loan creation failed:", error);

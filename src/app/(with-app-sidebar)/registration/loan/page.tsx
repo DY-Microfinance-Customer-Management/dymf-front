@@ -183,9 +183,9 @@ function LoanManagementPage({ selectedCustomer, onBack }: { selectedCustomer: Ge
                 repaymentCycle: null,
                 interestRate: 28,
                 numberOfRepayment: null,
-                repaymentMethod: '',
+                repaymentMethod: 'Equal',
             });
-            router.refresh();
+            onBack();
         } else {
             toast.error(state?.message);
         }
