@@ -39,18 +39,18 @@ export enum WorkingStatusEnum {
 	etc
 }
 export enum LoanStateEnum {
-    inprocess,
-    overdue,
-    complete
+	inprocess,
+	overdue,
+	complete
 }
 export enum RepaymentMethodEnum {
-    Equal,
-    Equal_Principal,
-    Bullet
+	Equal,
+	Equal_Principal,
+	Bullet
 }
 export enum CollateralTypeEnum {
 	Property,
-    Car
+	Car
 }
 
 // Shemas
@@ -96,6 +96,7 @@ export interface GuarantorSchema {
 	image?: string;
 }
 
+export type GetCollateralSchema = Omit<CollateralSchema, 'loan'>;
 export type PostCollateralSchema = Omit<CollateralSchema, 'id' | 'loan'>;
 export interface CollateralSchema {
 	id: number;
@@ -146,20 +147,52 @@ export interface LoanOfficerSchema {
 	loan: GetLoanSchema[];
 }
 
-export interface GetLoanSchema extends LoanSchema { }
+export type GetLoanSchema = Omit<LoanSchema, 'loan_schedules' | 'loan_transactions'>;
+export interface GetOneLoanSchema extends LoanSchema { }
 export interface LoanSchema {
 	id: number;
-	loan_officer: LoanOfficerSchema;
-	// loan_schedules: GetLoanScheduleSchema[];
 	loan_state: LoanStateEnum;
 	loan_amount: number;
 	repayment_cycle: number;
 	interest_rate: number;
 	number_of_repayment: number;
 	repayment_method: RepaymentMethodEnum;
-	customer: GetCustomerSchema;
+	overdue_status: boolean;
 	consulting_info?: string[];
-	// collaterals: GetCollateralSchema[];
-	// guarantees: GetGuaranteeSchema[];
-	// loan_transactions: GetLoanTransactionSchema[];
+	loan_officer: LoanOfficerSchema;
+	customer: GetCustomerSchema;
+	collaterals: GetCollateralSchema[];
+	guarantees: GetGuaranteeSchema[];
+	loan_schedules: GetLoanScheduleSchema[];
+	loan_transactions?: GetLoanTransactionSchema[];
+}
+
+export type GetLoanScheduleSchema = Omit<LoanScheduleSchema, 'loan'>;
+export interface LoanScheduleSchema {
+	id: number;
+	principal: number;
+	interest: number;
+	loan_state: LoanStateEnum;
+	payment_date: string;
+	period: number;
+	remaining_balance: number;
+	total: number;
+	loan_payment_status: boolean;
+	loan: GetLoanSchema;
+}
+
+export type GetGuaranteeSchema = Pick<GuaranteeSchema, 'id'>;
+export interface GuaranteeSchema {
+	id: number;
+	loan: GetLoanSchema;
+	guarantor: GetGuarantorSchema;
+}
+
+export type GetLoanTransactionSchema = Omit<LoanTransactionSchema, 'loan'>;
+export interface LoanTransactionSchema {
+	id: number;
+	before_re: number;
+	repayment_amount: number;
+	loan: GetLoanSchema;
+	is_overdue: boolean;
 }
