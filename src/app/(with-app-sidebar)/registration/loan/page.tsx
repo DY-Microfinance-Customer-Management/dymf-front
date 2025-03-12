@@ -4,10 +4,10 @@
 import { createLoanAction } from "@/actions/create-loan.action";
 
 // Components: Tabs
-import LoanCalculationTab from "./loan-calculation-tab";
-import GuarantorManagementTab from "./guarantor-management-tab";
-import CollateralManagementTab from "./collateral-management-tab";
-import ConsultingInfoTab from "./counseling-info-tab";
+import LoanCalculationTab from "@/components/tabs/loan-calculation-tab";
+import GuarantorManagementTab from "@/components/tabs/guarantor-management-tab";
+import CollateralManagementTab from "@/components/tabs/collateral-management-tab";
+import ConsultingInfoTab from "@/components/tabs/counseling-info-tab";
 
 // Components: UI
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";

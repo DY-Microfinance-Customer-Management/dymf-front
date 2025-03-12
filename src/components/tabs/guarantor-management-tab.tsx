@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 
 // Components: PopUp
-import GuarantorSearchPopup from "./guarantor-search-popup";
+import GuarantorSearchPopup from "@/components/pop-ups/guarantor-search-popup";
 
 // Types
 import { GetGuarantorSchema } from "@/types";
