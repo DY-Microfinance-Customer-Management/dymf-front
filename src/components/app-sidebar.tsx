@@ -55,18 +55,18 @@ const data = {
 					title: "Loan",
 					url: "/search/loan",
 				},
-				{
-					title: "Guarantors",
-					url: "/search/guarantors",
-				},
-				{
-					title: "Collateral",
-					url: "/search/collateral",
-				},
-				{
-					title: "Counseling",
-					url: "/search/counseling",
-				},
+				// {
+				// 	title: "Guarantors",
+				// 	url: "/search/guarantors",
+				// },
+				// {
+				// 	title: "Collateral",
+				// 	url: "/search/collateral",
+				// },
+				// {
+				// 	title: "Counseling",
+				// 	url: "/search/counseling",
+				// },
 			],
 		},
 		{
