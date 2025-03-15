@@ -1,29 +1,61 @@
 'use client';
 
 // React
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 // UI Components
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-
-// Icons
-import { ChevronDown } from "lucide-react";
 
 // Types
 import { GetCustomerSchema, GetLoanSchema, RepaymentMethodEnum } from "@/types";
 
 // Loan Calculation Component
-export default function LoanDetailsTab({ selectedLoan, selectedCustomer, loanOfficer }:
-    {
-        selectedLoan: GetLoanSchema;
-        selectedCustomer: GetCustomerSchema;
-        loanOfficer: string;
-    }) {
+export default function LoanDetailsTab({ selectedLoan, selectedCustomer, loanOfficer }: {
+    selectedLoan: GetLoanSchema;
+    selectedCustomer: GetCustomerSchema;
+    loanOfficer: string;
+}) {
+    // Loan Schedule Handler
+    const [loanSchedules, setLoanSchedules] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const fetchLoanSchedule = async () => {
+        setIsLoading(true);
+        try {
+            const response = await fetch(`/api/getOneLoan?loanId=${selectedLoan.id}`);
+            const data = await response.json();
+            const loanSchedule = data.loanData;
+
+            setLoanSchedules(loanSchedule.loan_schedules);
+        } catch (error) {
+            console.error("Failed to fetch loan schedule:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const totalPrincipal = loanSchedules.reduce((sum, row) => sum + Number(row.principal), 0);
+    const totalInterest = loanSchedules.reduce((sum, row) => sum + Number(row.interest), 0);
+    const totalPayment = loanSchedules.reduce((sum, row) => sum + Number(row.total), 0);
+
+    const getStatus = (schedule: any) => {
+        if (schedule.loan_payment_status) {
+            return <span className="text-green-600 font-semibold">Paid</span>;
+        }
+
+        const paymentDate = new Date(schedule.payment_date);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // 시간 초기화
+
+        if (paymentDate < today) {
+            return <span className="text-red-600 font-semibold">Overdue</span>;
+        } else {
+            return <span className="text-black font-semibold">Scheduled</span>;
+        }
+    };
 
     const repaymentMethodMap: Record<RepaymentMethodEnum, string> = {
         [RepaymentMethodEnum.Equal]: "Equal",
@@ -73,11 +105,7 @@ export default function LoanDetailsTab({ selectedLoan, selectedCustomer, loanOff
                         <div className="col-span-1 flex items-end gap-2">
                             <div className="flex-1">
                                 <Label>Loan Amount</Label>
-                                <Input
-                                    type="number"
-                                    value={selectedLoan.loan_amount ?? ""}
-                                    disabled
-                                />
+                                <Input type="number" value={selectedLoan.loan_amount ?? ""} disabled />
                             </div>
                             <Label>MMK</Label>
                         </div>
@@ -103,57 +131,52 @@ export default function LoanDetailsTab({ selectedLoan, selectedCustomer, loanOff
                             <Label>Repayment Method</Label>
                             <Input value={repaymentMethodMap[selectedLoan.repayment_method]} disabled />
                         </div>
-                        {/* <div className="col-span-1 flex items-end justify-self-end">
-                            <Button type="button" disabled={isCalculateDisabled} onClick={calculateSchedule} className="bg-blue-600 text-white hover:bg-blue-700">Calculate</Button>
-                        </div> */}
                     </div>
 
                     <Table className="mt-8">
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Payment Date</TableHead>
-                                <TableHead>Principal</TableHead>
-                                <TableHead>Interest</TableHead>
-                                <TableHead>Total</TableHead>
-                                <TableHead>Remaining Balance</TableHead>
+                                <TableHead>Period</TableHead>
+                                <TableHead className="text-center">Payment Date</TableHead>
+                                <TableHead className="text-center">Principal</TableHead>
+                                <TableHead className="text-center">Interest</TableHead>
+                                <TableHead className="text-center">Total</TableHead>
+                                <TableHead className="text-center">Status</TableHead>
+                                <TableHead className="text-right">Remaining Balance</TableHead>
                             </TableRow>
                         </TableHeader>
-                        {/* {schedule.length > 0 && (
-                            <TableBody>
-                                {schedule.map((row, index) => (
-                                    <TableRow key={index}>
-                                        <TableCell>{row.date}</TableCell>
-                                        <TableCell className="text-right">
-                                            {row.principal.toLocaleString()}
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            {row.interest.toLocaleString()}
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            {row.total.toLocaleString()}
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            {row.balance.toLocaleString()}
-                                        </TableCell>
+                        <TableBody>
+                            {loanSchedules.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={7} className="text-center py-4">
+                                        <Button onClick={fetchLoanSchedule} disabled={isLoading} className="bg-blue-600 text-white hover:bg-blue-700">
+                                            {isLoading ? "Loading..." : "View Schedule"}
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            ) : (
+                                <>
+                                    {loanSchedules.map((schedule, index) => (
+                                        <TableRow key={index}>
+                                            <TableCell className="w-[20px]">{schedule.period}</TableCell>
+                                            <TableCell className="text-center">{schedule.payment_date}</TableCell>
+                                            <TableCell className="text-center">{Number(schedule.principal).toLocaleString()}</TableCell>
+                                            <TableCell className="text-center">{Number(schedule.interest).toLocaleString()}</TableCell>
+                                            <TableCell className="text-center">{Number(schedule.total).toLocaleString()}</TableCell>
+                                            <TableCell className="text-center">{getStatus(schedule)}</TableCell>
+                                            <TableCell className="text-right">{Number(schedule.remaining_balance).toLocaleString()}</TableCell>
+                                        </TableRow>
+                                    ))}
+                                    <TableRow className="font-bold border-t">
+                                        <TableCell colSpan={2} className="text-center">Total</TableCell>
+                                        <TableCell className="text-center">{totalPrincipal.toLocaleString()}</TableCell>
+                                        <TableCell className="text-center">{totalInterest.toLocaleString()}</TableCell>
+                                        <TableCell className="text-center">{totalPayment.toLocaleString()}</TableCell>
+                                        <TableCell colSpan={2} />
                                     </TableRow>
-                                ))}
-                                {schedule.length > 0 && (
-                                    <TableRow className="bg-gray-100 font-bold">
-                                        <TableCell>Total</TableCell>
-                                        <TableCell className="text-right">
-                                            {totals.totalPrincipal.toLocaleString()}
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            {totals.totalInterest.toLocaleString()}
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            {totals.totalPayment.toLocaleString()}
-                                        </TableCell>
-                                        <TableCell />
-                                    </TableRow>
-                                )}
-                            </TableBody>
-                        )} */}
+                                </>
+                            )}
+                        </TableBody>
                     </Table>
                 </CardContent>
             </Card>
