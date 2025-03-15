@@ -175,7 +175,6 @@ function LoanManagementPage({ selectedCustomer, onBack }: { selectedCustomer: Ge
         guarantorsCnt: 0,
         collateralsCnt: 0,
         consultingInfosCnt: 0,
-    
     });
     useEffect(() => {
         setConfirmData((prev) => ({ ...prev, contractDate: new Date().toISOString().split("T")[0] }));
