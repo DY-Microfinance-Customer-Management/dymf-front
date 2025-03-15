@@ -11,18 +11,13 @@ import ConsultingDetailsTab from "@/components/tabs/counseling-details-tab";
 
 // Components: UI
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-// Icons
-import { ChevronDown } from "lucide-react";
 
 // React
 import { useActionState, useEffect, useState } from "react";
@@ -179,12 +174,21 @@ function LoanDetailsPage({ selectedLoan, onBack }: { selectedLoan: GetLoanSchema
 
     // Actions
     const [state, formAction, isPending] = useActionState(deleteLoanAction, null);
+    useEffect(() => {
+        if (state === null) return;
+
+        if (state?.status === 200) {
+            toast.success(state?.message);
+            onBack();
+        } else {
+            toast.error(state?.message);
+        }
+    }, [state]);
 
     // Data Handler
     const [loading, setLoading] = useState(true);
     const [selectedCustomer, setSelectedCustomer] = useState<GetCustomerSchema>({} as GetCustomerSchema);
     const [loanOfficer, setLoanOfficer] = useState('-');
-
     useEffect(() => {
         Promise.all([
             fetch(`/api/getOneCustomer?customerId=${selectedLoan.customer.id}`)
@@ -207,7 +211,7 @@ function LoanDetailsPage({ selectedLoan, onBack }: { selectedLoan: GetLoanSchema
 
     return (
         <div className="flex flex-col p-6 space-y-6">
-            <form action={formAction}>
+            <form id="loanForm" action={formAction}>
                 <input name="loanId" value={selectedLoan.id} type="text" readOnly hidden />
                 <div className="flex justify-between items-center">
                     <div className="mb-8">
@@ -217,9 +221,26 @@ function LoanDetailsPage({ selectedLoan, onBack }: { selectedLoan: GetLoanSchema
                         <p className="text-gray-600">CP No.: {selectedCustomer.cp_number.area_number}</p>
                     </div>
                     <div className="space-x-4">
-                        <Button type="submit" className="bg-red-600 hover:bg-red-700 text-white">
-                            Delete
-                        </Button>
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button type="button" disabled={isPending} className="bg-red-600 hover:bg-red-700 text-white">Delete</Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        Are you sure you want to delete this loan? This action cannot be undone.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction asChild>
+                                        <Button form="loanForm" type="submit" disabled={isPending} className="bg-red-600 hover:bg-red-700 text-white">Confirm</Button>
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+
                         <Button variant="secondary" onClick={onBack}>Back</Button>
                     </div>
                 </div>

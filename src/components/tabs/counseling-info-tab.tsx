@@ -11,11 +11,17 @@ import { Textarea } from "@/components/ui/textarea";
 import { X } from "lucide-react";
 
 // React
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-export default function ConsultingInfoTab() {
+export default function ConsultingInfoTab({ setInfoData, }: {
+    setInfoData: (data: any) => void; 
+}) {
     const [consultingInfos, setConsultingInfos] = useState<{ id: number; detail: string }[]>([]);
     const [detailInput, setDetailInput] = useState("");
+
+    useEffect(() => {
+        setInfoData((prev: any) => ({ ...prev, consultingInfosCnt: consultingInfos.length, }));
+    }, [consultingInfos, setInfoData]);
 
     function handleAddConsultingInfo() {
         if (!detailInput.trim()) return;

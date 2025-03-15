@@ -13,49 +13,47 @@ import { Textarea } from "@/components/ui/textarea";
 import { ChevronDown, X } from 'lucide-react';
 
 // React
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 // Types
-import { PostCollateralSchema, CollateralTypeEnum } from "@/types";
-
-interface CollateralItem extends PostCollateralSchema {
-    id: number; // 별도 관리 ID
-}
-
-// 🔹 문자열을 숫자로 변환하는 매핑
+import { CollateralTypeEnum, GetCollateralSchema } from "@/types";
 const collateralTypeMap: Record<string, CollateralTypeEnum> = {
     Property: CollateralTypeEnum.Property,
     Car: CollateralTypeEnum.Car,
 };
 
-export default function CollateralManagementTab() {
-    const [collaterals, setCollaterals] = useState<CollateralItem[]>([]);
-    const [nextId, setNextId] = useState(1); // ID 관리
+export default function CollateralManagementTab({ setInfoData }: {
+    setInfoData: (data: any) => void;
+}) {
+    const [collaterals, setCollaterals] = useState<GetCollateralSchema[]>([]);
+    const [nextId, setNextId] = useState(1);
     const [collateralType, setCollateralType] = useState<string>('-');
     const [collateralName, setCollateralName] = useState('');
     const [collateralDetail, setCollateralDetail] = useState('');
 
-    // 🔹 문자열을 Enum으로 변환하여 상태 업데이트
+    useEffect(() => {
+        setInfoData((prev: any) => ({ ...prev, collateralsCnt: collaterals.length }));
+    }, [collaterals, setInfoData]);
+
     const handleCollateralType = (value: string) => {
         setCollateralType(value);
     };
 
     function handleAddCollateral() {
-        if (collateralType === '-' || !collateralName.trim() || !collateralDetail.trim()) return; // 유효성 검사
+        if (collateralType === '-' || !collateralName.trim() || !collateralDetail.trim()) return;
 
-        // 🔹 문자열을 숫자로 변환 (매핑 사용)
         const enumType = collateralTypeMap[collateralType];
-        if (enumType === undefined) return; // 유효하지 않으면 추가 X
+        if (enumType === undefined) return;
 
-        const newCollateral: CollateralItem = {
-            id: nextId, // 별도 ID 관리
-            type: enumType, // 숫자 기반 Enum 사용
+        const newCollateral: GetCollateralSchema = {
+            id: nextId,
+            type: enumType,
             name: collateralName,
             detail: collateralDetail,
         };
 
         setCollaterals([...collaterals, newCollateral]);
-        setNextId(nextId + 1); // 다음 ID 증가
+        setNextId(nextId + 1);
         setCollateralType('-');
         setCollateralName('');
         setCollateralDetail('');
@@ -101,7 +99,7 @@ export default function CollateralManagementTab() {
                         </Button>
                     </div>
                 </div>
-                
+
                 <Table>
                     <TableHeader>
                         <TableRow>
@@ -118,10 +116,7 @@ export default function CollateralManagementTab() {
                                 <TableCell>{collateral.name}</TableCell>
                                 <TableCell className="text-center w-[250px] break-all">{collateral.detail}</TableCell>
                                 <TableCell className="text-right">
-                                    <Button 
-                                        className="bg-transparent text-red-800 hover:bg-gray-200"
-                                        onClick={() => handleCollateralDeletion(collateral.id)}
-                                    >
+                                    <Button className="bg-transparent text-red-800 hover:bg-gray-200" onClick={() => handleCollateralDeletion(collateral.id)}>
                                         <X />
                                     </Button>
                                 </TableCell>
@@ -130,7 +125,6 @@ export default function CollateralManagementTab() {
                     </TableBody>
                 </Table>
 
-                {/* Hidden inputs for form submission */}
                 {collaterals.map((collateral) => (
                     <input key={collateral.id} name="collaterals" value={JSON.stringify(collateral)} hidden readOnly />
                 ))}

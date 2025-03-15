@@ -1,7 +1,6 @@
 'use client';
 
 // Components: UI
-import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -13,14 +12,22 @@ import GuarantorSearchPopup from "@/components/pop-ups/guarantor-search-popup";
 // Types
 import { GetGuarantorSchema } from "@/types";
 
-export default function GuarantorManagementTab() {
+// React
+import { useState, useEffect } from "react";
+
+export default function GuarantorManagementTab({ setInfoData }: {
+    setInfoData: (data: any) => void; 
+}) {
     const [guarantors, setGuarantors] = useState<GetGuarantorSchema[]>([]);
     const [isPopupOpen, setIsPopupOpen] = useState(false);
+
+    useEffect(() => {
+        setInfoData((prev: any) => ({ ...prev, guarantorsCnt: guarantors.length }));
+    }, [guarantors, setInfoData]);
 
     function handleGuarantorDeletion(id: number) {
         setGuarantors((prev) => {
             const updatedGuarantors = prev.filter((guarantor) => guarantor.id !== id);
-            console.log(`guarantor management tab: updated: ${updatedGuarantors.length}`);
             return updatedGuarantors;
         });
     }
@@ -29,7 +36,6 @@ export default function GuarantorManagementTab() {
         setGuarantors((prev) => {
             const existingIds = new Set(prev.map((g) => g.id));
             const newGuarantors = selectedGuarantors.filter((g) => !existingIds.has(g.id));
-            console.log(`guarantor management tab: new: ${newGuarantors.length}`);
             return [...prev, ...newGuarantors];
         });
         setIsPopupOpen(false);

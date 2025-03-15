@@ -30,6 +30,6 @@ export async function deleteLoanAction(_: any, formData: FormData): Promise<serv
 
     return {
         status: 200,
-        message: 'Customer successfully updated.'
+        message: `Loan No.${loanId?.toString().padStart(8, '0')} successfully deleted.`
     };
 }

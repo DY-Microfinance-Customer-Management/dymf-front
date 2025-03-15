@@ -13,13 +13,15 @@ export default function ConsultingDetailsTab({ presetConsultingInfos }: {
     const [consultingInfos, setConsultingInfos] = useState<{ id: number; detail: string }[]>([]);
 
     useEffect(() => {
-        if (presetConsultingInfos && presetConsultingInfos.length > 0) {
-            const formattedConsultingInfos = presetConsultingInfos.map((detail, index) => ({
-                id: index + 1,
-                detail
-            }));
-            setConsultingInfos(formattedConsultingInfos);
-        }
+        if (!presetConsultingInfos || presetConsultingInfos.length === 0) return;
+        if (presetConsultingInfos.length === 1 && presetConsultingInfos[0] === "") return;
+    
+        const formattedConsultingInfos = presetConsultingInfos.map((detail, index) => ({
+            id: index + 1,
+            detail
+        }));
+    
+        setConsultingInfos(formattedConsultingInfos);
     }, []);
 
     return (

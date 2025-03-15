@@ -18,19 +18,20 @@ import { ChevronDown } from "lucide-react";
 import { GetCustomerSchema } from "@/types";
 
 // Loan Calculation Component
-export default function LoanCalculationTab({ selectedCustomer, setIsCalculated, confirmData, setConfirmData }:
-    {
-        selectedCustomer: GetCustomerSchema;
-        setIsCalculated: (value: boolean) => void;
-        confirmData: {
-            loanAmount: number | null;
-            repaymentCycle: number | null;
-            interestRate: number;
-            numberOfRepayment: number | null;
-            repaymentMethod: string;
-        };
-        setConfirmData: (data: any) => void;
-    }) {
+export default function LoanCalculationTab({ selectedCustomer, setIsCalculated, confirmData, setConfirmData }: {
+    selectedCustomer: GetCustomerSchema;
+    setIsCalculated: (value: boolean) => void;
+    confirmData: {
+        contractDate: string;
+        loanAmount: number | null;
+        repaymentCycle: number | null;
+        interestRate: number;
+        numberOfRepayment: number | null;
+        repaymentMethod: string;
+        loanOfficer: string;
+    };
+    setConfirmData: (data: any) => void;
+}) {
     const [schedule, setSchedule] = useState<{ date: string; principal: number; interest: number; total: number; balance: number }[]>([]);
     const [loanOfficer, setLoanOfficer] = useState('-');
     const [assignedLoanOfficer, setAssignedLoanOfficer] = useState<number | null>(null);
@@ -43,7 +44,6 @@ export default function LoanCalculationTab({ selectedCustomer, setIsCalculated, 
         confirmData.numberOfRepayment === null ||
         confirmData.repaymentMethod === "";
 
-    // confirmData 값이 변경될 때 `isCalculated`를 false로 초기화하여 Save 버튼 비활성화
     useEffect(() => {
         setIsCalculated(false);
     }, [confirmData]);
@@ -65,6 +65,7 @@ export default function LoanCalculationTab({ selectedCustomer, setIsCalculated, 
     const handleLoanOfficer = (id: number, name: string) => {
         setLoanOfficer(name);
         setAssignedLoanOfficer(id);
+        setConfirmData((prev: any) => ({ ...prev, loanOfficer: name }));
     };
 
     const calculateSchedule = () => {
@@ -134,7 +135,7 @@ export default function LoanCalculationTab({ selectedCustomer, setIsCalculated, 
                         </div>
                         <div className="col-span-1">
                             <Label>Contract Date</Label>
-                            <Input name="contractDate" type="date" defaultValue={new Date().toISOString().split("T")[0]} />
+                            <Input name="contractDate" type="date" value={confirmData.contractDate} onChange={(e) => setConfirmData({ ...confirmData, contractDate: e.target.value })} />
                         </div>
                         <div className="col-span-1">
                             <Label>CP No.</Label>

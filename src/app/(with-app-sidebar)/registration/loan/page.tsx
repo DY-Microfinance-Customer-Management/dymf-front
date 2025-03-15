@@ -10,17 +10,17 @@ import CollateralManagementTab from "@/components/tabs/collateral-management-tab
 import ConsultingInfoTab from "@/components/tabs/counseling-info-tab";
 
 // Components: UI
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
 
 // React
 import { useActionState, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 
 // Types
 import { GetCustomerSchema } from "@/types";
@@ -163,15 +163,25 @@ function SelectCustomerPage({ onConfirm }: { onConfirm: (customer: GetCustomerSc
 function LoanManagementPage({ selectedCustomer, onBack }: { selectedCustomer: GetCustomerSchema; onBack: () => void; }) {
     // Data Handler
     const [confirmData, setConfirmData] = useState({
+        contractDate: '',
         loanAmount: null,
         repaymentCycle: null,
         interestRate: 28,
         numberOfRepayment: null,
         repaymentMethod: 'Equal',
+        loanOfficer: '',
     });
+    const [infoData, setInfoData] = useState({
+        guarantorsCnt: 0,
+        collateralsCnt: 0,
+        consultingInfosCnt: 0,
+    
+    });
+    useEffect(() => {
+        setConfirmData((prev) => ({ ...prev, contractDate: new Date().toISOString().split("T")[0] }));
+    }, []);
 
     // Actions
-    const router = useRouter();
     const [state, formAction, isPending] = useActionState(createLoanAction, null);
     useEffect(() => {
         if (state === null) return;
@@ -179,11 +189,18 @@ function LoanManagementPage({ selectedCustomer, onBack }: { selectedCustomer: Ge
         if (state?.status === 200) {
             toast.success(state?.message);
             setConfirmData({
+                contractDate: '',
                 loanAmount: null,
                 repaymentCycle: null,
                 interestRate: 28,
                 numberOfRepayment: null,
                 repaymentMethod: 'Equal',
+                loanOfficer: '',
+            });
+            setInfoData({
+                guarantorsCnt: 0,
+                collateralsCnt: 0,
+                consultingInfosCnt: 0,
             });
             onBack();
         } else {
@@ -194,27 +211,59 @@ function LoanManagementPage({ selectedCustomer, onBack }: { selectedCustomer: Ge
     // Tab Handler
     const [activeTab, setActiveTab] = useState("loanCalculation");
 
-    // Loan Calculation 완료 여부 상태
+    // Loan Calculation Handler
     const [isCalculated, setIsCalculated] = useState(false);
 
     return (
         <div className="flex flex-col p-6 space-y-6">
-            <form action={formAction}>
+            <form id="loanForm" action={formAction}>
                 <input name="customerId" value={selectedCustomer.id} type="text" readOnly hidden />
                 <div className="flex justify-between items-center">
                     <div className="mb-8">
                         <h1 className="text-2xl font-bold text-green-800">Loan Registration</h1>
                         <p className="text-gray-600">Selected Customer: {selectedCustomer.name}</p>
                         <p className="text-gray-600">NRC No.: {selectedCustomer.nrc_number}</p>
+                        <p className="text-gray-600">CP No.: {selectedCustomer.cp_number.area_number}</p>
                     </div>
                     <div className="space-x-4">
-                        <Button
-                            disabled={isPending || !isCalculated}
-                            type="submit"
-                            className="bg-blue-600 hover:bg-blue-700 text-white"
-                        >
-                            Save
-                        </Button>
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button disabled={isPending || !isCalculated} type="button" className="bg-blue-600 hover:bg-blue-700 text-white">
+                                    Save
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Confirm Save</AlertDialogTitle>
+                                    <AlertDialogDescription className="space-y-2">
+                                        <span><strong>Are you sure you want to save?</strong></span>
+                                        <br />
+                                        <span>&nbsp;&nbsp;&nbsp;&nbsp;Contract Date: {new Date().toISOString().split("T")[0]}</span>
+                                        <br />
+                                        <span>&nbsp;&nbsp;&nbsp;&nbsp;Loan Officer: {confirmData.loanOfficer ?? "Not Selected"}</span>
+                                        <br />
+                                        <span>&nbsp;&nbsp;&nbsp;&nbsp;Loan Amount: {confirmData.loanAmount ? `${confirmData.loanAmount} MMK` : "Not Specified"}</span>
+                                        <br />
+                                        <span>&nbsp;&nbsp;&nbsp;&nbsp;Repayment Method: {confirmData.repaymentMethod}</span>
+                                        <br />
+                                        <span>&nbsp;&nbsp;&nbsp;&nbsp;Guarantors: {infoData.guarantorsCnt ?? 0}</span>
+                                        <br />
+                                        <span>&nbsp;&nbsp;&nbsp;&nbsp;Collaterals: {infoData.collateralsCnt ?? 0}</span>
+                                        <br />
+                                        <span>&nbsp;&nbsp;&nbsp;&nbsp;Consulting Info: {infoData.consultingInfosCnt ?? 0}</span>
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction asChild>
+                                        <Button form="loanForm" type="submit" disabled={isPending} className="bg-blue-600 hover:bg-blue-700 text-white">
+                                            Confirm
+                                        </Button>
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+
                         <Button variant="secondary" onClick={onBack}>Back</Button>
                     </div>
                 </div>
@@ -230,13 +279,13 @@ function LoanManagementPage({ selectedCustomer, onBack }: { selectedCustomer: Ge
                         <LoanCalculationTab selectedCustomer={selectedCustomer} setIsCalculated={setIsCalculated} confirmData={confirmData} setConfirmData={setConfirmData} />
                     </TabsContent>
                     <TabsContent forceMount={true} value="guarantorManagement" hidden={"guarantorManagement" !== activeTab}>
-                        <GuarantorManagementTab />
+                        <GuarantorManagementTab setInfoData={setInfoData} />
                     </TabsContent>
                     <TabsContent forceMount={true} value="collateralManagement" hidden={"collateralManagement" !== activeTab}>
-                        <CollateralManagementTab />
+                        <CollateralManagementTab setInfoData={setInfoData} />
                     </TabsContent>
                     <TabsContent forceMount={true} value="consultingInfo" hidden={"consultingInfo" !== activeTab}>
-                        <ConsultingInfoTab />
+                        <ConsultingInfoTab setInfoData={setInfoData} />
                     </TabsContent>
                 </Tabs>
             </form>
