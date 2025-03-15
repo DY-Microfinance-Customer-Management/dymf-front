@@ -13,18 +13,16 @@ import { useEffect, useState } from "react";
 // Types
 import { GetGuarantorSchema } from "@/types";
 
-interface GuarantorSearchPopupProps {
-    onClose: () => void;
-    onConfirm: (selectedGuarantors: GetGuarantorSchema[]) => void;
-    existingGuarantors: GetGuarantorSchema[];
-}
-
-export default function GuarantorSearchPopup({ onClose, onConfirm, existingGuarantors }: GuarantorSearchPopupProps) {
+export default function GuarantorSearchPopup({ onClose, onConfirm, existingGuarantors }: {
+        onClose: () => void;
+        onConfirm: (selectedGuarantors: GetGuarantorSchema[]) => void;
+        existingGuarantors: GetGuarantorSchema[];
+}) {
     const [searchQuery, setSearchQuery] = useState("");
     const [guarantors, setGuarantors] = useState<GetGuarantorSchema[]>([]);
     const [selectedGuarantors, setSelectedGuarantors] = useState<GetGuarantorSchema[]>(existingGuarantors);
     const [loading, setLoading] = useState(false);
-    const [nextCursor, setNextCursor] = useState<string | null>(null);
+    const [nextCursor, setNextCursor] = useState("");
     const [remainingGuarantorCnt, setRemainingGuarantorCnt] = useState<number>(1);
 
     useEffect(() => {
@@ -78,6 +76,17 @@ export default function GuarantorSearchPopup({ onClose, onConfirm, existingGuara
         );
     };
 
+    const scrollHandler = (event: React.UIEvent<HTMLDivElement>) => {
+        const target = event.target as HTMLDivElement;
+        const scrollTop = target.scrollTop;
+        const scrollHeight = target.scrollHeight;
+        const clientHeight = target.clientHeight;
+
+        if (scrollTop + clientHeight === scrollHeight && remainingGuarantorCnt !== 0) {
+            fetchGuarantors(nextCursor);
+        }
+    };
+
     return (
         <Dialog open onOpenChange={onClose}>
             <DialogContent className="max-w-3xl">
@@ -100,14 +109,14 @@ export default function GuarantorSearchPopup({ onClose, onConfirm, existingGuara
                     </Button>
                 </div>
 
-                <ScrollArea className="h-72 rounded-md border">
+                <ScrollArea className="h-72 rounded-md border" onScrollCapture={scrollHandler}>
                     <Table>
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Name</TableHead>
                                 <TableHead>NRC No.</TableHead>
                                 <TableHead>Phone</TableHead>
-                                <TableHead>Select</TableHead>
+                                <TableHead className="text-right">Select</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -127,7 +136,7 @@ export default function GuarantorSearchPopup({ onClose, onConfirm, existingGuara
                                         <TableCell>{guarantor.name}</TableCell>
                                         <TableCell>{guarantor.nrc_number}</TableCell>
                                         <TableCell>{guarantor.phone_number}</TableCell>
-                                        <TableCell>
+                                        <TableCell className="text-right">
                                             {selectedGuarantors.some((g) => g.id === guarantor.id) ? (
                                                 existingGuarantors.some((g) => g.id === guarantor.id) ? (
                                                     "✅"

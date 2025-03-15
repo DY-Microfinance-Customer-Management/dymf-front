@@ -153,12 +153,13 @@ export interface LoanSchema {
 	id: number;
 	loan_state: LoanStateEnum;
 	loan_amount: number;
+	contract_date: string;
 	repayment_cycle: number;
 	interest_rate: number;
 	number_of_repayment: number;
 	repayment_method: RepaymentMethodEnum;
 	overdue_status: boolean;
-	consulting_info?: string[];
+	consulting_info: string[];
 	loan_officer: LoanOfficerSchema;
 	customer: GetCustomerSchema;
 	collaterals: GetCollateralSchema[];
@@ -181,11 +182,11 @@ export interface LoanScheduleSchema {
 	loan: GetLoanSchema;
 }
 
-export type GetGuaranteeSchema = Pick<GuaranteeSchema, 'id'>;
+export type GetGuaranteeSchema = Pick<GuaranteeSchema, 'id' | 'guarantor'>;
 export interface GuaranteeSchema {
 	id: number;
 	loan: GetLoanSchema;
-	guarantor: GetGuarantorSchema;
+	guarantor: { id: number };
 }
 
 export type GetLoanTransactionSchema = Omit<LoanTransactionSchema, 'loan'>;
