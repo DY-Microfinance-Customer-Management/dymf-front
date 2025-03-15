@@ -22,7 +22,6 @@ export default function GuarantorDetailsTab({ presetGuarantorIds }: {
                 .then(res => res.json())
                 .then(data => {
                     const presetGuarantorsData = data.guarantorsData;
-                    console.log(presetGuarantorsData)
                     setGuarantors(presetGuarantorsData);
                 });
         }
