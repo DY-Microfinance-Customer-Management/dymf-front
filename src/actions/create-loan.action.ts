@@ -45,7 +45,7 @@ export async function createLoanAction(_: any, formData: FormData): Promise<serv
                     const collateralData = {
                         name: collateral.name,
                         detail: collateral.detail,
-                        collateral_type: collateral.type,
+                        type: collateral.type,
                         price: 0
                     };
 
