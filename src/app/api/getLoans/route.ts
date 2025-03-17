@@ -15,9 +15,10 @@ export async function GET(request: NextRequest) {
     if (name) {
         apiUrl += `?name=${encodeURIComponent(name)}&overdue_status=0`;
     } else if (nextCursor === "") {
-        apiUrl += `?order[]=id_ASC&take=6`;
+        apiUrl += `?order[]=id_ASC&overdue_status=0&take=6`;
     } else {
-        apiUrl += `?cursor=${nextCursor}`;
+        // TODO: Test 필요
+        apiUrl += `?cursor=${nextCursor}&overdue_status=0`;
     }
 
     // API 요청
