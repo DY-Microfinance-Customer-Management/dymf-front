@@ -82,12 +82,12 @@ const data = {
 					url: "/overdue/registration",
 				},
 				{
-					title: "Search",
-					url: "/overdue/search",
-				},
-				{
 					title: "Management",
 					url: "/overdue/management",
+				},
+				{
+					title: "Search",
+					url: "/overdue/search",
 				},
 			],
 		},
