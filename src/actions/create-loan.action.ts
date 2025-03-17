@@ -117,7 +117,6 @@ export async function createLoanAction(_: any, formData: FormData): Promise<serv
     }
 
     const data = {
-        loan_state: LoanStateEnum.inprocess,
         loan_amount: Number(formData.get('loanAmount')) || 0,
         contract_date: formData.get('contractDate') ?? new Date().toISOString().split("T")[0],
         repayment_cycle: Number(formData.get('repaymentCycle')) || 0,
