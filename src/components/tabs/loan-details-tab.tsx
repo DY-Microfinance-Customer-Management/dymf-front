@@ -156,17 +156,21 @@ export default function LoanDetailsTab({ selectedLoan, selectedCustomer, loanOff
                                 </TableRow>
                             ) : (
                                 <>
-                                    {loanSchedules.map((schedule, index) => (
-                                        <TableRow key={index}>
-                                            <TableCell className="w-[20px]">{schedule.period}</TableCell>
-                                            <TableCell className="text-center">{schedule.payment_date}</TableCell>
-                                            <TableCell className="text-center">{Number(schedule.principal).toLocaleString()}</TableCell>
-                                            <TableCell className="text-center">{Number(schedule.interest).toLocaleString()}</TableCell>
-                                            <TableCell className="text-center">{Number(schedule.total).toLocaleString()}</TableCell>
-                                            <TableCell className="text-center">{getStatus(schedule)}</TableCell>
-                                            <TableCell className="text-right">{Number(schedule.remaining_balance).toLocaleString()}</TableCell>
-                                        </TableRow>
-                                    ))}
+                                    {
+                                        loanSchedules
+                                            .sort((a, b) => a.period - b.period)
+                                            .map((schedule, index) => (
+                                                <TableRow key={index}>
+                                                    <TableCell className="w-[20px]">{schedule.period}</TableCell>
+                                                    <TableCell className="text-center">{schedule.payment_date.split("T")[0]}</TableCell>
+                                                    <TableCell className="text-center">{Number(schedule.principal).toLocaleString()}</TableCell>
+                                                    <TableCell className="text-center">{Number(schedule.interest).toLocaleString()}</TableCell>
+                                                    <TableCell className="text-center">{Number(schedule.total).toLocaleString()}</TableCell>
+                                                    <TableCell className="text-center">{getStatus(schedule)}</TableCell>
+                                                    <TableCell className="text-right">{Number(schedule.remaining_balance).toLocaleString()}</TableCell>
+                                                </TableRow>
+                                            ))
+                                    }
                                     <TableRow className="font-bold border-t">
                                         <TableCell colSpan={2} className="text-center">Total</TableCell>
                                         <TableCell className="text-center">{totalPrincipal.toLocaleString()}</TableCell>
