@@ -14,10 +14,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { GetCustomerSchema, GetLoanSchema, RepaymentMethodEnum } from "@/types";
 
 // Loan Calculation Component
-export default function LoanDetailsTab({ selectedLoan, selectedCustomer, loanOfficer }: {
+export default function LoanDetailsTab({ selectedLoan }: {
     selectedLoan: GetLoanSchema;
-    selectedCustomer: GetCustomerSchema;
-    loanOfficer: string;
 }) {
     // Loan Schedule Handler
     const [loanSchedules, setLoanSchedules] = useState<any[]>([]);
@@ -81,7 +79,7 @@ export default function LoanDetailsTab({ selectedLoan, selectedCustomer, loanOff
                         </div>
                         <div className="col-span-1">
                             <Label>CP No.</Label>
-                            <Input disabled value={selectedCustomer.cp_number.area_number} type="text" />
+                            <Input disabled value={selectedLoan.customer.cp_number.area_number} type="text" />
                         </div>
                         <div className="col-span-1">
                             <Label>Loan Type</Label>
@@ -90,7 +88,7 @@ export default function LoanDetailsTab({ selectedLoan, selectedCustomer, loanOff
                         <div className="col-span-1"></div>
                         <div className="col-span-1">
                             <Label>Loan Officer</Label>
-                            <Input disabled value={loanOfficer} type="text" />
+                            <Input disabled value={selectedLoan.loan_officer.personnel_id.name} type="text" />
                         </div>
                     </div>
                 </CardContent>

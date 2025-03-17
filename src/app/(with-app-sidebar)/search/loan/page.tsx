@@ -23,7 +23,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useActionState, useEffect, useState } from "react";
 
 // Types
-import { GetCustomerSchema, GetLoanSchema } from "@/types";
+import { GetLoanSchema } from "@/types";
 
 export default function Page() {
     const [selectedLoan, setSelectedLoan] = useState<GetLoanSchema | null>(null);
@@ -176,30 +176,6 @@ function LoanDetailsPage({ selectedLoan, onBack }: { selectedLoan: GetLoanSchema
         }
     }, [state]);
 
-    // Data Handler
-    const [loading, setLoading] = useState(true);
-    const [selectedCustomer, setSelectedCustomer] = useState<GetCustomerSchema>({} as GetCustomerSchema);
-    const [loanOfficer, setLoanOfficer] = useState('-');
-    useEffect(() => {
-        Promise.all([
-            fetch(`/api/getOneCustomer?customerId=${selectedLoan.customer.id}`)
-                .then(res => res.json())
-                .then(data => setSelectedCustomer(data.customerData)),
-
-            fetch(`/api/getOneLoanOfficer?loanOfficerId=${selectedLoan.loan_officer.id}`)
-                .then(res => res.json())
-                .then(data => setLoanOfficer(data.loanOfficer.name))
-        ]).finally(() => setLoading(false));
-    }, []);
-
-    if (loading) {
-        return (
-            <div className="flex justify-center items-center h-40">
-                <p className="text-gray-600">Loading...</p>
-            </div>
-        );
-    }
-
     return (
         <div className="flex flex-col p-6 space-y-6">
             <form id="loanForm" action={formAction}>
@@ -209,7 +185,7 @@ function LoanDetailsPage({ selectedLoan, onBack }: { selectedLoan: GetLoanSchema
                         <h1 className="text-2xl font-bold text-green-800">Loan Search</h1>
                         <p className="text-gray-600">Selected Customer: {selectedLoan.customer.name}</p>
                         <p className="text-gray-600">NRC No.: {selectedLoan.customer.nrc_number}</p>
-                        <p className="text-gray-600">CP No.: {selectedCustomer.cp_number.area_number}</p>
+                        <p className="text-gray-600">CP No.: {selectedLoan.customer.cp_number.area_number}</p>
                     </div>
                     <div className="space-x-4">
                         <AlertDialog>
@@ -244,7 +220,7 @@ function LoanDetailsPage({ selectedLoan, onBack }: { selectedLoan: GetLoanSchema
                         <TabsTrigger value="consultingInfo">Consulting Info</TabsTrigger>
                     </TabsList>
                     <TabsContent forceMount={true} value="loanCalculation" hidden={"loanCalculation" !== activeTab}>
-                        <LoanDetailsTab selectedLoan={selectedLoan} selectedCustomer={selectedCustomer} loanOfficer={loanOfficer} />
+                        <LoanDetailsTab selectedLoan={selectedLoan} />
                     </TabsContent>
                     <TabsContent forceMount={true} value="guarantorManagement" hidden={"guarantorManagement" !== activeTab}>
                         <GuarantorDetailsTab presetGuarantorIds={selectedLoan.guarantees} />

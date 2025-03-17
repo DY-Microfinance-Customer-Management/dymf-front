@@ -17,11 +17,8 @@ import { toast } from "sonner";
 import { useActionState, useEffect, useState } from "react";
 
 // Loan Calculation Component
-export default function RepaymentSingleTab({ selectedLoan, selectedCustomer, loanOfficer, onBack }: {
+export default function RepaymentSingleTab({ selectedLoan }: {
     selectedLoan: GetLoanSchema;
-    selectedCustomer: GetCustomerSchema;
-    loanOfficer: string;
-    onBack: () => void;
 }) {
     // Loan Schedule Handler
     const [loanSchedules, setLoanSchedules] = useState<any[]>([]);
@@ -86,7 +83,7 @@ export default function RepaymentSingleTab({ selectedLoan, selectedCustomer, loa
                             </div>
                             <div className="col-span-1">
                                 <Label>CP No.</Label>
-                                <Input disabled value={selectedCustomer.cp_number.area_number} type="text" />
+                                <Input disabled value={selectedLoan.customer.cp_number.area_number} type="text" />
                             </div>
                             <div className="col-span-1">
                                 <Label>Loan Type</Label>
@@ -95,7 +92,7 @@ export default function RepaymentSingleTab({ selectedLoan, selectedCustomer, loa
                             <div className="col-span-1"></div>
                             <div className="col-span-1">
                                 <Label>Loan Officer</Label>
-                                <Input disabled value={loanOfficer} type="text" />
+                                <Input disabled value={selectedLoan.loan_officer.personnel_id.name} type="text" />
                             </div>
                         </div>
                     </CardContent>

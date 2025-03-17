@@ -158,30 +158,6 @@ function LoanDetailsPage({ selectedLoan, onBack }: { selectedLoan: GetLoanSchema
     // Tab Handler
     const [activeTab, setActiveTab] = useState("loanCalculation");
 
-    // Data Handler
-    const [loading, setLoading] = useState(true);
-    const [selectedCustomer, setSelectedCustomer] = useState<GetCustomerSchema>({} as GetCustomerSchema);
-    const [loanOfficer, setLoanOfficer] = useState('-');
-    useEffect(() => {
-        Promise.all([
-            fetch(`/api/getOneCustomer?customerId=${selectedLoan.customer.id}`)
-                .then(res => res.json())
-                .then(data => setSelectedCustomer(data.customerData)),
-
-            fetch(`/api/getOneLoanOfficer?loanOfficerId=${selectedLoan.loan_officer.id}`)
-                .then(res => res.json())
-                .then(data => setLoanOfficer(data.loanOfficer.name))
-        ]).finally(() => setLoading(false));
-    }, []);
-
-    if (loading) {
-        return (
-            <div className="flex justify-center items-center h-40">
-                <p className="text-gray-600">Loading...</p>
-            </div>
-        );
-    }
-
     return (
         <div className="flex flex-col p-6 space-y-6">
             <div className="flex justify-between items-center">
@@ -189,7 +165,7 @@ function LoanDetailsPage({ selectedLoan, onBack }: { selectedLoan: GetLoanSchema
                     <h1 className="text-2xl font-bold text-green-800">Repayment (Single)</h1>
                     <p className="text-gray-600">Customer Name: {selectedLoan.customer.name}</p>
                     <p className="text-gray-600">NRC No.: {selectedLoan.customer.nrc_number}</p>
-                    <p className="text-gray-600">CP No.: {selectedCustomer.cp_number.area_number}</p>
+                    <p className="text-gray-600">CP No.: {selectedLoan.customer.cp_number.area_number}</p>
                 </div>
                 <Button variant="secondary" onClick={onBack}>Back</Button>
             </div>
@@ -202,7 +178,7 @@ function LoanDetailsPage({ selectedLoan, onBack }: { selectedLoan: GetLoanSchema
                     <TabsTrigger value="consultingInfo">Consulting Info</TabsTrigger>
                 </TabsList>
                 <TabsContent forceMount={true} value="loanCalculation" hidden={"loanCalculation" !== activeTab}>
-                    <RepaymentSingleTab selectedLoan={selectedLoan} selectedCustomer={selectedCustomer} loanOfficer={loanOfficer} onBack={onBack} />
+                    <RepaymentSingleTab selectedLoan={selectedLoan} />
                 </TabsContent>
                 <TabsContent forceMount={true} value="guarantorManagement" hidden={"guarantorManagement" !== activeTab}>
                     <GuarantorDetailsTab presetGuarantorIds={selectedLoan.guarantees} />
