@@ -17,13 +17,13 @@ export default function CollateralDetailsTab({ presetCollaterals }: {
 
     useEffect(() => {
         if (presetCollaterals && presetCollaterals.length > 0) {
-            const formattedCollaterals = presetCollaterals.map((collateral) => ({
-                id: collateral.id,
+            const formattedCollaterals = presetCollaterals.map((collateral, index) => ({
+                id: index + 1,
                 type: collateral.type,
                 name: collateral.name,
                 detail: collateral.detail,
             }));
-
+    
             setCollaterals(formattedCollaterals);
         }
     }, []);
