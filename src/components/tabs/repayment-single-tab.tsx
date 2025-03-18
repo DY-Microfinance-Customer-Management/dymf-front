@@ -65,7 +65,7 @@ export default function RepaymentSingleTab({ selectedLoan }: {
     };
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-2">
             <form action={formAction}>
                 <Card>
                     <CardHeader>
