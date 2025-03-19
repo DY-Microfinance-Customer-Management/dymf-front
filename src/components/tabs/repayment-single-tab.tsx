@@ -26,7 +26,7 @@ export default function RepaymentSingleTab({ selectedLoan }: {
     const fetchLoanSchedule = async () => {
         setIsLoading(true);
         try {
-            const response = await fetch(`/api/getOneLoan?loanId=${selectedLoan.id}`);
+            const response = await fetch(`/api/getOneLoan?loanId=${selectedLoan.id}&overdueStatus=0`);
             const data = await response.json();
             const loanSchedule = data.loanData;
 

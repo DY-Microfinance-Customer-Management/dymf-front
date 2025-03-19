@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 // Types
-import { GetCustomerSchema, GetLoanSchema, RepaymentMethodEnum } from "@/types";
+import { GetLoanSchema, RepaymentMethodEnum } from "@/types";
 
 // Loan Calculation Component
 export default function LoanDetailsTab({ selectedLoan }: {
@@ -23,7 +23,7 @@ export default function LoanDetailsTab({ selectedLoan }: {
     const fetchLoanSchedule = async () => {
         setIsLoading(true);
         try {
-            const response = await fetch(`/api/getOneLoan?loanId=${selectedLoan.id}`);
+            const response = await fetch(`/api/getOneLoan?loanId=${selectedLoan.id}&overdueStatus=0`);
             const data = await response.json();
             const loanSchedule = data.loanData;
 
@@ -39,6 +39,14 @@ export default function LoanDetailsTab({ selectedLoan }: {
     const totalInterest = loanSchedules.reduce((sum, row) => sum + Number(row.interest), 0);
     const totalPayment = loanSchedules.reduce((sum, row) => sum + Number(row.total), 0);
 
+    const totalPaidPrincipal = loanSchedules.filter(row => row.loan_payment_status).reduce((sum, row) => sum + Number(row.principal), 0);
+    const totalPaidInterest = loanSchedules.filter(row => row.loan_payment_status).reduce((sum, row) => sum + Number(row.interest), 0);
+    const totalPaidPayment = loanSchedules.filter(row => row.loan_payment_status).reduce((sum, row) => sum + Number(row.total), 0);
+
+    const totalRemainingPrincipal = loanSchedules.filter(row => !row.loan_payment_status).reduce((sum, row) => sum + Number(row.principal), 0);
+    const totalRemainingInterest = loanSchedules.filter(row => !row.loan_payment_status).reduce((sum, row) => sum + Number(row.interest), 0);
+    const totalRemainingPayment = loanSchedules.filter(row => !row.loan_payment_status).reduce((sum, row) => sum + Number(row.total), 0);
+
     const getStatus = (schedule: any) => {
         if (schedule.loan_payment_status) {
             return <span className="text-green-600 font-semibold">Paid</span>;
@@ -46,7 +54,7 @@ export default function LoanDetailsTab({ selectedLoan }: {
 
         const paymentDate = new Date(schedule.payment_date);
         const today = new Date();
-        today.setHours(0, 0, 0, 0); // 시간 초기화
+        today.setHours(0, 0, 0, 0);
 
         if (paymentDate < today) {
             return <span className="text-red-600 font-semibold">Overdue</span>;
@@ -174,6 +182,20 @@ export default function LoanDetailsTab({ selectedLoan }: {
                                         <TableCell className="text-center">{totalPrincipal.toLocaleString()}</TableCell>
                                         <TableCell className="text-center">{totalInterest.toLocaleString()}</TableCell>
                                         <TableCell className="text-center">{totalPayment.toLocaleString()}</TableCell>
+                                        <TableCell colSpan={2} />
+                                    </TableRow>
+                                    <TableRow className="font-bold border-t">
+                                        <TableCell colSpan={2} className="text-center text-green-600">Paid</TableCell>
+                                        <TableCell className="text-center text-green-600">{totalPaidPrincipal.toLocaleString()}</TableCell>
+                                        <TableCell className="text-center text-green-600">{totalPaidInterest.toLocaleString()}</TableCell>
+                                        <TableCell className="text-center text-green-600">{totalPaidPayment.toLocaleString()}</TableCell>
+                                        <TableCell colSpan={2} />
+                                    </TableRow>
+                                    <TableRow className="font-bold border-t">
+                                        <TableCell colSpan={2} className="text-center text-red-600">Remaining</TableCell>
+                                        <TableCell className="text-center text-red-600">{totalRemainingPrincipal.toLocaleString()}</TableCell>
+                                        <TableCell className="text-center text-red-600">{totalRemainingInterest.toLocaleString()}</TableCell>
+                                        <TableCell className="text-center text-red-600">{totalRemainingPayment.toLocaleString()}</TableCell>
                                         <TableCell colSpan={2} />
                                     </TableRow>
                                 </>
