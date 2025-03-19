@@ -7,8 +7,9 @@ export async function GET(request: NextRequest) {
 
     const searchParams = request.nextUrl.searchParams;
     const loanId = searchParams.get('loanId');
+    const overdueStatus = searchParams.get('overdueStatus')
 
-    const response = await fetch(`${process.env.API_SERVER_URL}/loan/${loanId}`, {
+    const response = await fetch(`${process.env.API_SERVER_URL}/loan/${loanId}?overdue_status=${overdueStatus}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
