@@ -20,7 +20,6 @@ import { ChevronDown } from "lucide-react";
 
 // React
 import { useActionState, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 
 // Types
 import { GetEmployeeSchema } from "@/types";
@@ -84,13 +83,13 @@ export function SelectEmployeePage({ onConfirm, onNew }: { onConfirm: (employee:
                     const fetchedEmployees = data.employees;
                     const returnCursor = data.returnCursor;
                     const count = data.count;
-    
+
                     setEmployees((prev) => {
                         const existingIds = new Set(prev.map(emp => emp.id));
                         const newEmployees = fetchedEmployees.filter((emp: { id: number }) => !existingIds.has(emp.id));
                         return [...prev, ...newEmployees];
                     });
-    
+
                     setNextCursor(returnCursor);
                     setRemainingEmployeeCnt(count);
                 }
@@ -114,7 +113,7 @@ export function SelectEmployeePage({ onConfirm, onNew }: { onConfirm: (employee:
         const scrollHeight = target.scrollHeight;
         const clientHeight = target.clientHeight;
 
-        if (scrollTop + clientHeight === scrollHeight && remainingEmployeeCnt !== 0) {
+        if (Math.floor(scrollTop + clientHeight) === scrollHeight && remainingEmployeeCnt !== 0) {
             fetchEmployee(nextCursor);
         }
     };
@@ -128,17 +127,8 @@ export function SelectEmployeePage({ onConfirm, onNew }: { onConfirm: (employee:
             <Card className="w-full max-w-3xl">
                 <CardContent>
                     <div className="space-y-4">
-                        <Input
-                            className="w-full mt-6"
-                            placeholder="Search by Employee Name"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                        />
-                        <Button
-                            className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                            onClick={handleSearch}
-                            disabled={loading}
-                        >
+                        <Input className="w-full mt-6" placeholder="Search by Employee Name" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+                        <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white" onClick={handleSearch} disabled={loading}>
                             {loading ? "Searching..." : "Search"}
                         </Button>
                     </div>
@@ -149,9 +139,9 @@ export function SelectEmployeePage({ onConfirm, onNew }: { onConfirm: (employee:
                             <TableHeader>
                                 <TableRow>
                                     <TableHead>Name</TableHead>
-                                    <TableHead>NRC No.</TableHead>
-                                    <TableHead>Date of Birth</TableHead>
-                                    <TableHead>Phone No.</TableHead>
+                                    <TableHead className="text-center">NRC No.</TableHead>
+                                    <TableHead className="text-center">Date of Birth</TableHead>
+                                    <TableHead className="text-right">Phone No.</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -159,9 +149,9 @@ export function SelectEmployeePage({ onConfirm, onNew }: { onConfirm: (employee:
                                     employees.map((employee) => (
                                         <TableRow key={employee.id} onClick={() => onConfirm(employee)} className="cursor-pointer hover:bg-gray-100">
                                             <TableCell>{employee.name}</TableCell>
-                                            <TableCell>{employee.nrc_number}</TableCell>
-                                            <TableCell>{employee.birth}</TableCell>
-                                            <TableCell>{employee.phone_number}</TableCell>
+                                            <TableCell className="text-center">{employee.nrc_number}</TableCell>
+                                            <TableCell className="text-center">{employee.birth}</TableCell>
+                                            <TableCell className="text-right">{employee.phone_number}</TableCell>
                                         </TableRow>
                                     ))
                                 ) : (
@@ -181,9 +171,6 @@ export function SelectEmployeePage({ onConfirm, onNew }: { onConfirm: (employee:
 }
 
 function EmployeeRegistrationPage({ selectedEmployee, onBack }: { selectedEmployee: GetEmployeeSchema | null; onBack: () => void; }) {
-    // Router
-    const router = useRouter();
-
     // Data Handler
     const loanOfficerId = JSON.stringify(selectedEmployee?.loan_officer?.id)
     const [hasChanges, setHasChanges] = useState(false);
@@ -220,6 +207,7 @@ function EmployeeRegistrationPage({ selectedEmployee, onBack }: { selectedEmploy
             ...prev,
             isLoanOfficer: !prev.isLoanOfficer
         }));
+        setHasChanges(true);
     };
 
     // Server Action
@@ -246,13 +234,8 @@ function EmployeeRegistrationPage({ selectedEmployee, onBack }: { selectedEmploy
             setUploadedImage(null);
             setIsEditing(false);
             onBack();
-        } else if (state?.status === 400) {
+        } else {
             toast.error(state?.message);
-        } else if (state?.status === 409) {
-            toast.error(state?.message);
-        } else if (state?.status === 401 || 403) {
-            toast.error(state?.message);
-            router.push('/login');
         }
     }, [state]);
 
@@ -262,8 +245,9 @@ function EmployeeRegistrationPage({ selectedEmployee, onBack }: { selectedEmploy
         if (selectedEmployee !== null) {
             const imgSrc = selectedEmployee?.image;
             const extractedImageName = imgSrc?.substring(imgSrc?.lastIndexOf("/") + 1);
-    
-            if (extractedImageName === 'empty') {
+            console.log(extractedImageName)
+
+            if (extractedImageName === 'empty' || 'localhost.dev.com') {
                 setUploadedImage(null);
             } else {
                 setUploadedImage(imgSrc ?? null);
@@ -344,13 +328,21 @@ function EmployeeRegistrationPage({ selectedEmployee, onBack }: { selectedEmploy
                                         <AlertDialogHeader>
                                             <AlertDialogTitle>Message</AlertDialogTitle>
                                             <AlertDialogDescription>
-                                                Register <strong>{confirmData.name}</strong> as Employee?
+                                                {confirmData.isLoanOfficer !== (loanOfficerId === undefined ? false : true) && confirmData.isLoanOfficer ? (
+                                                    <>Assigning Loan Officer cannot be undone. Are you sure you want to save changes for Employee: <strong>{confirmData.name}</strong>?</>
+                                                ) : (
+                                                    <>Save changes for Employee: <strong>{confirmData.name}</strong>?</>
+                                                )}
                                             </AlertDialogDescription>
                                         </AlertDialogHeader>
                                         <AlertDialogFooter>
                                             <AlertDialogCancel>Cancel</AlertDialogCancel>
                                             <AlertDialogAction asChild>
-                                                <Button type="submit" form="employeeForm">Confirm</Button>
+                                                {confirmData.isLoanOfficer !== (loanOfficerId === undefined ? false : true) && confirmData.isLoanOfficer ? (
+                                                    <Button className="bg-red-700" type="submit" form="employeeForm">Confirm</Button>
+                                                ) : (
+                                                    <Button type="submit" form="employeeForm">Confirm</Button>
+                                                )}
                                             </AlertDialogAction>
                                         </AlertDialogFooter>
                                     </AlertDialogContent>
@@ -361,7 +353,7 @@ function EmployeeRegistrationPage({ selectedEmployee, onBack }: { selectedEmploy
 
                 <Card>
                     <CardContent className="flex justify-between mt-6">
-                        <Label className="mt-1.5">Loan Officer</Label> <Switch name="isLoanOfficer" onClick={handleSwitchChange} checked={confirmData.isLoanOfficer} disabled={loanOfficerId !== undefined && confirmData.isLoanOfficer} />
+                        <Label className="mt-1.5">Loan Officer</Label> <Switch name="isLoanOfficer" onClick={handleSwitchChange} checked={confirmData.isLoanOfficer} disabled={loanOfficerId !== undefined && confirmData.isLoanOfficer || !isEditing} />
                     </CardContent>
                 </Card>
 

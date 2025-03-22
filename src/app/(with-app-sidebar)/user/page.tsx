@@ -1,28 +1,24 @@
 'use client';
 
-// Actions
-import { useActionState, useEffect, useState } from "react";
+// Action
+import { createUserAction } from "@/actions/create-user.action";
 
 // UI Components
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
 
 // React
-import { createUserAction } from "@/actions/create-user.action";
-import { useRouter } from "next/navigation";
+import { useActionState, useEffect, useState } from "react";
 
 export default function Page() {
-    // Router
-    const router = useRouter();
-
     // Variables
     const [users, setUsers] = useState<{ id: number; userName: string; role: number; }[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
@@ -38,10 +34,7 @@ export default function Page() {
 
         if (state?.status === 200) {
             toast.success(`User has been successfully registered!`);
-            fetchUsers(""); // 사용자 목록 다시 불러오기
-        } else if (state?.status === 401 || 403) {
-            toast.error(state?.message);
-            router.push('/login');
+            fetchUsers("");
         } else {
             toast.error(state?.message);
         }
@@ -198,7 +191,7 @@ export default function Page() {
                                                     <Checkbox checked={selectedUser === user.id} onCheckedChange={() => handleUserSelect(user.id)} />
                                                 </TableCell>
                                                 <TableCell>{user.userName}</TableCell>
-                                                <TableCell>{user.role}</TableCell>
+                                                <TableCell>{user.role === 0 ? 'Admin' : 'User'}</TableCell>
                                             </TableRow>
                                         ))
                                     ) : (

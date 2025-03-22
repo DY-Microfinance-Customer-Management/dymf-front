@@ -108,7 +108,7 @@ function SelectGuarantorPage({ onConfirm }: { onConfirm: (guarantor: GetGuaranto
         const scrollHeight = target.scrollHeight;
         const clientHeight = target.clientHeight;
 
-        if (scrollTop + clientHeight === scrollHeight && remainingGuarantorCnt !== 0) {
+        if (Math.floor(scrollTop + clientHeight) === scrollHeight && remainingGuarantorCnt !== 0) {
             fetchGuarantor(nextCursor);
         }
     };
@@ -142,9 +142,9 @@ function SelectGuarantorPage({ onConfirm }: { onConfirm: (guarantor: GetGuaranto
                             <TableHeader>
                                 <TableRow>
                                     <TableHead>Name</TableHead>
-                                    <TableHead>NRC No.</TableHead>
-                                    <TableHead>Date of Birth</TableHead>
-                                    <TableHead>Phone No.</TableHead>
+                                    <TableHead className="text-center">NRC No.</TableHead>
+                                    <TableHead className="text-center">Date of Birth</TableHead>
+                                    <TableHead className="text-right">Phone No.</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -152,9 +152,9 @@ function SelectGuarantorPage({ onConfirm }: { onConfirm: (guarantor: GetGuaranto
                                     guarantors.map((guarantors) => (
                                         <TableRow key={guarantors.id} onClick={() => onConfirm(guarantors)} className="cursor-pointer hover:bg-gray-100">
                                             <TableCell>{guarantors.name}</TableCell>
-                                            <TableCell>{guarantors.nrc_number}</TableCell>
-                                            <TableCell>{guarantors.birth}</TableCell>
-                                            <TableCell>{guarantors.phone_number}</TableCell>
+                                            <TableCell className="text-center">{guarantors.nrc_number}</TableCell>
+                                            <TableCell className="text-center">{guarantors.birth}</TableCell>
+                                            <TableCell className="text-right">{guarantors.phone_number}</TableCell>
                                         </TableRow>
                                     ))
                                 ) : (
@@ -186,7 +186,7 @@ function GuarantorEditPage({ selectedGuarantor, onBack }: { selectedGuarantor: G
         phone: selectedGuarantor?.phone_number ?? '',
         email: selectedGuarantor?.email ?? '',
         gender: selectedGuarantor?.gender === 1 ? "Female" : "Male",
-        cpNo: selectedGuarantor?.cp_number ?? '',
+        cpNo: selectedGuarantor?.cp_number.area_number ?? '',
         loanType: selectedGuarantor?.loan_type === 1 ? "Group Loan" : "Special Loan",
         homeAddress: selectedGuarantor?.home_address ?? '',
         homePostalCode: selectedGuarantor?.home_postal_code ?? '',

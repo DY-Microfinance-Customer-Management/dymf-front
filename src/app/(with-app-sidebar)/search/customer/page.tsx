@@ -1,8 +1,8 @@
 'use client';
 
 // Actions
-import { updateCustomerAction } from "@/actions/update-customer.action"
-;
+import { updateCustomerAction } from "@/actions/update-customer.action";
+
 // Componenets: Dialog
 import { CpNumberDialog } from "@/components/pop-ups/cp-number-dialog";
 
@@ -108,7 +108,7 @@ function SelectCustomerPage({ onConfirm }: { onConfirm: (customer: GetCustomerSc
         const scrollHeight = target.scrollHeight;
         const clientHeight = target.clientHeight;
 
-        if (scrollTop + clientHeight === scrollHeight && remainingCustomerCnt !== 0) {
+        if (Math.floor(scrollTop + clientHeight) === scrollHeight && remainingCustomerCnt !== 0) {
             fetchCustomer(nextCursor);
         }
     };
@@ -121,17 +121,8 @@ function SelectCustomerPage({ onConfirm }: { onConfirm: (customer: GetCustomerSc
             <Card className="w-full max-w-3xl">
                 <CardContent>
                     <div className="space-y-4">
-                        <Input
-                            className="w-full mt-6"
-                            placeholder="Search by Customer Name"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                        />
-                        <Button
-                            className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                            onClick={handleSearch}
-                            disabled={loading}
-                        >
+                        <Input className="w-full mt-6" placeholder="Search by Customer Name" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+                        <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white" onClick={handleSearch} disabled={loading}>
                             {loading ? "Searching..." : "Search"}
                         </Button>
                     </div>
@@ -142,9 +133,9 @@ function SelectCustomerPage({ onConfirm }: { onConfirm: (customer: GetCustomerSc
                             <TableHeader>
                                 <TableRow>
                                     <TableHead>Name</TableHead>
-                                    <TableHead>NRC No.</TableHead>
-                                    <TableHead>Date of Birth</TableHead>
-                                    <TableHead>Phone No.</TableHead>
+                                    <TableHead className="text-center">NRC No.</TableHead>
+                                    <TableHead className="text-center">Date of Birth</TableHead>
+                                    <TableHead className="text-right">Phone No.</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -152,9 +143,9 @@ function SelectCustomerPage({ onConfirm }: { onConfirm: (customer: GetCustomerSc
                                     customers.map((customer) => (
                                         <TableRow key={customer.id} onClick={() => onConfirm(customer)} className="cursor-pointer hover:bg-gray-100">
                                             <TableCell>{customer.name}</TableCell>
-                                            <TableCell>{customer.nrc_number}</TableCell>
-                                            <TableCell>{customer.birth}</TableCell>
-                                            <TableCell>{customer.phone_number}</TableCell>
+                                            <TableCell className="text-center">{customer.nrc_number}</TableCell>
+                                            <TableCell className="text-center">{customer.birth}</TableCell>
+                                            <TableCell className="text-right">{customer.phone_number}</TableCell>
                                         </TableRow>
                                     ))
                                 ) : (

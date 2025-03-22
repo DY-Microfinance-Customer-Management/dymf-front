@@ -1,12 +1,13 @@
 'use client';
 
-// Actions
+// Action
 import { createCheckPointAction } from "@/actions/create-checkpoint.action";
 
 // Components: UI
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
@@ -17,12 +18,10 @@ import { useRouter } from "next/navigation";
 
 // Types
 import { GetCheckPointSchema, GetLoanOfficerSchema } from "@/types";
-import { Input } from "@/components/ui/input";
 
 export default function Page() {
     const [cpNumbers, setCpNumbers] = useState<GetCheckPointSchema[]>([]);
     const [tempCpNumbers, setTempCpNumbers] = useState<GetCheckPointSchema[]>([]);
-    // const [loanOfficers, setLoanOfficers] = useState<{ id: number; name: string; cp_numbers: { id: number, area_number: string, description: string }[] }[]>([]);
     const [loanOfficers, setLoanOfficers] = useState<GetLoanOfficerSchema[]>([]);
     const [expandedCP, setExpandedCP] = useState<number | null>(null);
     const [modifiedMap, setModifiedMap] = useState<{ [cpId: number]: boolean }>({});
@@ -34,7 +33,6 @@ export default function Page() {
 
     // Init
     useEffect(() => {
-        // Fetch all registered CP No.s
         fetch('/api/getCpNumbers')
             .then((res) => res.json())
             .then((data) => {
@@ -42,7 +40,6 @@ export default function Page() {
                 setTempCpNumbers(data.cpNumbers);
             });
 
-        // Fetch all Loan Officers
         fetch('/api/getLoanOfficers')
             .then((res) => res.json())
             .then((data) => {
@@ -168,8 +165,8 @@ export default function Page() {
                     <TableHeader>
                         <TableRow>
                             <TableHead className="w-[100px]">CP No.</TableHead>
-                            <TableHead className="w-[150px]">Description</TableHead>
-                            <TableHead className="text-right">Loan Officers</TableHead>
+                            <TableHead className="w-[300px] break-all max-w-[300px]">Description</TableHead>
+                            <TableHead>Assigned Loan Officers</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -177,8 +174,8 @@ export default function Page() {
                             <Fragment key={cp.id}>
                                 <TableRow className="cursor-pointer hover:bg-gray-100">
                                     <TableCell>{cp.area_number}</TableCell>
-                                    <TableCell>{cp.description}</TableCell>
-                                    <TableCell className="text-right flex justify-between items-center">
+                                    <TableCell className="w-[300px] break-all max-w-[300px]">{cp.description}</TableCell>
+                                    <TableCell className="flex justify-between items-center">
                                         {cp.loan_officers.length > 0
                                             ? loanOfficers
                                                 .filter(officer => cp.loan_officers.some(lo => lo.id === officer.id))
@@ -202,19 +199,11 @@ export default function Page() {
                                                     return (
                                                         <div key={officer.id} className="flex justify-between items-center py-2 border-b">
                                                             <span>{officer.name}</span>
-                                                            <Switch
-                                                                checked={cp.loan_officers.some(lo => lo.id === officer.id)}
-                                                                onCheckedChange={checked => handleSwitchChange(cp.id, officer.id, checked)}
-                                                                disabled={isInitiallyAssigned}
-                                                            />
+                                                            <Switch checked={cp.loan_officers.some(lo => lo.id === officer.id)} onCheckedChange={checked => handleSwitchChange(cp.id, officer.id, checked)} disabled={isInitiallyAssigned} />
                                                         </div>
                                                     );
                                                 })}
-                                                <Button
-                                                    onClick={() => handleSaveChanges(cp.id)}
-                                                    disabled={!modifiedMap[cp.id]}
-                                                    className="bg-blue-600 hover:bg-blue-700 text-white flex justify-self-end"
-                                                >
+                                                <Button onClick={() => handleSaveChanges(cp.id)} disabled={!modifiedMap[cp.id]} className="bg-blue-600 hover:bg-blue-700 text-white flex justify-self-end">
                                                     Save
                                                 </Button>
                                             </div>

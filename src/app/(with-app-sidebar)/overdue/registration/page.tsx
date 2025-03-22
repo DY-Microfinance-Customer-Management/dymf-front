@@ -103,7 +103,7 @@ function SelectLoanPage({ onConfirm }: { onConfirm: (loan: GetLoanSchema) => voi
         const scrollHeight = target.scrollHeight;
         const clientHeight = target.clientHeight;
 
-        if (scrollTop + clientHeight === scrollHeight && remainingLoanCnt !== 0) {
+        if (Math.floor(scrollTop + clientHeight) === scrollHeight && remainingLoanCnt !== 0) {
             fetchLoan(nextCursor);
         }
     };
