@@ -1,7 +1,10 @@
 'use client';
 
+// Actions
+import { changeLoan2OverdueAction } from "@/actions/change-loan-to-overdue.action";
+
 // Components: Tabs
-import OverdueLoanDetailsTab from "@/components/tabs/overdue-loan-details-tab";
+import LoanDetailsTab from "@/components/tabs/loan-details-tab";
 import GuarantorDetailsTab from "@/components/tabs/guarantor-details-tab";
 import CollateralDetailsTab from "@/components/tabs/collateral-details-tab";
 import ConsultingDetailsTab from "@/components/tabs/counseling-details-tab";
@@ -17,7 +20,7 @@ import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // React
-import { useEffect, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 
 // Types
 import { GetLoanSchema } from "@/types";
@@ -38,7 +41,7 @@ export default function Page() {
     return (
         <div className="flex flex-col min-h-screen">
             {selectedLoan && !isConfirming ? (
-                <OverdueManagementPage selectedLoan={selectedLoan} onBack={goBackToSelectLoan} />
+                <LoanDetailsPage selectedLoan={selectedLoan} onBack={goBackToSelectLoan} />
             ) : (
                 <SelectLoanPage onConfirm={confirmSelection} />
             )}
@@ -56,7 +59,7 @@ function SelectLoanPage({ onConfirm }: { onConfirm: (loan: GetLoanSchema) => voi
 
     const fetchLoan = (cursor: string, query: string = "") => {
         setLoading(true);
-        let apiUrl = `/api/getOverdueLoans?cursor=${cursor}`;
+        let apiUrl = `/api/getLoans?cursor=${cursor}`;
         if (query.trim()) {
             apiUrl += `&name=${encodeURIComponent(query)}`;
         }
@@ -108,7 +111,7 @@ function SelectLoanPage({ onConfirm }: { onConfirm: (loan: GetLoanSchema) => voi
     return (
         <div className="flex flex-col items-center p-6 space-y-6 min-h-screen">
             <div className="flex justify-between w-full max-w-3xl mt-4">
-                <h1 className="text-3xl font-bold">Overdue Search</h1>
+                <h1 className="text-3xl font-bold">Overdue Registration</h1>
             </div>
             <Card className="w-full max-w-3xl">
                 <CardContent>
@@ -156,49 +159,82 @@ function SelectLoanPage({ onConfirm }: { onConfirm: (loan: GetLoanSchema) => voi
     );
 }
 
-// Overdue Loan Management Page
-function OverdueManagementPage({ selectedLoan, onBack }: {
-    selectedLoan: GetLoanSchema;
-    onBack: () => void;
-}) {
+function LoanDetailsPage({ selectedLoan, onBack }: { selectedLoan: GetLoanSchema; onBack: () => void; }) {
     // Tab Handler
     const [activeTab, setActiveTab] = useState("loanCalculation");
 
+    // Actions
+    const [state, formAction, isPending] = useActionState(changeLoan2OverdueAction, null);
+    useEffect(() => {
+        if (state === null) return;
+
+        if (state?.status === 200) {
+            toast.success(state?.message);
+            onBack();
+        } else {
+            toast.error(state?.message);
+        }
+    }, [state]);
+
     return (
         <div className="flex flex-col p-6 space-y-6">
-            <div className="flex justify-between items-center">
-                <div className="mb-8">
-                    <h1 className="text-3xl font-bold">Overdue Search</h1>
-                    <p className="text-gray-600">Selected Customer: {selectedLoan.customer.name}</p>
-                    <p className="text-gray-600">NRC No.: {selectedLoan.customer.nrc_number}</p>
-                    <p className="text-gray-600">CP No.: {selectedLoan.customer.cp_number.area_number}</p>
-                </div>
-                <div className="space-x-4">
-                    <Button variant="secondary" onClick={onBack}>Back</Button>
-                </div>
-            </div>
+            <form id="loanForm" action={formAction}>
+                <input name="loanId" value={selectedLoan.id} type="text" readOnly hidden />
+                <div className="flex justify-between items-center">
+                    <div className="mb-8">
+                        <h1 className="text-2xl font-bold text-green-800">Overdue Registration</h1>
+                        <p className="text-gray-600">Selected Customer: {selectedLoan.customer.name}</p>
+                        <p className="text-gray-600">NRC No.: {selectedLoan.customer.nrc_number}</p>
+                        <p className="text-gray-600">CP No.: {selectedLoan.customer.cp_number.area_number}</p>
+                    </div>
+                    <div className="space-x-4">
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button type="button" disabled={isPending} className="bg-red-600 hover:bg-red-700 text-white">Mark as Overdue</Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Mark as Overdue</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        Are you sure you want to mark this loan as overdue? This action cannot be undone.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction asChild>
+                                        <Button form="loanForm" type="submit" disabled={isPending} className="bg-red-600 hover:bg-red-700 text-white">Confirm</Button>
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
 
-            <Tabs className="w-full" value={activeTab} onValueChange={setActiveTab}>
-                <TabsList className="w-full">
-                    <TabsTrigger value="loanCalculation">Loan Calculation</TabsTrigger>
-                    <TabsTrigger value="guarantorManagement">Guarantor Management</TabsTrigger>
-                    <TabsTrigger value="collateralManagement">Collateral Management</TabsTrigger>
-                    <TabsTrigger value="consultingInfo">Consulting Info</TabsTrigger>
-                </TabsList>
-                <TabsContent forceMount={true} value="loanCalculation" hidden={"loanCalculation" !== activeTab}>
-                    <OverdueLoanDetailsTab selectedLoan={selectedLoan} />
-                </TabsContent>
-                <TabsContent forceMount={true} value="guarantorManagement" hidden={"guarantorManagement" !== activeTab}>
-                    <GuarantorDetailsTab presetGuarantorIds={selectedLoan.guarantees} />
-                </TabsContent>
-                <TabsContent forceMount={true} value="collateralManagement" hidden={"collateralManagement" !== activeTab}>
-                    <CollateralDetailsTab presetCollaterals={selectedLoan.collaterals} />
-                </TabsContent>
-                <TabsContent forceMount={true} value="consultingInfo" hidden={"consultingInfo" !== activeTab}>
-                    <ConsultingDetailsTab presetConsultingInfos={selectedLoan.consulting_info} />
-                </TabsContent>
-            </Tabs>
+                        <Button variant="secondary" onClick={onBack}>Back</Button>
+                    </div>
+                </div>
 
+                <Tabs className="w-full" value={activeTab} onValueChange={setActiveTab}>
+                    <TabsList className="w-full">
+                        <TabsTrigger value="loanCalculation">Loan Calculation</TabsTrigger>
+                        <TabsTrigger value="guarantorManagement">Guarantor Management</TabsTrigger>
+                        <TabsTrigger value="collateralManagement">Collateral Management</TabsTrigger>
+                        <TabsTrigger value="consultingInfo">Consulting Info</TabsTrigger>
+                    </TabsList>
+                    <TabsContent forceMount={true} value="loanCalculation" hidden={"loanCalculation" !== activeTab}>
+                        <LoanDetailsTab selectedLoan={selectedLoan} />
+                    </TabsContent>
+                    <TabsContent forceMount={true} value="guarantorManagement" hidden={"guarantorManagement" !== activeTab}>
+                        <GuarantorDetailsTab presetGuarantorIds={selectedLoan.guarantees} />
+                    </TabsContent>
+                    <TabsContent forceMount={true} value="collateralManagement" hidden={"collateralManagement" !== activeTab}>
+                        <CollateralDetailsTab presetCollaterals={selectedLoan.collaterals} />
+                    </TabsContent>
+                    <TabsContent forceMount={true} value="consultingInfo" hidden={"consultingInfo" !== activeTab}>
+                        <ConsultingDetailsTab presetConsultingInfos={selectedLoan.consulting_info} />
+                    </TabsContent>
+                </Tabs>
+
+                <input name="selectedLoanId" value={selectedLoan.id} hidden readOnly />
+            </form>
         </div>
     );
 }

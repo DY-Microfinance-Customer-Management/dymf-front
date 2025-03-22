@@ -182,6 +182,26 @@ export interface LoanScheduleSchema {
 	loan: GetLoanSchema;
 }
 
+export interface GetOverdueLoanScheduleSchema extends OverdueLoanScheduleSchema { }
+export interface OverdueLoanScheduleSchema {
+	id: number;
+	principal: number;
+	interest: number;
+	overdue_interest: number;
+	payment_date: string;
+	overdue_transaction?: GetOverdueLoanTransactionSchema;
+	loan: GetLoanSchema;
+}
+
+export type GetOverdueLoanTransactionSchema = Omit<OverdueLoanTransactionSchema, 'overdue_schedule'>;
+export interface OverdueLoanTransactionSchema {
+	id: number;
+	received_principal: number;
+	received_interest: number;
+	received_overdue_interest: number;
+	// overdue_schedule: GetOverdueLoanScheduleSchema;
+}
+
 export type GetGuaranteeSchema = Pick<GuaranteeSchema, 'id' | 'guarantor'>;
 export interface GuaranteeSchema {
 	id: number;

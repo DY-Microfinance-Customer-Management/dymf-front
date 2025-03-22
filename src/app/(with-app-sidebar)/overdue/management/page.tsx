@@ -1,413 +1,242 @@
-"use client";
-
-// React
-import React, { useActionState, useState } from "react";
-
-// UI Components
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+'use client';
 
 // Actions
-import { createLoanAction } from "@/actions/create-loan.action";
-import { Label } from "@/components/ui/label";
+import { createOverdueTransactionAction } from "@/actions/create-overdue-transaction.action";
 
-// Main Component
-export default function LoanManagementApp() {
-    const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null);
-    const [isConfirming, setIsConfirming] = useState<boolean>(false);
+// Components: Tabs
+import OverdueLoanManagementTab from "@/components/tabs/overdue-loan-management-tab";
+import GuarantorDetailsTab from "@/components/tabs/guarantor-details-tab";
+import CollateralDetailsTab from "@/components/tabs/collateral-details-tab";
+import ConsultingDetailsTab from "@/components/tabs/counseling-details-tab";
 
-    const confirmSelection = (customer: string) => {
-        setSelectedCustomer(customer);
-        setIsConfirming(true);
-    };
+// Components: UI
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { toast } from "sonner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-    const proceedToLoanManagement = () => {
-        setIsConfirming(false);
-    };
+// React
+import { useActionState, useEffect, useState } from "react";
 
-    const cancelSelection = () => {
-        setIsConfirming(false);
-        setSelectedCustomer(null);
-    };
+// Types
+import { GetLoanSchema } from "@/types";
 
-    const goBackToSelectCustomer = () => {
-        setSelectedCustomer(null);
-    };
+export default function Page() {
+	const [selectedLoan, setSelectedLoan] = useState<GetLoanSchema | null>(null);
+	const [isConfirming, setIsConfirming] = useState<boolean>(true);
 
-    return (
-        <div className="flex flex-col min-h-screen">
-            {selectedCustomer && !isConfirming ? (
-                <LoanManagementPage selectedCustomer={selectedCustomer} onBack={goBackToSelectCustomer} />
-            ) : (
-                <SelectCustomerPage onConfirm={confirmSelection} />
-            )}
+	const confirmSelection = (loan: GetLoanSchema) => {
+		setSelectedLoan(loan);
+		setIsConfirming(false);
+	};
 
-            {/* Confirmation Dialog */}
-            {isConfirming && (
-                <Dialog open={isConfirming}>
-                    <DialogContent>
-                        <DialogHeader>
-                            <DialogTitle>Confirm Customer</DialogTitle>
-                            <DialogDescription>
-                                Are you sure you want to select <strong>{selectedCustomer}</strong> as the customer?
-                            </DialogDescription>
-                        </DialogHeader>
-                        <DialogFooter>
-                            <Button variant="secondary" onClick={cancelSelection}>
-                                Cancel
-                            </Button>
-                            <Button onClick={proceedToLoanManagement}>Confirm</Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
-            )}
-        </div>
-    );
+	const goBackToSelectLoan = () => {
+		setSelectedLoan(null);
+	};
+
+	return (
+		<div className="flex flex-col min-h-screen">
+			{selectedLoan && !isConfirming ? (
+				<OverdueManagementPage selectedLoan={selectedLoan} onBack={goBackToSelectLoan} />
+			) : (
+				<SelectLoanPage onConfirm={confirmSelection} />
+			)}
+		</div>
+	);
 }
 
-// Select Customer Page
-function SelectCustomerPage({ onConfirm }: { onConfirm: (customer: string) => void }) {
-    const [searchQuery, setSearchQuery] = useState("");
+// Select Loan Page
+function SelectLoanPage({ onConfirm }: { onConfirm: (loan: GetLoanSchema) => void }) {
+	const [searchQuery, setSearchQuery] = useState("");
+	const [loans, setLoans] = useState<GetLoanSchema[]>([]);
+	const [loading, setLoading] = useState(true);
+	const [nextCursor, setNextCursor] = useState("");
+	const [remainingLoanCnt, setRemainingLoanCnt] = useState<number>(1);
 
-    return (
-        <div className="flex flex-col items-center p-6 space-y-6 min-h-screen">
-            <h1 className="text-2xl font-bold">Select Customer</h1>
-            <Card className="w-full max-w-3xl">
-                <CardContent>
-                    <div className="space-y-4">
-                        <Input className="w-full mt-6" placeholder="Enter customer name" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
-                        <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">Search</Button>
-                    </div>
-                </CardContent>
-                <CardContent>
-                    <Table>
-                        <TableCaption>Search Results</TableCaption>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Name</TableHead>
-                                <TableHead>NRC No.</TableHead>
-                                <TableHead>Date of Birth</TableHead>
-                                <TableHead>Phone No.</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            <TableRow onClick={() => onConfirm("John Doe")} className="cursor-pointer hover:bg-gray-100">
-                                <TableCell>John Doe</TableCell>
-                                <TableCell>123456</TableCell>
-                                <TableCell>1990-01-01</TableCell>
-                                <TableCell>+123456789</TableCell>
-                            </TableRow>
-                            <TableRow onClick={() => onConfirm("Jane Smith")} className="cursor-pointer hover:bg-gray-100" >
-                                <TableCell>Jane Smith</TableCell>
-                                <TableCell>7891011</TableCell>
-                                <TableCell>1985-05-15</TableCell>
-                                <TableCell>+987654321</TableCell>
-                            </TableRow>
-                        </TableBody>
-                    </Table>
-                </CardContent>
-            </Card>
-        </div>
-    );
+	const fetchLoan = (cursor: string, query: string = "") => {
+		setLoading(true);
+		let apiUrl = `/api/getOverdueLoans?cursor=${cursor}`;
+		if (query.trim()) {
+			apiUrl += `&name=${encodeURIComponent(query)}`;
+		}
+
+		fetch(apiUrl)
+			.then((res) => res.json())
+			.then((data) => {
+				if (data === null) {
+					setLoans([]);
+				} else {
+					const fetchedLoans = data.loans;
+					const returnCursor = data.returnCursor;
+					const count = data.count;
+
+					setLoans((prev) => {
+						const existingIds = new Set(prev.map(emp => emp.id));
+						const newLoans = fetchedLoans.filter((emp: { id: number }) => !existingIds.has(emp.id));
+						return [...prev, ...newLoans];
+					});
+
+					setNextCursor(returnCursor);
+					setRemainingLoanCnt(count);
+				}
+			})
+			.finally(() => setLoading(false));
+	}
+
+	useEffect(() => {
+		fetchLoan('');
+		setLoading(false);
+	}, []);
+
+	const handleSearch = () => {
+		setLoans([]);
+		fetchLoan('', searchQuery);
+	};
+
+	const scrollHandler = (event: React.UIEvent<HTMLDivElement>) => {
+		const target = event.target as HTMLDivElement;
+		const scrollTop = target.scrollTop;
+		const scrollHeight = target.scrollHeight;
+		const clientHeight = target.clientHeight;
+
+		if (scrollTop + clientHeight === scrollHeight && remainingLoanCnt !== 0) {
+			fetchLoan(nextCursor);
+		}
+	};
+
+	return (
+		<div className="flex flex-col items-center p-6 space-y-6 min-h-screen">
+			<div className="flex justify-between w-full max-w-3xl mt-4">
+				<h1 className="text-3xl font-bold">Overdue Management</h1>
+			</div>
+			<Card className="w-full max-w-3xl">
+				<CardContent>
+					<div className="space-y-4">
+						<Input className="w-full mt-6" placeholder="Search by loan Name" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+						<Button className="w-full bg-blue-600 hover:bg-blue-700 text-white" onClick={handleSearch} disabled={loading}>
+							{loading ? "Searching..." : "Search"}
+						</Button>
+					</div>
+				</CardContent>
+				<CardContent>
+					<ScrollArea className="h-72 rounded-md border" onScrollCapture={scrollHandler}>
+						<Table>
+							<TableHeader>
+								<TableRow>
+									<TableHead>Loan No.</TableHead>
+									<TableHead className="text-center">Contract Date</TableHead>
+									<TableHead className="text-center">Name</TableHead>
+									<TableHead className="text-right">NRC No.</TableHead>
+								</TableRow>
+							</TableHeader>
+							<TableBody>
+								{loans.length > 0 ? (
+									loans.map((loan) => (
+										<TableRow key={loan.id} onClick={() => onConfirm(loan)} className="cursor-pointer hover:bg-gray-100">
+											<TableCell>{loan.id.toString().padStart(8, '0')}</TableCell>
+											<TableCell className="text-center">{loan.contract_date.split("T")[0]}</TableCell>
+											<TableCell className="text-center">{loan.customer.name}</TableCell>
+											<TableCell className="text-right">{loan.customer.nrc_number}</TableCell>
+										</TableRow>
+									))
+								) : (
+									<TableRow>
+										<TableCell colSpan={4} className="text-center">
+											No Loans found.
+										</TableCell>
+									</TableRow>
+								)}
+							</TableBody>
+						</Table>
+					</ScrollArea>
+				</CardContent>
+			</Card>
+		</div>
+	);
 }
 
-// Loan Management Page
-function LoanManagementPage({ selectedCustomer, onBack }: {
-    selectedCustomer: string;
-    onBack: () => void;
+// Overdue Loan Management Page
+function OverdueManagementPage({ selectedLoan, onBack }: {
+	selectedLoan: GetLoanSchema;
+	onBack: () => void;
 }) {
-    return (
-        <div className="flex flex-col p-6 space-y-6">
-            <div className="flex justify-between items-center">
-                <div>
-                    <h1 className="text-2xl font-bold text-green-800">Overdue Loan Management</h1>
-                    <p className="text-gray-600">Selected Customer: {selectedCustomer}</p>
-                </div>
-                <Button variant="secondary" onClick={onBack}>Back</Button>
-            </div>
+	// Tab Handler
+	const [activeTab, setActiveTab] = useState("loanCalculation");
 
-            <Tabs defaultValue="repaymentSchedule">
-                <TabsList className="w-full">
-                    <TabsTrigger value="repaymentSchedule">Repayment Schedule</TabsTrigger>
-                    <TabsTrigger value="loanInfo">Loan Info</TabsTrigger>
-                </TabsList>
+	// Action
+	const [state, formAction, isPending] = useActionState(createOverdueTransactionAction, null);
+	useEffect(() => {
+		if (state === null) return;
 
-                <TabsContent value="repaymentSchedule" className="space-y-2">
-                    <Card className="w-full">
-                        <CardHeader>
-                            <CardTitle className="text-2xl font-bold text-red-800">Overdue Repayment Schedule</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <Table className="mt-8">
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Payment Date</TableHead>
-                                        <TableHead>Principal</TableHead>
-                                        <TableHead>Interest</TableHead>
-                                        <TableHead>Overdue Interest</TableHead>
-                                        <TableHead>Received Principal</TableHead>
-                                        <TableHead>Received Interest</TableHead>
-                                        <TableHead className="text-right">Received Overdue Interest</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    <TableRow>
-                                        <TableCell></TableCell>
-                                        <TableCell className="text-right"></TableCell>
-                                    </TableRow>
-                                </TableBody>
-                            </Table>
-                        </CardContent>
-                    </Card>
+		if (state?.status === 200) {
+			toast.success(state?.message);
+			onBack();
+		} else {
+			toast.error(state?.message);
+		}
+	}, [state]);
 
-                    <Card className="w-full">
-                        <CardContent>
-                            <div className="col-span-3 grid grid-cols-3 gap-1 mt-4">
-                                <div className="col-span-1 flex items-end gap-2">
-                                    <div className="flex-row">
-                                        <Label>Received Principal</Label>
-                                        <Input name="receivedPrincipal" type="number" />
-                                    </div>
-                                    <Label>MMK</Label>
-                                </div>
-                                <div className="col-span-1 flex items-end gap-2">
-                                    <div className="flex-row">
-                                        <Label>Received Interest</Label>
-                                        <Input name="receivedInterest" type="number" />
-                                    </div>
-                                    <Label>MMK</Label>
-                                </div>
-                                <div className="col-span-1 flex items-end gap-2">
-                                    <div className="flex-row">
-                                        <Label>Received Overdue Interest</Label>
-                                        <Input name="receivedOverdueInterest" type="number" />
-                                    </div>
-                                    <Label>MMK</Label>
-                                </div>
-                                <div className="col-span-3 justify-self-end mt-4">
-                                    <Button className="bg-blue-600 text-white hover:bg-blue-700">Calculate</Button>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </TabsContent>
+	return (
+		<div className="flex flex-col p-6 space-y-6">
+			<form id="loanForm" action={formAction}>
+				<div className="flex justify-between items-center">
+					<div className="mb-8">
+						<h1 className="text-3xl font-bold">Overdue Management</h1>
+						<p className="text-gray-600">Selected Customer: {selectedLoan.customer.name}</p>
+						<p className="text-gray-600">NRC No.: {selectedLoan.customer.nrc_number}</p>
+						<p className="text-gray-600">CP No.: {selectedLoan.customer.cp_number.area_number}</p>
+					</div>
+					<div className="space-x-4">
+						<AlertDialog>
+							<AlertDialogTrigger asChild>
+								<Button type="button" disabled={isPending} className="bg-blue-600 hover:bg-blue-700 text-white">Confirm Received</Button>
+							</AlertDialogTrigger>
+							<AlertDialogContent>
+								<AlertDialogHeader>
+									<AlertDialogTitle>Create Repayment Schedule</AlertDialogTitle>
+									<AlertDialogDescription>
+										Are you sure you want to create a new repayment schedule? This action cannot be undone.
+									</AlertDialogDescription>
+								</AlertDialogHeader>
+								<AlertDialogFooter>
+									<AlertDialogCancel>Cancel</AlertDialogCancel>
+									<AlertDialogAction asChild>
+										<Button form="loanForm" type="submit" disabled={isPending} className="bg-blue-600 hover:bg-blue-700 text-white">Confirm</Button>
+									</AlertDialogAction>
+								</AlertDialogFooter>
+							</AlertDialogContent>
+						</AlertDialog>
 
-                <TabsContent value="loanInfo">
-                    <div className="w-full space-y-6">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-red-800">Overdue Loan</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="col-span-3 grid grid-cols-3 gap-4 mb-8">
-                                    <div className="col-span-1">
-                                        <Label>Loan No.</Label>
-                                        <Input disabled name="loanNumber" type="text" />
-                                    </div>
-                                    <div className="col-span-1">
-                                        <Label>Loan Type</Label>
-                                        <Input disabled name="loanType" type="text" />
-                                    </div>
-                                    <div className="col-span-1">
-                                        <Label>CP No.</Label>
-                                        <Input disabled name="cpNumber" type="text" />
-                                    </div>
-                                    <div className="col-span-1">
-                                        <Label>Contract Date</Label>
-                                        <Input disabled name="contractDate" type="date" />
-                                    </div>
-                                    <div className="col-span-1">
-                                        <Label>Loan Officer</Label>
-                                        <Input disabled name="loanOfficer" />
-                                    </div>
-                                </div>
-                                <div className="col-span-3 grid grid-cols-3 gap-4">
-                                    <div className="col-span-1 flex items-end gap-2">
-                                        <div className="flex-1">
-                                            <Label>Loan Amount</Label>
-                                            <Input disabled name="loanAmount" type="number" />
-                                        </div>
-                                        <Label>MMK</Label>
-                                    </div>
-                                    <div className="col-span-1 flex items-end gap-2">
-                                        <div className="flex-1">
-                                            <Label>Repayment Cycle</Label>
-                                            <Input disabled name="repaymentCycle" type="number" />
-                                        </div>
-                                        <Label>days</Label>
-                                    </div>
-                                    <div className="col-span-1 flex items-end gap-2">
-                                        <div className="flex-1">
-                                            <Label>Interest Rate</Label>
-                                            <Input disabled name="interestRate" type="number" />
-                                        </div>
-                                        <Label>%</Label>
-                                    </div>
-                                    <div className="col-span-1">
-                                        <Label>Number of Repayment</Label>
-                                        <Input disabled name="numberOfRepayment" type="number" />
-                                    </div>
-                                    <div className="col-span-1">
-                                        <Label>Repayment Method</Label>
-                                        <Input disabled name="repaymentMethod" />
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
+						<Button variant="secondary" onClick={onBack}>Back</Button>
+					</div>
+				</div>
 
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-green-800 line-through">Loan</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="col-span-3 grid grid-cols-3 gap-4 mb-8">
-                                    <div className="col-span-1">
-                                        <Label>Loan No.</Label>
-                                        <Input disabled name="loanNumber" type="text" />
-                                    </div>
-                                    <div className="col-span-1">
-                                        <Label>Loan Type</Label>
-                                        <Input disabled name="loanType" type="text" />
-                                    </div>
-                                    <div className="col-span-1">
-                                        <Label>CP No.</Label>
-                                        <Input disabled name="cpNumber" type="text" />
-                                    </div>
-                                    <div className="col-span-1">
-                                        <Label>Contract Date</Label>
-                                        <Input disabled name="contractDate" type="date" />
-                                    </div>
-                                    <div className="col-span-1">
-                                        <Label>Loan Officer</Label>
-                                        <Input disabled name="loanOfficer" />
-                                    </div>
-                                </div>
-                                <div className="col-span-3 grid grid-cols-3 gap-4">
-                                    <div className="col-span-1 flex items-end gap-2">
-                                        <div className="flex-1">
-                                            <Label>Loan Amount</Label>
-                                            <Input disabled name="loanAmount" type="number" />
-                                        </div>
-                                        <Label>MMK</Label>
-                                    </div>
-                                    <div className="col-span-1 flex items-end gap-2">
-                                        <div className="flex-1">
-                                            <Label>Repayment Cycle</Label>
-                                            <Input disabled name="repaymentCycle" type="number" />
-                                        </div>
-                                        <Label>days</Label>
-                                    </div>
-                                    <div className="col-span-1 flex items-end gap-2">
-                                        <div className="flex-1">
-                                            <Label>Interest Rate</Label>
-                                            <Input disabled name="interestRate" type="number" />
-                                        </div>
-                                        <Label>%</Label>
-                                    </div>
-                                    <div className="col-span-1">
-                                        <Label>Number of Repayment</Label>
-                                        <Input disabled name="numberOfRepayment" type="number" />
-                                    </div>
-                                    <div className="col-span-1">
-                                        <Label>Repayment Method</Label>
-                                        <Input disabled name="repaymentMethod" />
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
+				<Tabs className="w-full" value={activeTab} onValueChange={setActiveTab}>
+					<TabsList className="w-full">
+						<TabsTrigger value="loanCalculation">Loan Calculation</TabsTrigger>
+						<TabsTrigger value="guarantorManagement">Guarantor Management</TabsTrigger>
+						<TabsTrigger value="collateralManagement">Collateral Management</TabsTrigger>
+						<TabsTrigger value="consultingInfo">Consulting Info</TabsTrigger>
+					</TabsList>
+					<TabsContent forceMount={true} value="loanCalculation" hidden={"loanCalculation" !== activeTab}>
+						<OverdueLoanManagementTab selectedLoan={selectedLoan} />
+					</TabsContent>
+					<TabsContent forceMount={true} value="guarantorManagement" hidden={"guarantorManagement" !== activeTab}>
+						<GuarantorDetailsTab presetGuarantorIds={selectedLoan.guarantees} />
+					</TabsContent>
+					<TabsContent forceMount={true} value="collateralManagement" hidden={"collateralManagement" !== activeTab}>
+						<CollateralDetailsTab presetCollaterals={selectedLoan.collaterals} />
+					</TabsContent>
+					<TabsContent forceMount={true} value="consultingInfo" hidden={"consultingInfo" !== activeTab}>
+						<ConsultingDetailsTab presetConsultingInfos={selectedLoan.consulting_info} />
+					</TabsContent>
+				</Tabs>
 
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-green-800">
-                                    Guarantors
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <Table>
-                                    <TableCaption>A list of Guarantors</TableCaption>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Name</TableHead>
-                                            <TableHead>NRC No.</TableHead>
-                                            <TableHead>Phone</TableHead>
-                                            <TableHead className="text-right">CP No.</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        <TableRow>
-                                            <TableCell className="font-medium">Something</TableCell>
-                                            <TableCell>124lh12h4k1</TableCell>
-                                            <TableCell>010-5555-5555</TableCell>
-                                            <TableCell className="text-right">TW-5</TableCell>
-                                        </TableRow>
-                                    </TableBody>
-                                </Table>
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-green-800">
-                                    Collaterals
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <Table>
-                                    <TableCaption>A list of Collaterals.</TableCaption>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Type</TableHead>
-                                            <TableHead>Name</TableHead>
-                                            <TableHead className="text-right">Details</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        <TableRow>
-                                            <TableCell className="font-medium">Car</TableCell>
-                                            <TableCell>Something</TableCell>
-                                            <TableCell className="text-right w-[250px] break-all">SomethingSomethingSomethingSomethingSomethingSomethingSomethingSomethingSomethingSomething</TableCell>
-                                        </TableRow>
-                                    </TableBody>
-                                </Table>
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-green-800">
-                                    Counselings
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <Table>
-                                    <TableCaption>A list of Counseling Info added.</TableCaption>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Date</TableHead>
-                                            <TableHead>Subject</TableHead>
-                                            <TableHead className="text-center">Details</TableHead>
-                                            <TableHead className="text-right">Corrective Measure</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        <TableRow>
-                                            <TableCell className="font-medium">2025/01/27</TableCell>
-                                            <TableCell>Something</TableCell>
-                                            <TableCell className="text-center w-[250px] break-all">Something Something Something Something Something Something Something Something Something</TableCell>
-                                            <TableCell className="text-right w-[250px] break-all">Something Something Something Something Something Something Something Something Something</TableCell>
-                                        </TableRow>
-                                    </TableBody>
-                                </Table>
-                            </CardContent>
-                        </Card>
-
-                    </div>
-                </TabsContent>
-            </Tabs>
-        </div >
-    );
+			</form>
+		</div>
+	);
 }
