@@ -53,6 +53,10 @@ export default function Home() {
     setLoanType(value);
   };
 
+  const totalPrincipal = schedule.reduce((sum, row) => sum + row.principal, 0);
+  const totalInterest = schedule.reduce((sum, row) => sum + row.interest, 0);
+  const totalPayment = schedule.reduce((sum, row) => sum + row.total, 0);
+
   return (
     <div className="flex flex-col p-10 space-y-8 min-h-screen">
       <div className="flex justify-between space-x-8">
@@ -69,36 +73,32 @@ export default function Home() {
               <div className="flex flex-col space-y-1">
                 <Label>Principal</Label>
                 <Input
-                  className="w-full"
+                  className="w-full appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                   type="number"
-                  value={principal}
                   onChange={(e) => setPrincipal(Number(e.target.value))}
                 />
               </div>
               <div className="flex flex-col space-y-1">
                 <Label>Interest Rate (%)</Label>
                 <Input
-                  className="w-full"
+                  className="w-full appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                   type="number"
-                  value={interestRate}
                   onChange={(e) => setInterestRate(Number(e.target.value))}
                 />
               </div>
               <div className="flex flex-col space-y-1">
                 <Label>Number of Repayments</Label>
                 <Input
-                  className="w-full"
+                  className="w-full appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                   type="number"
-                  value={repaymentCount}
                   onChange={(e) => setRepaymentCount(Number(e.target.value))}
                 />
               </div>
               <div className="flex flex-col space-y-1">
                 <Label>Repayment Cycle (days)</Label>
                 <Input
-                  className="w-full"
+                  className="w-full appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                   type="number"
-                  value={repaymentCycle}
                   onChange={(e) => setRepaymentCycle(Number(e.target.value))}
                 />
               </div>
@@ -168,6 +168,13 @@ export default function Home() {
                       </TableCell>
                     </TableRow>
                   ))}
+                  <TableRow className="font-bold border-t">
+                    <TableCell className="text-center">Total</TableCell>
+                    <TableCell className="text-right">{totalPrincipal.toLocaleString()}</TableCell>
+                    <TableCell className="text-right">{totalInterest.toLocaleString()}</TableCell>
+                    <TableCell className="text-right">{totalPayment.toLocaleString()}</TableCell>
+                    <TableCell />
+                  </TableRow>
                 </TableBody>
               </Table>
             ) : (

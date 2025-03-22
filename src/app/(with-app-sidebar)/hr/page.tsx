@@ -438,28 +438,28 @@ function EmployeeRegistrationPage({ selectedEmployee, onBack }: { selectedEmploy
                             <div className="col-span-1">
                                 <Label>Salary</Label>
                                 <div className="flex items-end space-x-2">
-                                    <Input name="salary" value={confirmData.salary} onChange={handleChange} disabled={isPending || !isEditing} type="number" required />
+                                    <Input className="appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" name="salary" value={confirmData.salary} onChange={handleChange} disabled={isPending || !isEditing} type="number" required />
                                     <Label>MMK</Label>
                                 </div>
                             </div>
                             <div className="col-span-1">
                                 <Label>SSB</Label>
                                 <div className="flex items-end space-x-2">
-                                    <Input name="ssb" value={confirmData.ssb} onChange={handleChange} disabled={isPending || !isEditing} type="number" required />
+                                    <Input className="appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" name="ssb" value={confirmData.ssb} onChange={handleChange} disabled={isPending || !isEditing} type="number" required />
                                     <Label>MMK</Label>
                                 </div>
                             </div>
                             <div className="col-span-1">
                                 <Label>Income Tax</Label>
                                 <div className="flex items-end space-x-2">
-                                    <Input name="incomeTax" value={confirmData.incomeTax} onChange={handleChange} disabled={isPending || !isEditing} type="number" required />
+                                    <Input className="appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" name="incomeTax" value={confirmData.incomeTax} onChange={handleChange} disabled={isPending || !isEditing} type="number" required />
                                     <Label>MMK</Label>
                                 </div>
                             </div>
                             <div className="col-span-1">
                                 <Label>Bonus</Label>
                                 <div className="flex items-end space-x-2">
-                                    <Input name="bonus" value={confirmData.bonus} onChange={handleChange} disabled={isPending || !isEditing} type="number" />
+                                    <Input className="appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" name="bonus" value={confirmData.bonus} onChange={handleChange} disabled={isPending || !isEditing} type="number" />
                                     <Label>MMK</Label>
                                 </div>
                             </div>
