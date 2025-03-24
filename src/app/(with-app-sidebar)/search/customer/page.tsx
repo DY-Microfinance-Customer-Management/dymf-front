@@ -252,7 +252,7 @@ function CustomerEditPage({ selectedCustomer, onBack }: { selectedCustomer: GetC
             const imgSrc = selectedCustomer?.image;
             const extractedImageName = imgSrc?.substring(imgSrc?.lastIndexOf("/") + 1);
 
-            if (extractedImageName === 'empty') {
+            if (extractedImageName === 'empty' || 'localhost.dev.com') {
                 setUploadedImage(null);
             } else {
                 setUploadedImage(imgSrc ?? null);

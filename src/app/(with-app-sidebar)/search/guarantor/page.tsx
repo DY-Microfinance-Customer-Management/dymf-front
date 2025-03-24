@@ -261,7 +261,7 @@ function GuarantorEditPage({ selectedGuarantor, onBack }: { selectedGuarantor: G
             const imgSrc = selectedGuarantor?.image;
             const extractedImageName = imgSrc?.substring(imgSrc?.lastIndexOf("/") + 1);
 
-            if (extractedImageName === 'empty') {
+            if (extractedImageName === 'empty' || 'localhost.dev.com') {
                 setUploadedImage(null);
             } else {
                 setUploadedImage(imgSrc ?? null);
