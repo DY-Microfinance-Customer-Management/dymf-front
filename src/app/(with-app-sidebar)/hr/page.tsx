@@ -245,9 +245,8 @@ function EmployeeRegistrationPage({ selectedEmployee, onBack }: { selectedEmploy
         if (selectedEmployee !== null) {
             const imgSrc = selectedEmployee?.image;
             const extractedImageName = imgSrc?.substring(imgSrc?.lastIndexOf("/") + 1);
-            console.log(extractedImageName)
 
-            if (extractedImageName === 'empty' || 'localhost.dev.com') {
+            if (extractedImageName === 'empty' || extractedImageName === 'localhost.dev.com') {
                 setUploadedImage(null);
             } else {
                 setUploadedImage(imgSrc ?? null);
