@@ -11,14 +11,12 @@ export async function GET(request: NextRequest) {
 
     let apiUrl = `${process.env.API_SERVER_URL}/loan`;
 
-    // name이 있을 경우 검색 필터 적용
     if (name) {
-        apiUrl += `?name=${encodeURIComponent(name)}&overdue_status=0`;
+        apiUrl += `?name=${encodeURIComponent(name)}`;
     } else if (nextCursor === "") {
-        apiUrl += `?order[]=id_ASC&overdue_status=0&take=6`;
+        apiUrl += `?order[]=id_ASC&take=6`;
     } else {
-        // TODO: Test 필요
-        apiUrl += `?cursor=${nextCursor}&overdue_status=0`;
+        apiUrl += `?cursor=${nextCursor}`;
     }
 
     // API 요청

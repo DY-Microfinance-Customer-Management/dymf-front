@@ -135,14 +135,18 @@ function SelectLoanPage({ onConfirm }: { onConfirm: (loan: GetLoanSchema) => voi
                             </TableHeader>
                             <TableBody>
                                 {loans.length > 0 ? (
-                                    loans.map((loan) => (
-                                        <TableRow key={loan.id} onClick={() => onConfirm(loan)} className="cursor-pointer hover:bg-gray-100">
-                                            <TableCell>{loan.id.toString().padStart(8, '0')}</TableCell>
-                                            <TableCell className="text-center">{loan.contract_date.split("T")[0]}</TableCell>
-                                            <TableCell className="text-center">{loan.customer.name}</TableCell>
-                                            <TableCell className="text-right">{loan.customer.nrc_number}</TableCell>
-                                        </TableRow>
-                                    ))
+                                    loans.map((loan) => {
+                                        const isOverdue = loan.overdue_status === true;
+
+                                        return (
+                                            <TableRow key={loan.id} onClick={!isOverdue ? () => onConfirm(loan) : undefined} className={`hover:bg-gray-100 ${isOverdue ? 'text-red-600 cursor-not-allowed' : 'cursor-pointer'}`}>
+                                                <TableCell>{loan.id.toString().padStart(8, '0')}</TableCell>
+                                                <TableCell className="text-center">{loan.contract_date.split("T")[0]}</TableCell>
+                                                <TableCell className="text-center">{loan.customer.name}</TableCell>
+                                                <TableCell className="text-right">{loan.customer.nrc_number}</TableCell>
+                                            </TableRow>
+                                        );
+                                    })
                                 ) : (
                                     <TableRow>
                                         <TableCell colSpan={4} className="text-center">
@@ -151,6 +155,7 @@ function SelectLoanPage({ onConfirm }: { onConfirm: (loan: GetLoanSchema) => voi
                                     </TableRow>
                                 )}
                             </TableBody>
+
                         </Table>
                     </ScrollArea>
                 </CardContent>

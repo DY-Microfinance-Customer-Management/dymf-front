@@ -188,7 +188,9 @@ export default function Page() {
                                         users.map(user => (
                                             <TableRow key={user.id}>
                                                 <TableCell>
-                                                    <Checkbox checked={selectedUser === user.id} onCheckedChange={() => handleUserSelect(user.id)} />
+                                                    {user.role === 0 ? null : (
+                                                        <Checkbox checked={selectedUser === user.id} onCheckedChange={() => handleUserSelect(user.id)} />
+                                                    )}
                                                 </TableCell>
                                                 <TableCell>{user.userName}</TableCell>
                                                 <TableCell>{user.role === 0 ? 'Admin' : 'User'}</TableCell>
@@ -197,7 +199,7 @@ export default function Page() {
                                     ) : (
                                         <TableRow>
                                             <TableCell colSpan={3} className="text-center">
-                                                No users found.
+                                                No users found.f
                                             </TableCell>
                                         </TableRow>
                                     )}
