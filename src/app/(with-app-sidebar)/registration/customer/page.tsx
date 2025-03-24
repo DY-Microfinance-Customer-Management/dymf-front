@@ -9,7 +9,7 @@ import { CpNumberDialog } from "@/components/pop-ups/cp-number-dialog";
 // Components: UI
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -33,6 +33,7 @@ export default function FormPage() {
         dateOfBirth: new Date("2000-01-01").toISOString().split("T")[0],
         phone: '',
         email: '',
+        fatherName: '',
         gender: "Male",
         cpNo: '',
         loanType: "Special Loan",
@@ -45,6 +46,11 @@ export default function FormPage() {
         info3: '',
         info4: '',
         info5: '',
+        info6: '',
+        info7: '',
+        info8: '',
+        info9: '',
+        info10: '',
     });
     // Input Value Handler
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -72,6 +78,7 @@ export default function FormPage() {
                 dateOfBirth: new Date("2000-01-01").toISOString().split("T")[0],
                 phone: '',
                 email: '',
+                fatherName: '',
                 gender: "Male",
                 cpNo: '',
                 loanType: "Special Loan",
@@ -84,6 +91,11 @@ export default function FormPage() {
                 info3: '',
                 info4: '',
                 info5: '',
+                info6: '',
+                info7: '',
+                info8: '',
+                info9: '',
+                info10: '',
             });
             setUploadedImage(null);
         } else if (state?.status === 400) {
@@ -180,6 +192,10 @@ export default function FormPage() {
                                         <Input name="name" value={confirmData.name} onChange={handleChange} disabled={isPending} type="text" required />
                                     </div>
                                     <div className="col-span-2">
+                                        <Label>Father's Name</Label>
+                                        <Input name="fatherName" value={confirmData.fatherName} onChange={handleChange} disabled={isPending} type="text" required />
+                                    </div>
+                                    <div className="col-span-2">
                                         <Label>NRC No.</Label>
                                         <Input name="nrcNo" value={confirmData.nrcNo} onChange={handleChange} disabled={isPending} type="text" required />
                                     </div>
@@ -216,11 +232,7 @@ export default function FormPage() {
                                             <Label>CP No.</Label>
                                             <Input name="cpNo" value={confirmData.cpNo} onClick={() => setIsCpNumberDialogOpen(true)} readOnly />
                                         </div>
-                                        <CpNumberDialog
-                                            open={isCpNumberDialogOpen}
-                                            onClose={() => setIsCpNumberDialogOpen(false)}
-                                            onSelect={(cpNo) => setConfirmData(prev => ({ ...prev, cpNo }))}
-                                        />
+                                        <CpNumberDialog open={isCpNumberDialogOpen} onClose={() => setIsCpNumberDialogOpen(false)} onSelect={(cpNo) => setConfirmData(prev => ({ ...prev, cpNo }))} />
                                     </div>
                                     <div className="col-span-2">
                                         <Label>Loan Type</Label>
@@ -294,6 +306,37 @@ export default function FormPage() {
                                 <div className="col-span-2">
                                     <Label>Info 5</Label>
                                     <Input name="info5" value={confirmData.info5} onChange={handleChange} disabled={isPending} type="text" />
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="text-green-800">Family Information</CardTitle>
+                            <CardDescription>Current property status of the family</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="col-span-2">
+                                    <Label>Info 1</Label>
+                                    <Input name="info6" value={confirmData.info6} onChange={handleChange} disabled={isPending} type="text" />
+                                </div>
+                                <div className="col-span-2">
+                                    <Label>Info 2</Label>
+                                    <Input name="info7" value={confirmData.info7} onChange={handleChange} disabled={isPending} type="text" />
+                                </div>
+                                <div className="col-span-2">
+                                    <Label>Info 3</Label>
+                                    <Input name="info8" value={confirmData.info8} onChange={handleChange} disabled={isPending} type="text" />
+                                </div>
+                                <div className="col-span-2">
+                                    <Label>Info 4</Label>
+                                    <Input name="info9" value={confirmData.info9} onChange={handleChange} disabled={isPending} type="text" />
+                                </div>
+                                <div className="col-span-2">
+                                    <Label>Info 5</Label>
+                                    <Input name="info10" value={confirmData.info10} onChange={handleChange} disabled={isPending} type="text" />
                                 </div>
                             </div>
                         </CardContent>

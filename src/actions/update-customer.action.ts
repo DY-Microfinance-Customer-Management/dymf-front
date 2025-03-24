@@ -31,6 +31,7 @@ export async function updateCustomerAction(_: any, formData: FormData): Promise<
         birth: responseData.birth,
         phone_number: responseData.phone_number,
         email: responseData.email,
+        father_name: responseData.father_name,
         gender: responseData.gender,
         area_number: responseData.cp_number,
         loan_type: responseData.loan_type,
@@ -38,25 +39,28 @@ export async function updateCustomerAction(_: any, formData: FormData): Promise<
         home_postal_code: responseData.home_postal_code,
         office_address: responseData.office_address,
         office_postal_code: responseData.office_postal_code,
+        family_information: responseData.family_information,
         details: responseData.details,
         image: responseData.image,
     }
 
     const infos = ['info1', 'info2', 'info3', 'info4', 'info5']
+    const family_infos = ['info6', 'info7', 'info8', 'info9', 'info10']
     const newData: PatchCustomerSchema = {
         name: formData.get("name")?.toString() ?? '',
         nrc_number: formData.get("nrcNo")?.toString() ?? '',
         birth: formData.get("dateOfBirth")?.toString() ?? '',
         phone_number: formData.get("phone")?.toString() ?? '',
         email: formData.get("email")?.toString() ?? '',
+        father_name: formData.get("fatherName")?.toString() ?? '',
         gender: formData.get("gender") === 'Male' ? GenderEnum.man : GenderEnum.woman,
-        // area_number: formData.get("cpNo")?.toString() ?? '',
-        area_number: 'A123',
+        area_number: formData.get("cpNo")?.toString() ?? '',
         loan_type: formData.get("loanType")?.toString() === 'Special Loan' ? LoanTypeEnum.special_loan : LoanTypeEnum.group_loan,
         home_address: formData.get("homeAddress")?.toString() ?? '',
         home_postal_code: formData.get("homePostalCode")?.toString() ?? '',
         office_address: formData.get("officeAddress")?.toString() ?? '',
         office_postal_code: formData.get("officePostalCode")?.toString() ?? '',
+        family_information: family_infos.map((idx) => formData.get(idx)?.toString() ?? ''),
         details: infos.map((idx) => formData.get(idx)?.toString() ?? ''),
         image: "empty"
     }
@@ -69,6 +73,13 @@ export async function updateCustomerAction(_: any, formData: FormData): Promise<
 
             if (JSON.stringify(oldDetails) !== JSON.stringify(newDetails)) {
                 patchData.details = newDetails;
+            }
+        } else if (key === "family_information") {
+            const oldFamilyInformations = compareData.family_information ?? [];
+            const newFamilyInformations = value as string[];
+
+            if (JSON.stringify(oldFamilyInformations) !== JSON.stringify(newFamilyInformations)) {
+                patchData.family_information = newFamilyInformations;
             }
         } else if (value !== (compareData as any)[key]) {
             (patchData as any)[key] = value;

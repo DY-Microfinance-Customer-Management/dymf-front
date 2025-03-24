@@ -11,12 +11,14 @@ export async function createCustomerAction(_: any, formData: FormData): Promise<
     const credentials = cookieStore.get('access_token')?.value;
 
     const infos = ['info1', 'info2', 'info3', 'info4', 'info5']
+    const family_infos = ['info6', 'info7', 'info8', 'info9', 'info10']
     const data: PostCustomerSchema = {
         name: formData.get("name")?.toString() ?? '',
         nrc_number: formData.get("nrcNo")?.toString() ?? '',
         birth: formData.get("dateOfBirth")?.toString() ?? '',
         phone_number: formData.get("phone")?.toString() ?? '', 
         email: formData.get("email")?.toString() ?? '',
+        father_name: formData.get("fatherName")?.toString() ?? '',
         gender: formData.get("gender") === 'Male' ? GenderEnum.man : GenderEnum.woman,
         area_number: formData.get("cpNo")?.toString() ?? '',
         loan_type: formData.get("loanType")?.toString()=== 'Special Loan' ? LoanTypeEnum.special_loan : LoanTypeEnum.group_loan,
@@ -25,6 +27,7 @@ export async function createCustomerAction(_: any, formData: FormData): Promise<
         office_address: formData.get("officeAddress")?.toString() ?? '',
         office_postal_code: formData.get("officePostalCode")?.toString() ?? '',
         details: infos.map((idx) => formData.get(idx)?.toString() ?? ''),
+        family_information: family_infos.map((idx) => formData.get(idx)?.toString() ?? ''),
         image: "empty"
     }
 

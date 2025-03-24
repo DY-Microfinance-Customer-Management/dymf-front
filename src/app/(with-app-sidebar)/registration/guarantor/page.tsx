@@ -33,6 +33,7 @@ export default function FormPage() {
         dateOfBirth: new Date("2000-01-01").toISOString().split("T")[0],
         phone: '',
         email: '',
+        fatherName: '',
         gender: "Male",
         cpNo: '',
         loanType: "Special Loan",
@@ -72,6 +73,7 @@ export default function FormPage() {
                 dateOfBirth: new Date("2000-01-01").toISOString().split("T")[0],
                 phone: '',
                 email: '',
+                fatherName: '',
                 gender: "Male",
                 cpNo: '',
                 loanType: "Special Loan",
@@ -171,6 +173,10 @@ export default function FormPage() {
                                     <div className="col-span-2">
                                         <Label>Name</Label>
                                         <Input name="name" value={confirmData.name} onChange={handleChange} disabled={isPending} type="text" required />
+                                    </div>
+                                    <div className="col-span-2">
+                                        <Label>Father's Name</Label>
+                                        <Input name="fatherName" value={confirmData.fatherName} onChange={handleChange} disabled={isPending} type="text" required />
                                     </div>
                                     <div className="col-span-2">
                                         <Label>NRC No.</Label>

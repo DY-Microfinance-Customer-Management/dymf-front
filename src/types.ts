@@ -63,6 +63,7 @@ export interface CustomerSchema {
 	nrc_number: string;
 	birth: string;
 	phone_number: string;
+	father_name: string;
 	email?: string;
 	gender: GenderEnum;
 	area_number: string;
@@ -72,6 +73,7 @@ export interface CustomerSchema {
 	office_address?: string;
 	office_postal_code?: string;
 	details?: string[];
+	family_information?: string[];
 	image?: string;
 }
 
@@ -84,6 +86,7 @@ export interface GuarantorSchema {
 	nrc_number: string;
 	birth: string;
 	phone_number: string;
+	father_name: string;
 	email?: string;
 	gender: GenderEnum;
 	area_number: string;

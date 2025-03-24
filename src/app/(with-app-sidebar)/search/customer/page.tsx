@@ -176,6 +176,7 @@ function CustomerEditPage({ selectedCustomer, onBack }: { selectedCustomer: GetC
         dateOfBirth: selectedCustomer?.birth ?? new Date("2000-01-01").toISOString().split("T")[0],
         phone: selectedCustomer?.phone_number ?? '',
         email: selectedCustomer?.email ?? '',
+        fatherName: selectedCustomer?.father_name ?? '',
         gender: selectedCustomer?.gender === 1 ? "Female" : "Male",
         cpNo: selectedCustomer?.cp_number.area_number ?? '',
         loanType: selectedCustomer?.loan_type === 1 ? "Group Loan" : "Special Loan",
@@ -188,6 +189,11 @@ function CustomerEditPage({ selectedCustomer, onBack }: { selectedCustomer: GetC
         info3: (selectedCustomer?.details ?? [])[2] ?? '',
         info4: (selectedCustomer?.details ?? [])[3] ?? '',
         info5: (selectedCustomer?.details ?? [])[4] ?? '',
+        info6: (selectedCustomer?.family_information ?? [])[0] ?? '',
+        info7: (selectedCustomer?.family_information ?? [])[1] ?? '',
+        info8: (selectedCustomer?.family_information ?? [])[2] ?? '',
+        info9: (selectedCustomer?.family_information ?? [])[3] ?? '',
+        info10: (selectedCustomer?.family_information ?? [])[4] ?? '',
     });
     // Input Value Handler
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -216,6 +222,7 @@ function CustomerEditPage({ selectedCustomer, onBack }: { selectedCustomer: GetC
                 dateOfBirth: new Date("2000-01-01").toISOString().split("T")[0],
                 phone: '',
                 email: '',
+                fatherName: '',
                 gender: 'Male',
                 cpNo: '',
                 loanType: 'Special Loan',
@@ -228,6 +235,11 @@ function CustomerEditPage({ selectedCustomer, onBack }: { selectedCustomer: GetC
                 info3: '',
                 info4: '',
                 info5: '',
+                info6: '',
+                info7: '',
+                info8: '',
+                info9: '',
+                info10: '',
             });
             setUploadedImage(null);
             setIsEditing(false);
@@ -252,7 +264,7 @@ function CustomerEditPage({ selectedCustomer, onBack }: { selectedCustomer: GetC
             const imgSrc = selectedCustomer?.image;
             const extractedImageName = imgSrc?.substring(imgSrc?.lastIndexOf("/") + 1);
 
-            if (extractedImageName === 'empty' || 'localhost.dev.com') {
+            if (extractedImageName === 'empty' || extractedImageName === 'localhost.dev.com') {
                 setUploadedImage(null);
             } else {
                 setUploadedImage(imgSrc ?? null);
@@ -273,6 +285,7 @@ function CustomerEditPage({ selectedCustomer, onBack }: { selectedCustomer: GetC
             const reader = new FileReader();
             reader.onload = () => {
                 setUploadedImage(reader.result as string);
+                setHasChanges(true);
             };
             reader.readAsDataURL(file);
         }
@@ -289,8 +302,8 @@ function CustomerEditPage({ selectedCustomer, onBack }: { selectedCustomer: GetC
             <div className="flex flex-col p-10 space-y-8 min-h-screen">
                 <div className="flex justify-between items-center">
                     <div>
-                        <h1 className="text-3xl font-bold">Customer</h1>
-                        <p className="text-gray-600">Selected Customer: {selectedCustomer.name}</p>
+                        <h1 className="text-3xl font-bold">Customer Search</h1>
+                        <p className="text-gray-600">Customer ID: {selectedCustomer.id.toString().padStart(8, '0')}</p>
                         <input name="id" value={selectedCustomer.id} readOnly hidden />
                     </div>
                     <div className="space-x-4">
@@ -336,12 +349,15 @@ function CustomerEditPage({ selectedCustomer, onBack }: { selectedCustomer: GetC
                                     )}
                                 </label>
                                 <Input name="image" disabled={isPending || !isEditing} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" id="image-upload" />
-
                             </div>
                             <div className="col-span-3 grid grid-cols-4 gap-4">
                                 <div className="col-span-2">
                                     <Label>Name</Label>
                                     <Input name="name" value={confirmData.name} onChange={handleChange} disabled={isPending || !isEditing} type="text" required />
+                                </div>
+                                <div className="col-span-2">
+                                    <Label>Father's Name</Label>
+                                    <Input name="fatherName" value={confirmData.fatherName} onChange={handleChange} disabled={isPending || !isEditing} type="text" required />
                                 </div>
                                 <div className="col-span-2">
                                     <Label>NRC No.</Label>
@@ -380,11 +396,7 @@ function CustomerEditPage({ selectedCustomer, onBack }: { selectedCustomer: GetC
                                         <Label>CP No.</Label>
                                         <Input name="cpNo" value={confirmData.cpNo} onClick={() => setIsCpNumberDialogOpen(true)} disabled={isPending || !isEditing} readOnly />
                                     </div>
-                                    <CpNumberDialog
-                                        open={isCpNumberDialogOpen}
-                                        onClose={() => setIsCpNumberDialogOpen(false)}
-                                        onSelect={(cpNo) => setConfirmData(prev => ({ ...prev, cpNo }))}
-                                    />
+                                    <CpNumberDialog open={isCpNumberDialogOpen} onClose={() => setIsCpNumberDialogOpen(false)} onSelect={(cpNo) => setConfirmData(prev => ({ ...prev, cpNo }))} />
                                 </div>
                                 <div className="col-span-2">
                                     <Label>Loan Type</Label>
@@ -458,6 +470,36 @@ function CustomerEditPage({ selectedCustomer, onBack }: { selectedCustomer: GetC
                             <div className="col-span-2">
                                 <Label>Info 5</Label>
                                 <Input name="info5" value={confirmData.info5} onChange={handleChange} disabled={isPending || !isEditing} type="text" />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="text-green-800">Family Information</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="col-span-2">
+                                <Label>Info 1</Label>
+                                <Input name="info6" value={confirmData.info1} onChange={handleChange} disabled={isPending || !isEditing} type="text" />
+                            </div>
+                            <div className="col-span-2">
+                                <Label>Info 2</Label>
+                                <Input name="info7" value={confirmData.info2} onChange={handleChange} disabled={isPending || !isEditing} type="text" />
+                            </div>
+                            <div className="col-span-2">
+                                <Label>Info 3</Label>
+                                <Input name="info8" value={confirmData.info3} onChange={handleChange} disabled={isPending || !isEditing} type="text" />
+                            </div>
+                            <div className="col-span-2">
+                                <Label>Info 4</Label>
+                                <Input name="info9" value={confirmData.info4} onChange={handleChange} disabled={isPending || !isEditing} type="text" />
+                            </div>
+                            <div className="col-span-2">
+                                <Label>Info 5</Label>
+                                <Input name="info10" value={confirmData.info5} onChange={handleChange} disabled={isPending || !isEditing} type="text" />
                             </div>
                         </div>
                     </CardContent>

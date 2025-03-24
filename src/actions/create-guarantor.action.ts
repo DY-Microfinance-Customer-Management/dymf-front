@@ -17,6 +17,7 @@ export async function createGuarantorAction(_: any, formData: FormData): Promise
         birth: formData.get("dateOfBirth")?.toString() ?? '',
         phone_number: formData.get("phone")?.toString() ?? '', 
         email: formData.get("email")?.toString() ?? '',
+        father_name: formData.get("fatherName")?.toString() ?? '',
         gender: formData.get("gender") === 'Male' ? GenderEnum.man : GenderEnum.woman,
         area_number: formData.get("cpNo")?.toString() ?? '',
         loan_type: formData.get("loanType")?.toString()=== 'Special Loan' ? LoanTypeEnum.special_loan : LoanTypeEnum.group_loan,

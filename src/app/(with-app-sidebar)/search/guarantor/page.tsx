@@ -185,6 +185,7 @@ function GuarantorEditPage({ selectedGuarantor, onBack }: { selectedGuarantor: G
         dateOfBirth: selectedGuarantor?.birth ?? new Date("2000-01-01").toISOString().split("T")[0],
         phone: selectedGuarantor?.phone_number ?? '',
         email: selectedGuarantor?.email ?? '',
+        fatherName: selectedGuarantor?.father_name ?? '',
         gender: selectedGuarantor?.gender === 1 ? "Female" : "Male",
         cpNo: selectedGuarantor?.cp_number.area_number ?? '',
         loanType: selectedGuarantor?.loan_type === 1 ? "Group Loan" : "Special Loan",
@@ -225,6 +226,7 @@ function GuarantorEditPage({ selectedGuarantor, onBack }: { selectedGuarantor: G
                 dateOfBirth: new Date("2000-01-01").toISOString().split("T")[0],
                 phone: '',
                 email: '',
+                fatherName: '',
                 gender: 'Male',
                 cpNo: '',
                 loanType: 'Special Loan',
@@ -261,7 +263,7 @@ function GuarantorEditPage({ selectedGuarantor, onBack }: { selectedGuarantor: G
             const imgSrc = selectedGuarantor?.image;
             const extractedImageName = imgSrc?.substring(imgSrc?.lastIndexOf("/") + 1);
 
-            if (extractedImageName === 'empty' || 'localhost.dev.com') {
+            if (extractedImageName === 'empty' || extractedImageName === 'localhost.dev.com') {
                 setUploadedImage(null);
             } else {
                 setUploadedImage(imgSrc ?? null);
@@ -282,6 +284,7 @@ function GuarantorEditPage({ selectedGuarantor, onBack }: { selectedGuarantor: G
             const reader = new FileReader();
             reader.onload = () => {
                 setUploadedImage(reader.result as string);
+                setHasChanges(true);
             };
             reader.readAsDataURL(file);
         }
@@ -345,9 +348,16 @@ function GuarantorEditPage({ selectedGuarantor, onBack }: { selectedGuarantor: G
                                     )}
                                 </label>
                                 <Input name="image" disabled={isPending || !isEditing} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" id="image-upload" />
-
                             </div>
                             <div className="col-span-3 grid grid-cols-4 gap-4">
+                                <div className="col-span-2">
+                                    <Label>Name</Label>
+                                    <Input name="name" value={confirmData.name} onChange={handleChange} disabled={isPending || !isEditing} type="text" required />
+                                </div>
+                                <div className="col-span-2">
+                                    <Label>Father's Name</Label>
+                                    <Input name="fatherName" value={confirmData.fatherName} onChange={handleChange} disabled={isPending || !isEditing} type="text" required />
+                                </div>
                                 <div className="col-span-2">
                                     <Label>Name</Label>
                                     <Input name="name" value={confirmData.name} onChange={handleChange} disabled={isPending || !isEditing} type="text" required />
