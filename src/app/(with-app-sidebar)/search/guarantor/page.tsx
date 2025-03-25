@@ -57,16 +57,17 @@ export default function Page() {
 // Select Guarantor Page
 function SelectGuarantorPage({ onConfirm }: { onConfirm: (guarantor: GetGuarantorSchema) => void }) {
     const [searchQuery, setSearchQuery] = useState("");
+    const [searchNRC, setSearchNRC] = useState("");
     const [guarantors, setGuarantors] = useState<GetGuarantorSchema[]>([]);
     const [loading, setLoading] = useState(true);
     const [nextCursor, setNextCursor] = useState("");
     const [remainingGuarantorCnt, setRemainingGuarantorCnt] = useState<number>(1);
 
-    const fetchGuarantor = (cursor: string, query: string = "") => {
+    const fetchGuarantor = (cursor: string, nameQuery: string = "", nrcQuery: string = "") => {
         setLoading(true);
         let apiUrl = `/api/getGuarantors?cursor=${cursor}`;
-        if (query.trim()) {
-            apiUrl += `&name=${encodeURIComponent(query)}`;
+        if (nameQuery.trim() || nrcQuery.trim()) {
+            apiUrl += `&name=${encodeURIComponent(nameQuery)}&nrcNo=${encodeURIComponent(nrcQuery)}`;
         }
 
         fetch(apiUrl)
@@ -99,7 +100,7 @@ function SelectGuarantorPage({ onConfirm }: { onConfirm: (guarantor: GetGuaranto
 
     const handleSearch = () => {
         setGuarantors([]);
-        fetchGuarantor('', searchQuery);
+        fetchGuarantor('', searchQuery, searchNRC);
     };
 
     const scrollHandler = (event: React.UIEvent<HTMLDivElement>) => {
@@ -121,17 +122,9 @@ function SelectGuarantorPage({ onConfirm }: { onConfirm: (guarantor: GetGuaranto
             <Card className="w-full max-w-3xl">
                 <CardContent>
                     <div className="space-y-4">
-                        <Input
-                            className="w-full mt-6"
-                            placeholder="Search by Guarantor Name"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                        />
-                        <Button
-                            className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                            onClick={handleSearch}
-                            disabled={loading}
-                        >
+                        <Input className="w-full mt-6" placeholder="Search by Guarantor Name" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+                        <Input className="w-full" placeholder="Search by NRC No." value={searchNRC} onChange={(e) => setSearchNRC(e.target.value)} />
+                        <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white" onClick={handleSearch} disabled={loading}>
                             {loading ? "Searching..." : "Search"}
                         </Button>
                     </div>
@@ -174,9 +167,6 @@ function SelectGuarantorPage({ onConfirm }: { onConfirm: (guarantor: GetGuaranto
 }
 
 function GuarantorEditPage({ selectedGuarantor, onBack }: { selectedGuarantor: GetGuarantorSchema; onBack: () => void; }) {
-    // Router
-    const router = useRouter();
-
     // Data Handler
     const [hasChanges, setHasChanges] = useState(false);
     const [confirmData, setConfirmData] = useState({
@@ -249,7 +239,6 @@ function GuarantorEditPage({ selectedGuarantor, onBack }: { selectedGuarantor: G
             toast.error(state?.message);
         } else if (state?.status === 401 || 403) {
             toast.error(state?.message);
-            router.refresh();
         }
     }, [state]);
 
@@ -302,7 +291,7 @@ function GuarantorEditPage({ selectedGuarantor, onBack }: { selectedGuarantor: G
                 <div className="flex justify-between items-center">
                     <div>
                         <h1 className="text-3xl font-bold">Guarantor</h1>
-                        <p className="text-gray-600">Selected Guarantor: {selectedGuarantor.name}</p>
+                        <p className="text-gray-600">Guarantor ID: {selectedGuarantor.id}</p>
                         <input name="id" value={selectedGuarantor.id} readOnly hidden />
                     </div>
                     <div className="space-x-4">

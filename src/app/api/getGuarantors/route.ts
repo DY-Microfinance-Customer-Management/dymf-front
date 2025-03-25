@@ -8,19 +8,18 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const nextCursor = searchParams.get('cursor');
     const name = searchParams.get('name');
+    const nrcNo = searchParams.get('nrcNo');
 
     let apiUrl = `${process.env.API_SERVER_URL}/guarantor`;
 
-    // name이 있을 경우 검색 필터 적용
-    if (name) {
-        apiUrl += `?name=${encodeURIComponent(name)}&take=100`;
+    if (name || nrcNo) {
+        apiUrl += `?name=${encodeURIComponent(name ?? '')}&nrcNo=${encodeURIComponent(nrcNo ?? '')}&take=100`;
     } else if (nextCursor === "") {
         apiUrl += `?order[]=id_ASC&take=6`;
     } else {
         apiUrl += `?cursor=${nextCursor}`;
     }
 
-    // API 요청
     const response = await fetch(apiUrl, {
         method: 'GET',
         headers: {

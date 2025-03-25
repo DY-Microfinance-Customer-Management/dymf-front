@@ -57,16 +57,17 @@ export default function Page() {
 // Select Customer Page
 function SelectCustomerPage({ onConfirm }: { onConfirm: (customer: GetCustomerSchema) => void }) {
     const [searchQuery, setSearchQuery] = useState("");
+    const [searchNRC, setSearchNRC] = useState("");
     const [customers, setCustomers] = useState<GetCustomerSchema[]>([]);
     const [loading, setLoading] = useState(true);
     const [nextCursor, setNextCursor] = useState("");
     const [remainingCustomerCnt, setRemainingCustomerCnt] = useState<number>(1);
 
-    const fetchCustomer = (cursor: string, query: string = "") => {
+    const fetchCustomer = (cursor: string, nameQuery: string = "", nrcQuery: string = "") => {
         setLoading(true);
         let apiUrl = `/api/getCustomers?cursor=${cursor}`;
-        if (query.trim()) {
-            apiUrl += `&name=${encodeURIComponent(query)}`;
+        if (nameQuery.trim() || nrcQuery.trim()) {
+            apiUrl += `&name=${encodeURIComponent(nameQuery)}&nrcNo=${encodeURIComponent(nrcQuery)}`;
         }
 
         fetch(apiUrl)
@@ -90,7 +91,7 @@ function SelectCustomerPage({ onConfirm }: { onConfirm: (customer: GetCustomerSc
                 }
             })
             .finally(() => setLoading(false));
-    }
+    };
 
     useEffect(() => {
         fetchCustomer('');
@@ -99,7 +100,7 @@ function SelectCustomerPage({ onConfirm }: { onConfirm: (customer: GetCustomerSc
 
     const handleSearch = () => {
         setCustomers([]);
-        fetchCustomer('', searchQuery);
+        fetchCustomer('', searchQuery, searchNRC);
     };
 
     const scrollHandler = (event: React.UIEvent<HTMLDivElement>) => {
@@ -122,6 +123,7 @@ function SelectCustomerPage({ onConfirm }: { onConfirm: (customer: GetCustomerSc
                 <CardContent>
                     <div className="space-y-4">
                         <Input className="w-full mt-6" placeholder="Search by Customer Name" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+                        <Input className="w-full" placeholder="Search by NRC No." value={searchNRC} onChange={(e) => setSearchNRC(e.target.value)} />
                         <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white" onClick={handleSearch} disabled={loading}>
                             {loading ? "Searching..." : "Search"}
                         </Button>
