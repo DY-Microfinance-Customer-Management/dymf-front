@@ -18,7 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useEffect, useState } from "react";
 
 // Types
-import { GetCustomerSchema, GetLoanSchema } from "@/types";
+import { GetLoanSchema } from "@/types";
 
 export default function Page() {
     const [selectedLoan, setSelectedLoan] = useState<GetLoanSchema | null>(null);
@@ -111,7 +111,7 @@ function SelectLoanPage({ onConfirm }: { onConfirm: (loan: GetLoanSchema) => voi
             <Card className="w-full max-w-3xl">
                 <CardContent>
                     <div className="space-y-4">
-                        <Input className="w-full mt-6" placeholder="Search by loan Name" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+                        <Input className="w-full mt-6" placeholder="Search by loan no." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
                         <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white" onClick={handleSearch} disabled={loading}>
                             {loading ? "Searching..." : "Search"}
                         </Button>
