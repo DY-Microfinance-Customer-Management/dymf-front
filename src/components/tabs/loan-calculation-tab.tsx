@@ -178,27 +178,27 @@ export default function LoanCalculationTab({ selectedCustomer, setIsCalculated, 
                         <div className="col-span-1 flex items-end gap-2">
                             <div className="flex-1">
                                 <Label>Loan Amount</Label>
-                                <Input type="number" name="loanAmount" value={confirmData.loanAmount ?? ""} onChange={(e) => setConfirmData({ ...confirmData, loanAmount: e.target.value ? Number(e.target.value) : null })} />
+                                <Input className="appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" type="number" name="loanAmount" value={confirmData.loanAmount ?? ""} onChange={(e) => setConfirmData({ ...confirmData, loanAmount: e.target.value ? Number(e.target.value) : null })} />
                             </div>
                             <Label>MMK</Label>
                         </div>
                         <div className="col-span-1 flex items-end gap-2">
                             <div className="flex-1">
                                 <Label>Repayment Cycle</Label>
-                                <Input type="number" name="repaymentCycle" value={confirmData.repaymentCycle ?? ""} onChange={(e) => setConfirmData({ ...confirmData, repaymentCycle: e.target.value ? Number(e.target.value) : null })} />
+                                <Input className="appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" type="number" name="repaymentCycle" value={confirmData.repaymentCycle ?? ""} onChange={(e) => setConfirmData({ ...confirmData, repaymentCycle: e.target.value ? Number(e.target.value) : null })} />
                             </div>
                             <Label>days</Label>
                         </div>
                         <div className="col-span-1 flex items-end gap-2">
                             <div className="flex-1">
                                 <Label>Interest Rate</Label>
-                                <Input type="number" name="interestRate" value={confirmData.interestRate} onChange={(e) => setConfirmData({ ...confirmData, interestRate: Number(e.target.value) })} />
+                                <Input className="appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" type="number" name="interestRate" value={confirmData.interestRate} onChange={(e) => setConfirmData({ ...confirmData, interestRate: Number(e.target.value) })} />
                             </div>
                             <Label>%</Label>
                         </div>
                         <div className="col-span-1">
                             <Label>Number of Repayment</Label>
-                            <Input type="number" name="numberOfRepayment" value={confirmData.numberOfRepayment ?? ""} onChange={(e) => setConfirmData({ ...confirmData, numberOfRepayment: e.target.value ? Number(e.target.value) : null })} />
+                            <Input className="appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" type="number" name="numberOfRepayment" value={confirmData.numberOfRepayment ?? ""} onChange={(e) => setConfirmData({ ...confirmData, numberOfRepayment: e.target.value ? Number(e.target.value) : null })} />
                         </div>
                         <div className="col-span-1">
                             <Label>Repayment Method</Label>

@@ -220,3 +220,15 @@ export interface LoanTransactionSchema {
 	loan: GetLoanSchema;
 	is_overdue: boolean;
 }
+
+export interface GetFixedAssetSchema extends FixedAssetSchema { }
+export type PostFixedAssetSchema = Omit<FixedAssetSchema, 'id'>;
+export interface FixedAssetSchema {
+	id: number;
+	name: string;
+	purchase_date: string;
+	price: number;
+	method_status: boolean;
+	depreciation_period?: number;
+	depreciation_ratio?: number;
+}
