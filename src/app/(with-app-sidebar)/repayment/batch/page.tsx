@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { toast } from "sonner";
 
 // Types
@@ -19,38 +20,38 @@ import { LoanScheduleSchema } from "@/types";
 import { useActionState, useEffect, useState } from "react";
 
 export default function Page() {
-    // Action
     const [state, formAction, isPending] = useActionState(changeScheduleStatusAction, null);
+    const [startDate, setStartDate] = useState(new Date().toISOString().split("T")[0]);
+    const [endDate, setEndDate] = useState(new Date().toISOString().split("T")[0]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [schedules, setSchedules] = useState<LoanScheduleSchema[]>([]);
+    const [totalPages, setTotalPages] = useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [selectedScheduleId, setSelectedScheduleId] = useState<number | null>(null);
+
     useEffect(() => {
         if (state === null) return;
-        
         if (state?.status === 200) {
             toast.success(state?.message);
-            fetchSchedules();
+            fetchSchedules(currentPage);
         } else {
             toast.error(state?.message);
         }
     }, [state]);
-    
-    // Date Handler
-    const today = new Date().toISOString().split("T")[0];
-    const [startDate, setStartDate] = useState(today);
-    const [endDate, setEndDate] = useState(today);
-    
-    // Data Handler
-    const [isLoading, setIsLoading] = useState(false);
-    const [schedules, setSchedules] = useState<LoanScheduleSchema[]>([]);
-    const fetchSchedules = async () => {
+
+    const fetchSchedules = async (page = 1) => {
         setIsLoading(true);
         setSchedules([]);
         try {
-            const response = await fetch(`/api/getSchedules?start_date=${startDate}&end_date=${endDate}`);
+            const response = await fetch(`/api/getSchedules?start_date=${startDate}&end_date=${endDate}&page=${page}`);
             const data = await response.json();
-
             if (data && data.schedules) {
                 setSchedules(data.schedules);
+                setTotalPages(data.totalPages);
+                setCurrentPage(page);
             } else {
                 setSchedules([]);
+                setTotalPages(0);
             }
         } catch (error) {
             console.error("Failed to fetch repayment schedules:", error);
@@ -59,11 +60,29 @@ export default function Page() {
         }
     };
 
-    // Checkbox Handler
-    const [selectedScheduleId, setSelectedScheduleId] = useState<number | null>(null);
     const handleCheckboxChange = (rowId: number) => {
         setSelectedScheduleId(selectedScheduleId === rowId ? null : rowId);
     };
+
+    const renderPagination = () => (
+        <Pagination>
+            <PaginationContent>
+                <PaginationItem>
+                    <PaginationPrevious href="#" onClick={() => currentPage > 1 && fetchSchedules(currentPage - 1)} />
+                </PaginationItem>
+                {[...Array(totalPages)].map((_, i) => (
+                    <PaginationItem key={i}>
+                        <PaginationLink href="#" isActive={i + 1 === currentPage} onClick={() => fetchSchedules(i + 1)}>
+                            {i + 1}
+                        </PaginationLink>
+                    </PaginationItem>
+                ))}
+                <PaginationItem>
+                    <PaginationNext href="#" onClick={() => currentPage < totalPages && fetchSchedules(currentPage + 1)} />
+                </PaginationItem>
+            </PaginationContent>
+        </Pagination>
+    );
 
     return (
         <div className="flex flex-col p-6 space-y-6">
@@ -74,9 +93,7 @@ export default function Page() {
 
                 <Card>
                     <CardHeader>
-                        <CardTitle className="text-green-800">
-                            Search Repayment Schedule
-                        </CardTitle>
+                        <CardTitle className="text-green-800">Search Repayment Schedule</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="col-span-3 grid grid-cols-3 gap-4">
@@ -89,7 +106,7 @@ export default function Page() {
                                 <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
                             </div>
                             <div className="col-span-1 flex justify-end items-end">
-                                <Button className="bg-blue-600 text-white hover:bg-blue-700" onClick={fetchSchedules} disabled={isLoading}>
+                                <Button className="bg-blue-600 text-white hover:bg-blue-700" onClick={() => fetchSchedules(1)} disabled={isLoading}>
                                     {isLoading ? "Searching..." : "Search"}
                                 </Button>
                             </div>
@@ -109,20 +126,18 @@ export default function Page() {
                                     <TableHead>Interest</TableHead>
                                     <TableHead>Total</TableHead>
                                     <TableHead className="text-right">Status</TableHead>
+                                    <TableHead className="text-center">Select</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {isLoading ? (
                                     <TableRow>
-                                        <TableCell colSpan={9} className="text-center py-4">
-                                            Loading...
-                                        </TableCell>
+                                        <TableCell colSpan={10} className="text-center py-4">Loading...</TableCell>
                                     </TableRow>
                                 ) : schedules.length > 0 ? (
                                     schedules.map((schedule, index) => {
                                         const today = new Date().toISOString().split("T")[0];
                                         const paymentDate = schedule.payment_date.split("T")[0];
-
                                         const isPastDate = paymentDate < today;
                                         const isToday = paymentDate === today;
                                         const isPaid = schedule.loan_payment_status;
@@ -130,9 +145,7 @@ export default function Page() {
 
                                         return (
                                             <TableRow key={index}>
-                                                <TableCell className="font-medium">
-                                                    {schedule.payment_date.split("T")[0]}
-                                                </TableCell>
+                                                <TableCell className="font-medium">{paymentDate}</TableCell>
                                                 <TableCell>{schedule.loan.id.toString().padStart(8, '0')}</TableCell>
                                                 <TableCell>{schedule.loan.customer.name}</TableCell>
                                                 <TableCell>{schedule.loan.customer.nrc_number}</TableCell>
@@ -159,16 +172,14 @@ export default function Page() {
                                     })
                                 ) : (
                                     <TableRow>
-                                        <TableCell colSpan={9} className="text-center py-4">
-                                            No records found.
-                                        </TableCell>
+                                        <TableCell colSpan={10} className="text-center py-4">No records found.</TableCell>
                                     </TableRow>
                                 )}
                             </TableBody>
                         </Table>
+                        {totalPages > 1 && <div className="mt-6 flex justify-center">{renderPagination()}</div>}
+                        <input name="selectedSchedule" value={selectedScheduleId ? JSON.stringify({ id: selectedScheduleId, status: schedules.find(s => s.id === selectedScheduleId)?.loan_payment_status }) : ""} hidden readOnly />
                     </CardContent>
-
-                    <input name="selectedSchedule" value={selectedScheduleId ? JSON.stringify({ id: selectedScheduleId, status: schedules.find(s => s.id === selectedScheduleId)?.loan_payment_status }) : ""} hidden readOnly />
                 </Card>
             </form>
         </div>
@@ -209,7 +220,7 @@ const ScheduleActionButton = ({ selectedSchedule, isPending }: {
     }
 
     return (
-        <Button type="submit" disabled={isDisabled || isPending} className={`${buttonClass} w-full py-2`} >
+        <Button type="submit" disabled={isDisabled || isPending} className={`${buttonClass} w-full py-2`}>
             {isPending ? "Processing..." : buttonText}
         </Button>
     );

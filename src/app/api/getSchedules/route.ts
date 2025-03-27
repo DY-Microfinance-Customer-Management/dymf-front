@@ -8,31 +8,23 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const start_date = searchParams.get('start_date');
     const end_date = searchParams.get('end_date');
+    const page = searchParams.get('page');
 
-    const response = await fetch(`${process.env.API_SERVER_URL}/loan/schedule?order=id_ASC&get_start_date=${start_date}&get_last_date=${end_date}&take=1000`, {
+    const response = await fetch(`${process.env.API_SERVER_URL}/loan/schedule?page_size=5&get_start_date=${start_date}&get_last_date=${end_date}&page=${page}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${credentials}`
         },
     });
-
+    
     if (!response.ok) {
         return NextResponse.json(null);
     }
-
+    
     const data = await response.json();
-    let schedules = data.data;
+    const totalPages = data.total_pages;
+    const schedules = data.data;
 
-    schedules.sort((a: any, b: any) => {
-        const dateA = new Date(a.payment_date).getTime();
-        const dateB = new Date(b.payment_date).getTime();
-
-        if (dateA !== dateB) {
-            return dateA - dateB;
-        }
-        return a.id - b.id;
-    });
-
-    return NextResponse.json({ schedules });
+    return NextResponse.json({ schedules, totalPages });
 }
