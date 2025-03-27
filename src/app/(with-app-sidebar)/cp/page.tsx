@@ -12,6 +12,9 @@ import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
 
+// Context
+import { useUser } from "@/context/UserProvider"
+
 // React
 import { useActionState, useEffect, useState, Fragment } from "react";
 import { useRouter } from "next/navigation";
@@ -26,6 +29,9 @@ export default function Page() {
     const [expandedCP, setExpandedCP] = useState<number | null>(null);
     const [modifiedMap, setModifiedMap] = useState<{ [cpId: number]: boolean }>({});
     const [dialogOpenCP, setDialogOpenCP] = useState<number | null>(null);
+
+    // Context
+    const { username, userRole } = useUser();
 
     // Server Action
     const router = useRouter();
@@ -65,27 +71,27 @@ export default function Page() {
         setCpNumbers(prev => {
             return prev.map(cp => {
                 if (cp.id !== cpId) return cp;
-    
+
                 const updatedLoanOfficers = checked
                     ? [...cp.loan_officers, { id: officerId } as GetLoanOfficerSchema]
                     : cp.loan_officers.filter(officer => officer.id !== officerId);
-    
+
                 return {
                     ...cp,
                     loan_officers: updatedLoanOfficers
                 };
             });
         });
-    
+
         // Save Button disable Handler
         setModifiedMap(prev => {
             const updatedLoanOfficers = checked
                 ? [...(cpNumbers.find(cp => cp.id === cpId)?.loan_officers || []), { id: officerId } as GetLoanOfficerSchema]
                 : (cpNumbers.find(cp => cp.id === cpId)?.loan_officers.filter(officer => officer.id !== officerId) || []);
-    
+
             const originalLoanOfficers = tempCpNumbers.find(cp => cp.id === cpId)?.loan_officers || [];
             const isSameAsOriginal = JSON.stringify(updatedLoanOfficers) === JSON.stringify(originalLoanOfficers);
-    
+
             return {
                 ...prev,
                 [cpId]: !isSameAsOriginal
@@ -137,25 +143,27 @@ export default function Page() {
                 <div className="flex justify-between items-center">
                     <h1 className="text-2xl font-bold">Check Point Management</h1>
                     <div className="space-x-4">
-                        <Dialog>
-                            <DialogTrigger asChild>
-                                <Button className="bg-blue-600 hover:bg-blue-700 text-white">Add</Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                                <DialogHeader>
-                                    <DialogTitle>Add CP No.</DialogTitle>
-                                </DialogHeader>
-                                <form id="createCheckPointForm" action={formAction}>
-                                    <div className="space-y-2">
-                                        <Input name="area_number" disabled={isPending} type="text" placeholder="Enter CP No." required />
-                                        <Input name="description" disabled={isPending} type="text" placeholder="Enter Description" required />
-                                    </div>
-                                </form>
-                                <DialogFooter>
-                                    <Button type="submit" form="createCheckPointForm">Save</Button>
-                                </DialogFooter>
-                            </DialogContent>
-                        </Dialog>
+                        {userRole === 0 && (
+                            <Dialog>
+                                <DialogTrigger asChild>
+                                    <Button className="bg-blue-600 hover:bg-blue-700 text-white">Add</Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <DialogHeader>
+                                        <DialogTitle>Add CP No.</DialogTitle>
+                                    </DialogHeader>
+                                    <form id="createCheckPointForm" action={formAction}>
+                                        <div className="space-y-2">
+                                            <Input name="area_number" disabled={isPending} type="text" placeholder="Enter CP No." required />
+                                            <Input name="description" disabled={isPending} type="text" placeholder="Enter Description" required />
+                                        </div>
+                                    </form>
+                                    <DialogFooter>
+                                        <Button type="submit" form="createCheckPointForm">Save</Button>
+                                    </DialogFooter>
+                                </DialogContent>
+                            </Dialog>
+                        )}
                         {/* TODO: Delete Function Update - Check if loan officer is assigned to that certain cp number and also if cp number is assigned to a Loan */}
                         {/* <Button className="bg-red-600 hover:bg-red-700 text-white" disabled={!selectedCP} onClick={handleDelete}>Delete</Button> */}
                     </div>
@@ -182,9 +190,11 @@ export default function Page() {
                                                 .map(officer => officer.name)
                                                 .join(", ")
                                             : "Not Assigned"}
-                                        <button onClick={() => setExpandedCP(expandedCP === cp.id ? null : cp.id)}>
-                                            {expandedCP === cp.id ? <ChevronUp /> : <ChevronDown />}
-                                        </button>
+                                        {userRole === 0 && (
+                                            <button onClick={() => setExpandedCP(expandedCP === cp.id ? null : cp.id)}>
+                                                {expandedCP === cp.id ? <ChevronUp /> : <ChevronDown />}
+                                            </button>
+                                        )}
                                     </TableCell>
                                 </TableRow>
                                 {expandedCP === cp.id && (

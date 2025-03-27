@@ -76,8 +76,6 @@ async function rotateAccessToken(refreshToken: string) {
             body: JSON.stringify({refreshToken: refreshToken}),
         });
         
-        console.log(response.statusText)
-
         if (!response.ok) {
             console.error("Failed to rotate access token:", response.status);
             return false;

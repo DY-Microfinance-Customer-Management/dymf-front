@@ -19,6 +19,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+// Context
+import { useUser } from "@/context/UserProvider"
+
 // React
 import { useActionState, useEffect, useState } from "react";
 
@@ -155,7 +158,6 @@ function SelectLoanPage({ onConfirm }: { onConfirm: (loan: GetLoanSchema) => voi
                                     </TableRow>
                                 )}
                             </TableBody>
-
                         </Table>
                     </ScrollArea>
                 </CardContent>
@@ -165,6 +167,9 @@ function SelectLoanPage({ onConfirm }: { onConfirm: (loan: GetLoanSchema) => voi
 }
 
 function LoanDetailsPage({ selectedLoan, onBack }: { selectedLoan: GetLoanSchema; onBack: () => void; }) {
+    // Context
+    const { username, userRole } = useUser();
+
     // Tab Handler
     const [activeTab, setActiveTab] = useState("loanCalculation");
 
@@ -193,25 +198,31 @@ function LoanDetailsPage({ selectedLoan, onBack }: { selectedLoan: GetLoanSchema
                         <p className="text-gray-600">CP No.: {selectedLoan.customer.cp_number.area_number}</p>
                     </div>
                     <div className="space-x-4">
-                        <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                                <Button type="button" disabled={isPending} className="bg-red-600 hover:bg-red-700 text-white">Delete</Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                                <AlertDialogHeader>
-                                    <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                        Are you sure you want to delete this loan? This action cannot be undone.
-                                    </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction asChild>
-                                        <Button form="loanForm" type="submit" disabled={isPending} className="bg-red-600 hover:bg-red-700 text-white">Confirm</Button>
-                                    </AlertDialogAction>
-                                </AlertDialogFooter>
-                            </AlertDialogContent>
-                        </AlertDialog>
+                        {userRole === 0 && (
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <Button type="button" disabled={isPending} className="bg-red-600 hover:bg-red-700 text-white">
+                                        Delete
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            Are you sure you want to delete this loan? This action cannot be undone.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction asChild>
+                                            <Button form="loanForm" type="submit" disabled={isPending} className="bg-red-600 hover:bg-red-700 text-white">
+                                                Confirm
+                                            </Button>
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                        )}
 
                         <Button variant="secondary" onClick={onBack}>Back</Button>
                     </div>

@@ -13,6 +13,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 
+// Context
+import { useUser } from "@/context/UserProvider";
+
 // React
 import { useActionState, useEffect, useState } from "react";
 
@@ -29,6 +32,9 @@ export default function Page() {
     const [isDecliningBalance, setIsDecliningBalance] = useState(false);
     const [depreciationPeriod, setDepreciationPeriod] = useState('');
     const [depreciationRatio, setDepreciationRatio] = useState('');
+
+    // Context
+    const { userRole } = useUser();
 
     useEffect(() => {
         if (state === null) return;
@@ -151,9 +157,11 @@ export default function Page() {
                     <CardHeader>
                         <div className="flex justify-between items-center">
                             <CardTitle className="text-green-800">Fixed Asset List</CardTitle>
-                            <div className="w-[150px]">
-                                <Button onClick={handleDeleteAsset} disabled={!selectedAssetId} className="mt-4 bg-red-600 hover:bg-red-700 text-white w-full">Delete Selected</Button>
-                            </div>
+                            {userRole === 0 && (
+                                <div className="w-[150px]">
+                                    <Button onClick={handleDeleteAsset} disabled={!selectedAssetId} className="mt-4 bg-red-600 hover:bg-red-700 text-white w-full">Delete Selected</Button>
+                                </div>
+                            )}
                         </div>
                     </CardHeader>
                     <CardContent>
@@ -161,7 +169,9 @@ export default function Page() {
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead className="w-[50px] text-center">Select</TableHead>
+                                        {userRole === 0 && (
+                                            <TableHead className="w-[50px] text-center">Select</TableHead>
+                                        )}
                                         <TableHead>Item</TableHead>
                                         <TableHead className="text-center">Purchase Date</TableHead>
                                         <TableHead className="text-center">Value</TableHead>
@@ -172,15 +182,11 @@ export default function Page() {
                                     {assets.length > 0 ? (
                                         assets.map((asset: any) => (
                                             <TableRow key={asset.id} className="hover:bg-gray-100">
-                                                <TableCell className="text-center">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={selectedAssetId === asset.id}
-                                                        onChange={() =>
-                                                            setSelectedAssetId(prev => (prev === asset.id ? null : asset.id))
-                                                        }
-                                                    />
-                                                </TableCell>
+                                                {userRole === 0 && (
+                                                    <TableCell className="text-center">
+                                                        <input type="checkbox" checked={selectedAssetId === asset.id} onChange={() => setSelectedAssetId(prev => (prev === asset.id ? null : asset.id))} />
+                                                    </TableCell>
+                                                )}
                                                 <TableCell>{asset.name}</TableCell>
                                                 <TableCell className="text-center">
                                                     {asset.purchase_date.split("T")[0]}
@@ -195,7 +201,7 @@ export default function Page() {
                                         ))
                                     ) : (
                                         <TableRow>
-                                            <TableCell colSpan={5} className="text-center py-2">
+                                            <TableCell colSpan={userRole === 0 ? 5 : 4} className="text-center py-2">
                                                 No assets found.
                                             </TableCell>
                                         </TableRow>

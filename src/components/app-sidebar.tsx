@@ -1,11 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { useState, useEffect } from "react";
 import Image from "next/image"
 import Link from "next/link"
-
-import { jwtDecode } from "jwt-decode";
 
 import { Users, PenLine, Calculator, Folders, Search, CalendarClock, Calendar, MapPinCheckInside, HousePlus, UserRoundPlus } from "lucide-react"
 
@@ -14,7 +11,7 @@ import { NavManagements } from "@/components/nav-management"
 import { NavUser } from "@/components/nav-user"
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail, SidebarTrigger } from "@/components/ui/sidebar"
 
-import { JwtData } from "@/types";
+import { useUser } from "@/context/UserProvider"
 
 const data = {
 	navMain: [
@@ -22,20 +19,10 @@ const data = {
 			title: "Registration",
 			url: "#",
 			icon: PenLine,
-			// isActive: true, // Always Open 
 			items: [
-				{
-					title: "Customer",
-					url: "/registration/customer",
-				},
-				{
-					title: "Guarantor",
-					url: "/registration/guarantor",
-				},
-				{
-					title: "Loan",
-					url: "/registration/loan",
-				},
+				{ title: "Customer", url: "/registration/customer" },
+				{ title: "Guarantor", url: "/registration/guarantor" },
+				{ title: "Loan", url: "/registration/loan" },
 			],
 		},
 		{
@@ -43,18 +30,9 @@ const data = {
 			url: "#",
 			icon: Search,
 			items: [
-				{
-					title: "Customer",
-					url: "/search/customer",
-				},
-				{
-					title: "Guarantor",
-					url: "/search/guarantor",
-				},
-				{
-					title: "Loan",
-					url: "/search/loan",
-				},
+				{ title: "Customer", url: "/search/customer" },
+				{ title: "Guarantor", url: "/search/guarantor" },
+				{ title: "Loan", url: "/search/loan" },
 			],
 		},
 		{
@@ -62,14 +40,8 @@ const data = {
 			url: "#",
 			icon: Calendar,
 			items: [
-				{
-					title: "Single",
-					url: "/repayment/single",
-				},
-				{
-					title: "Batch",
-					url: "/repayment/batch",
-				},
+				{ title: "Single", url: "/repayment/single" },
+				{ title: "Batch", url: "/repayment/batch" },
 			],
 		},
 		{
@@ -77,88 +49,52 @@ const data = {
 			url: "#",
 			icon: CalendarClock,
 			items: [
-				{
-					title: "Registration",
-					url: "/overdue/registration",
-				},
-				{
-					title: "Management",
-					url: "/overdue/management",
-				},
-				{
-					title: "Search",
-					url: "/overdue/search",
-				},
+				{ title: "Registration", url: "/overdue/registration" },
+				{ title: "Management", url: "/overdue/management" },
+				{ title: "Search", url: "/overdue/search" },
 			],
 		},
 	],
 	menus: [
-		{
-			name: "Check Point",
-			url: "/cp",
-			icon: MapPinCheckInside,
-		},
-		{
-			name: "Report",
-			url: "/report",
-			icon: Folders,
-		},
-		{
-			name: "HR",
-			url: "/hr",
-			icon: Users,
-		},
-		{
-			name: "Fixed Assets",
-			url: "/fixed-assets",
-			icon: HousePlus,
-		},
-		{
-			name: "Calculator",
-			url: "/calculator",
-			icon: Calculator,
-		},
-		{
-			name: "User",
-			url: "/user",
-			icon: UserRoundPlus,
-		},
+		{ name: "Check Point", url: "/cp", icon: MapPinCheckInside },
+		{ name: "Report", url: "/report", icon: Folders },
+		{ name: "HR", url: "/hr", icon: Users },
+		{ name: "Fixed Assets", url: "/fixed-assets", icon: HousePlus },
+		{ name: "Calculator", url: "/calculator", icon: Calculator },
+		{ name: "User", url: "/user", icon: UserRoundPlus },
 	],
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-	const [username, setUsername] = useState<string>('');
-	const [userRole, setUserRole] = useState<number>(0);
+	const { username, userRole } = useUser();
 
-	useEffect(() => {
-		async function fetchToken() {
-			try {
-				const response = await fetch('/api/auth/accessToken');
-				const data = await response.json();
-				if (data.token) {
-					const decoded: JwtData = jwtDecode(data.token);
-					setUsername(decoded.userName.replace(/\b[a-z]/, letter => letter.toUpperCase()));
-					setUserRole(decoded.role);
-				}
-			} catch (error) {
-				console.error("Failed to fetch token:", error);
-			}
+	const filteredNavMain = data.navMain.map(nav => {
+		if (nav.title === "Overdue") {
+			return {
+				...nav,
+				items: nav.items.filter(item =>
+					userRole === 0 || item.title !== "Registration"
+				),
+			};
 		}
+		return nav;
+	});
 
-		fetchToken();
-	}, []);
+	const filteredMenus = data.menus.filter(
+		menu => userRole !== 1 || !["User", "HR", "Report"].includes(menu.name)
+	);
 
 	return (
 		<Sidebar collapsible="icon" {...props}>
 			<Link href="/home">
 				<SidebarHeader className="pb-0">
-					<Image src="/icon.png" width={35} height={40} alt="Logo" style={{ width: 40, height: "auto" }} />
+					<Image src="/icon.png" width={35} height={40} alt="Logo" style={{ width: 40, height: "auto" }} priority />
 				</SidebarHeader>
 			</Link>
 
 			<SidebarContent>
-				<NavMain items={data.navMain} />
-				<NavManagements menus={data.menus} />
+				<NavMain items={filteredNavMain} />
+				<NavManagements menus={filteredMenus} />
 			</SidebarContent>
 
 			<SidebarTrigger className="ml-2.5" />
