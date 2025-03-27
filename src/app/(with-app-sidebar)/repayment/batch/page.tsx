@@ -64,25 +64,50 @@ export default function Page() {
         setSelectedScheduleId(selectedScheduleId === rowId ? null : rowId);
     };
 
-    const renderPagination = () => (
-        <Pagination>
-            <PaginationContent>
-                <PaginationItem>
-                    <PaginationPrevious href="#" onClick={() => currentPage > 1 && fetchSchedules(currentPage - 1)} />
-                </PaginationItem>
-                {[...Array(totalPages)].map((_, i) => (
-                    <PaginationItem key={i}>
-                        <PaginationLink href="#" isActive={i + 1 === currentPage} onClick={() => fetchSchedules(i + 1)}>
-                            {i + 1}
-                        </PaginationLink>
+    const renderPagination = () => {
+        const pages = [];
+        const maxPagesToShow = 5;
+
+        if (totalPages <= maxPagesToShow) {
+            for (let i = 1; i <= totalPages; i++) {
+                pages.push(i);
+            }
+        } else {
+            if (currentPage <= 3) {
+                pages.push(1, 2, 3, 4, '...', totalPages);
+            } else if (currentPage >= totalPages - 2) {
+                pages.push(1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+            } else {
+                pages.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
+            }
+        }
+
+        return (
+            <Pagination>
+                <PaginationContent>
+                    <PaginationItem>
+                        <PaginationPrevious href="#" onClick={() => currentPage > 1 && fetchSchedules(currentPage - 1)} />
                     </PaginationItem>
-                ))}
-                <PaginationItem>
-                    <PaginationNext href="#" onClick={() => currentPage < totalPages && fetchSchedules(currentPage + 1)} />
-                </PaginationItem>
-            </PaginationContent>
-        </Pagination>
-    );
+                    {pages.map((page, i) =>
+                        page === '...' ? (
+                            <PaginationItem key={`ellipsis-${i}`}>
+                                <span className="px-2 text-muted-foreground">...</span>
+                            </PaginationItem>
+                        ) : (
+                            <PaginationItem key={page}>
+                                <PaginationLink href="#" isActive={page === currentPage} onClick={() => fetchSchedules(Number(page))}>
+                                    {page}
+                                </PaginationLink>
+                            </PaginationItem>
+                        )
+                    )}
+                    <PaginationItem>
+                        <PaginationNext href="#" onClick={() => currentPage < totalPages && fetchSchedules(currentPage + 1)} />
+                    </PaginationItem>
+                </PaginationContent>
+            </Pagination>
+        );
+    };
 
     return (
         <div className="flex flex-col p-6 space-y-6">
