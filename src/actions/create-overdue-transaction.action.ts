@@ -23,10 +23,10 @@ export async function createOverdueTransactionAction(_: any, formData: FormData)
     }
 
     const data = {
-        received_principal: receivedPrincipal,
-        received_interest: receivedInterest,
-        received_overdue_interest: receivedOverdueInterest,
-        overdue_interest: 0.28
+        received_principal: Number(receivedPrincipal),
+        received_interest: Number(receivedInterest),
+        received_overdue_interest: Number(receivedOverdueInterest),
+        overdue_interest_rate: 0.28
     }
 
     const response = await fetch(`${process.env.API_SERVER_URL}/loan/overdue_transaction/${loanId}`, {
@@ -38,6 +38,9 @@ export async function createOverdueTransactionAction(_: any, formData: FormData)
         body: JSON.stringify(data),
     });
 
+    const res = await response.json()
+    console.log(res)
+
     if (!response.ok) {
         const status = response.status;
         const statusText = response.statusText;
@@ -46,6 +49,11 @@ export async function createOverdueTransactionAction(_: any, formData: FormData)
             return {
                 status: status,
                 message: 'You cannot enter a value before due date.'
+            }
+        } else if (status === 404) {
+            return {
+                status: status,
+                message: 'Please check the values. Values cannot be bigger than the debt amount.'
             }
         }
 
