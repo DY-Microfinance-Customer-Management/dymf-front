@@ -17,6 +17,9 @@ import { ChevronDown } from "lucide-react";
 // Types
 import { GetCustomerSchema } from "@/types";
 
+// Loan Calculation
+import LoanCalculator from "@/util/loan-calculator";
+
 // Loan Calculation Component
 export default function LoanCalculationTab({ selectedCustomer, setIsCalculated, confirmData, setConfirmData }: {
     selectedCustomer: GetCustomerSchema;
@@ -32,11 +35,10 @@ export default function LoanCalculationTab({ selectedCustomer, setIsCalculated, 
     };
     setConfirmData: (data: any) => void;
 }) {
-    const [schedule, setSchedule] = useState<{ date: string; principal: number; interest: number; total: number; balance: number }[]>([]);
+    const [schedule, setSchedule] = useState<any[]>([]);
     const [loanOfficer, setLoanOfficer] = useState('-');
     const [assignedLoanOfficer, setAssignedLoanOfficer] = useState<number | null>(null);
 
-    // Calculate Button Handler
     const isCalculateDisabled =
         confirmData.loanAmount === null ||
         confirmData.repaymentCycle === null ||
@@ -48,7 +50,6 @@ export default function LoanCalculationTab({ selectedCustomer, setIsCalculated, 
         setIsCalculated(false);
     }, [confirmData]);
 
-    // Loan Officer Data Handler
     const [availableLoanOfficers, setAvailableLoanOfficers] = useState<{ id: number, name: string }[]>([]);
     useEffect(() => {
         fetch(`/api/getAvailableLoanOfficers?cpNumber=${selectedCustomer.cp_number.id}`)
@@ -69,53 +70,26 @@ export default function LoanCalculationTab({ selectedCustomer, setIsCalculated, 
     };
 
     const calculateSchedule = () => {
-        if (
-            confirmData.loanAmount === null ||
-            confirmData.repaymentCycle === null ||
-            confirmData.numberOfRepayment === null ||
-            confirmData.interestRate === null
-        ) return;
+        const { loanAmount, repaymentCycle, interestRate, numberOfRepayment, repaymentMethod } = confirmData;
+        if (!loanAmount || !repaymentCycle || !interestRate || !numberOfRepayment) return;
 
-        const result = [];
-        const loanAmount = confirmData.loanAmount;
-        const numberOfRepayment = confirmData.numberOfRepayment;
-        const interestRate = confirmData.interestRate;
-        const repaymentCycle = confirmData.repaymentCycle;
-
-        if (loanAmount <= 0 || numberOfRepayment <= 0 || interestRate <= 0 || repaymentCycle <= 0) return;
-
-        const monthlyPrincipal = Math.floor(loanAmount / numberOfRepayment);
-        let remainingBalance = loanAmount;
-
-        for (let i = 1; i <= numberOfRepayment; i++) {
-            const interest = Math.floor((remainingBalance * (interestRate / 100)) / 12);
-            const totalPayment = monthlyPrincipal + interest;
-            remainingBalance -= monthlyPrincipal;
-
-            result.push({
-                date: calculateDate(new Date(), repaymentCycle, i),
-                principal: monthlyPrincipal,
-                interest: interest,
-                total: totalPayment,
-                balance: remainingBalance,
-            });
+        let result = [];
+        if (repaymentMethod === "Equal") {
+            result = LoanCalculator.equalPayment(loanAmount, new Date(), repaymentCycle, interestRate / 100, numberOfRepayment);
+        } else if (repaymentMethod === "Equal Principal") {
+            result = LoanCalculator.equalPrincipalPayment(loanAmount, new Date(), repaymentCycle, interestRate / 100, numberOfRepayment);
+        } else if (repaymentMethod === "Bullet") {
+            result = LoanCalculator.bulletPayment(loanAmount, new Date(), repaymentCycle, interestRate / 100, numberOfRepayment);
         }
 
         setSchedule(result);
         setIsCalculated(true);
     };
 
-    const calculateDate = (startDate: Date, cycle: number, index: number) => {
-        const nextDate = new Date(startDate);
-        nextDate.setDate(startDate.getDate() + cycle * index);
-        return nextDate.toISOString().split("T")[0];
-    };
-
     const calculateTotals = () => {
-        const totalPrincipal = schedule.reduce((sum, row) => sum + row.principal, 0);
-        const totalInterest = schedule.reduce((sum, row) => sum + row.interest, 0);
-        const totalPayment = schedule.reduce((sum, row) => sum + row.total, 0);
-
+        const totalPrincipal = schedule.reduce((sum, row) => sum + row.Principal, 0);
+        const totalInterest = schedule.reduce((sum, row) => sum + row.Interest, 0);
+        const totalPayment = schedule.reduce((sum, row) => sum + row.Total, 0);
         return { totalPrincipal, totalInterest, totalPayment };
     };
 
@@ -226,41 +200,43 @@ export default function LoanCalculationTab({ selectedCustomer, setIsCalculated, 
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Payment Date</TableHead>
-                                <TableHead>Principal</TableHead>
-                                <TableHead>Interest</TableHead>
-                                <TableHead>Total</TableHead>
-                                <TableHead>Remaining Balance</TableHead>
+                                <TableHead className="text-center">Principal</TableHead>
+                                <TableHead className="text-center">Interest</TableHead>
+                                <TableHead className="text-center">Total</TableHead>
+                                <TableHead className="text-right">Remaining Balance</TableHead>
                             </TableRow>
                         </TableHeader>
                         {schedule.length > 0 && (
                             <TableBody>
                                 {schedule.map((row, index) => (
                                     <TableRow key={index}>
-                                        <TableCell>{row.date}</TableCell>
-                                        <TableCell className="text-right">
-                                            {row.principal.toLocaleString()}
+                                        <TableCell>
+                                            {row.PaymentDate}
+                                        </TableCell>
+                                        <TableCell className="text-center">
+                                            {row.Principal.toLocaleString()}
+                                        </TableCell>
+                                        <TableCell className="text-center">
+                                            {row.Interest.toLocaleString()}
+                                        </TableCell>
+                                        <TableCell className="text-center">
+                                            {row.Total.toLocaleString()}
                                         </TableCell>
                                         <TableCell className="text-right">
-                                            {row.interest.toLocaleString()}
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            {row.total.toLocaleString()}
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            {row.balance.toLocaleString()}
+                                            {row.RemainingBalance.toLocaleString()}
                                         </TableCell>
                                     </TableRow>
                                 ))}
                                 {schedule.length > 0 && (
                                     <TableRow className="bg-gray-100 font-bold">
                                         <TableCell>Total</TableCell>
-                                        <TableCell className="text-right">
+                                        <TableCell className="text-center">
                                             {totals.totalPrincipal.toLocaleString()}
                                         </TableCell>
-                                        <TableCell className="text-right">
+                                        <TableCell className="text-center">
                                             {totals.totalInterest.toLocaleString()}
                                         </TableCell>
-                                        <TableCell className="text-right">
+                                        <TableCell className="text-center">
                                             {totals.totalPayment.toLocaleString()}
                                         </TableCell>
                                         <TableCell />

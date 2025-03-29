@@ -41,6 +41,7 @@ export async function middleware(request: NextRequest) {
         }
     } else if (refreshToken) {
         const success = await rotateAccessToken(refreshToken);
+        console.log(1)
         if (!success) {
             console.log("Token rotation failed. Redirecting to login.");
             cookieStore.delete('access_token');

@@ -14,48 +14,56 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 // Icons
 import { ChevronDown } from "lucide-react";
 
+// Loan Calculation
+import LoanCalculator from "@/util/loan-calculator";
+
 export default function Home() {
 	const [principal, setPrincipal] = useState<number>(0);
 	const [interestRate, setInterestRate] = useState<number>(0);
 	const [repaymentCount, setRepaymentCount] = useState<number>(0);
 	const [repaymentCycle, setRepaymentCycle] = useState<number>(0);
-	const [schedule, setSchedule] = useState<{ date: string; principal: number; interest: number; total: number; balance: number }[]>([]);
-
-	const calculateDate = (startDate: Date, cycle: number, index: number) => {
-		const nextDate = new Date(startDate);
-		nextDate.setDate(startDate.getDate() + cycle * index);
-		return nextDate.toISOString().split("T")[0];
-	};
-
-	const calculateSchedule = () => {
-		const result = [];
-		const monthlyPrincipal = Math.floor(principal / repaymentCount);
-		let remainingBalance = principal;
-
-		for (let i = 1; i <= repaymentCount; i++) {
-			const interest = Math.floor((remainingBalance * (interestRate / 100)) / 12);
-			const totalPayment = monthlyPrincipal + interest;
-			remainingBalance -= monthlyPrincipal;
-
-			result.push({
-				date: calculateDate(new Date(), repaymentCycle, i),
-				principal: monthlyPrincipal,
-				interest: interest,
-				total: totalPayment,
-				balance: remainingBalance,
-			});
-		}
-		setSchedule(result);
-	};
-
+	const [schedule, setSchedule] = useState<any[]>([]);
 	const [loanType, setLoanType] = useState('Equal');
+
 	const handleLoanType = (value: string) => {
 		setLoanType(value);
 	};
 
-	const totalPrincipal = schedule.reduce((sum, row) => sum + row.principal, 0);
-	const totalInterest = schedule.reduce((sum, row) => sum + row.interest, 0);
-	const totalPayment = schedule.reduce((sum, row) => sum + row.total, 0);
+	const calculateSchedule = () => {
+		if (!principal || !interestRate || !repaymentCount || !repaymentCycle) return;
+
+		let result = [];
+		if (loanType === "Equal") {
+			result = LoanCalculator.equalPayment(principal, new Date(), repaymentCycle, interestRate / 100, repaymentCount);
+		} else if (loanType === "Equal Principal") {
+			result = LoanCalculator.equalPrincipalPayment(principal, new Date(), repaymentCycle, interestRate / 100, repaymentCount);
+		} else if (loanType === "Bullet") {
+			result = LoanCalculator.bulletPayment(principal, new Date(), repaymentCycle, interestRate / 100, repaymentCount);
+		}
+
+		setSchedule(result);
+	};
+
+	const totalPrincipal = schedule.reduce((sum, row) => sum + row.Principal, 0);
+	const totalInterest = schedule.reduce((sum, row) => sum + row.Interest, 0);
+	const totalPayment = schedule.reduce((sum, row) => sum + row.Total, 0);
+
+	// Input Tag Handler
+	const [principalText, setPrincipalText] = useState('');
+	const handlePrincipalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const raw = e.target.value.replace(/,/g, '');
+		if (raw === '') {
+			setPrincipalText('');
+			setPrincipal(0);
+			return;
+		}
+
+		if (!/^\d*$/.test(raw)) return;
+
+		const number = Number(raw);
+		setPrincipalText(number.toLocaleString());
+		setPrincipal(number);
+	};
 
 	return (
 		<div className="flex flex-col p-10 space-y-8 min-h-screen">
@@ -73,35 +81,25 @@ export default function Home() {
 						<div className="space-y-4">
 							<div className="flex flex-col space-y-1">
 								<Label>Principal</Label>
+								{/* <Input className="appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" type="number" onChange={(e) => setPrincipal(Number(e.target.value))} /> */}
 								<Input
-									className="w-full appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-									type="number"
-									onChange={(e) => setPrincipal(Number(e.target.value))}
+									type="text"
+									value={principalText}
+									onChange={handlePrincipalChange}
+									className="text-right"
 								/>
 							</div>
 							<div className="flex flex-col space-y-1">
 								<Label>Interest Rate (%)</Label>
-								<Input
-									className="w-full appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-									type="number"
-									onChange={(e) => setInterestRate(Number(e.target.value))}
-								/>
-							</div>
-							<div className="flex flex-col space-y-1">
-								<Label>Number of Repayments</Label>
-								<Input
-									className="w-full appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-									type="number"
-									onChange={(e) => setRepaymentCount(Number(e.target.value))}
-								/>
+								<Input className="appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" type="number" onChange={(e) => setInterestRate(Number(e.target.value))} />
 							</div>
 							<div className="flex flex-col space-y-1">
 								<Label>Repayment Cycle (days)</Label>
-								<Input
-									className="w-full appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-									type="number"
-									onChange={(e) => setRepaymentCycle(Number(e.target.value))}
-								/>
+								<Input className="appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" type="number" onChange={(e) => setRepaymentCycle(Number(e.target.value))} />
+							</div>
+							<div className="flex flex-col space-y-1">
+								<Label>Number of Repayments</Label>
+								<Input className="appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" type="number" onChange={(e) => setRepaymentCount(Number(e.target.value))} />
 							</div>
 							<div className="flex flex-col space-y-1">
 								<Label>Loan Type</Label>
@@ -123,10 +121,7 @@ export default function Home() {
 						</div>
 					</CardContent>
 					<CardFooter>
-						<Button
-							onClick={calculateSchedule}
-							className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-						>
+						<Button onClick={calculateSchedule} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
 							Calculate
 						</Button>
 					</CardFooter>
@@ -153,19 +148,11 @@ export default function Home() {
 								<TableBody>
 									{schedule.map((row, index) => (
 										<TableRow key={index}>
-											<TableCell>{row.date}</TableCell>
-											<TableCell className="text-right">
-												{row.principal.toLocaleString()}
-											</TableCell>
-											<TableCell className="text-right">
-												{row.interest.toLocaleString()}
-											</TableCell>
-											<TableCell className="text-right">
-												{row.total.toLocaleString()}
-											</TableCell>
-											<TableCell className="text-right">
-												{row.balance.toLocaleString()}
-											</TableCell>
+											<TableCell>{row.PaymentDate}</TableCell>
+											<TableCell className="text-right">{row.Principal.toLocaleString()}</TableCell>
+											<TableCell className="text-right">{row.Interest.toLocaleString()}</TableCell>
+											<TableCell className="text-right">{row.Total.toLocaleString()}</TableCell>
+											<TableCell className="text-right">{typeof row.RemainingBalance === 'number' ? row.RemainingBalance.toLocaleString() : '-'}</TableCell>
 										</TableRow>
 									))}
 									<TableRow className="font-bold border-t">
