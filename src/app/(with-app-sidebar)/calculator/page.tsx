@@ -81,12 +81,10 @@ export default function Home() {
 						<div className="space-y-4">
 							<div className="flex flex-col space-y-1">
 								<Label>Principal</Label>
-								{/* <Input className="appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" type="number" onChange={(e) => setPrincipal(Number(e.target.value))} /> */}
 								<Input
 									type="text"
 									value={principalText}
 									onChange={handlePrincipalChange}
-									className="text-right"
 								/>
 							</div>
 							<div className="flex flex-col space-y-1">
