@@ -141,7 +141,7 @@ export default function Page() {
         <>
             <div className="flex flex-col p-6 space-y-8">
                 <div className="flex justify-between items-center">
-                    <h1 className="text-2xl font-bold">Check Point Management</h1>
+                    <h1 className="text-2xl font-bold">Collection Point Management</h1>
                     <div className="space-x-4">
                         {userRole === 0 && (
                             <Dialog>

@@ -56,7 +56,7 @@ const data = {
 		},
 	],
 	menus: [
-		{ name: "Check Point", url: "/cp", icon: MapPinCheckInside },
+		{ name: "CP No.", url: "/cp", icon: MapPinCheckInside },
 		{ name: "Report", url: "/report", icon: Folders },
 		{ name: "HR", url: "/hr", icon: Users },
 		{ name: "Fixed Assets", url: "/fixed-assets", icon: HousePlus },
