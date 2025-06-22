@@ -60,7 +60,7 @@ export default function Page() {
     );
 }
 
-export function SelectEmployeePage({ onConfirm, onNew }: { onConfirm: (employee: GetEmployeeSchema) => void, onNew: () => void }) {
+function SelectEmployeePage({ onConfirm, onNew }: { onConfirm: (employee: GetEmployeeSchema) => void, onNew: () => void }) {
     const [searchQuery, setSearchQuery] = useState("");
     const [employees, setEmployees] = useState<GetEmployeeSchema[]>([]);
     const [loading, setLoading] = useState(true);
