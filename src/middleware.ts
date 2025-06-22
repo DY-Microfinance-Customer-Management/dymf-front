@@ -103,17 +103,17 @@ async function rotateAccessToken(refreshToken: string) {
 
 export const config = {
     matcher: [
-        "/home/:path*",
-        "/registration/:path*",
-        "/search/:path*",
-        "/repayment/:path*",
-        "/overdue/:path*",
-        "/cp/:path*",
-        "/report/:path*",
-        "/hr/:path*",
-        "/fixed-asset/:path*",
         "/calculator/:path*",
+        "/cp/:path*",
+        "/fixed-assets/:path*",
+        "/home/:path*",
+        "/hr/:path*",
+        "/overdue/:path*",
+        "/registration/:path*",
+        "/repayment/:path*",
+        "/report/:path*",
+        "/search/:path*",
         "/user/:path*",
-        "/api/:path*"
+        "/api/:path*",
     ],
 };
