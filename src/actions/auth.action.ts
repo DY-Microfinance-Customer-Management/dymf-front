@@ -24,7 +24,10 @@ export async function login(_: any, formData: FormData): Promise<serverActionMes
     });
 
     if (!response.ok) {
-        throw new Error('Login Failed! Please try again');
+        return {
+            status: 500,
+            message: 'Login Failed! Please try again'
+        }
     }
 
     // 'use server'; 때문에 쿠키가 client로 저장되지 않음

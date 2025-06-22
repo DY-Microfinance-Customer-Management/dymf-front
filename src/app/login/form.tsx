@@ -1,19 +1,27 @@
 'use client';
 
 // React
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 
 // UI
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PasswordInput } from "@/components/ui/password-input";
+import { toast } from "sonner";
 
 // Action
 import { login } from "@/actions/auth.action";
 
 export function LoginForm() {
-    const [_, formAction, isPending] = useActionState(login, null);
+    const [state, formAction, isPending] = useActionState(login, null);
+    useEffect(() => {
+        if (state?.status === 200) {
+            console.log('pass');
+        } else {
+            toast.error(`${state?.message}`);
+        }
+    }, [state]);
 
     return (
         <form action={formAction}>
