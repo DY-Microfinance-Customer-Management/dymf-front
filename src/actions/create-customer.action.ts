@@ -81,7 +81,7 @@ export async function createCustomerAction(_: any, formData: FormData): Promise<
         const status = response.status;
 
         if (status === 400) {
-            console.log(`[Create Customer Action]: ${response.json()}`)
+            console.log(`[Create Customer Action]: ${JSON.stringify(response)}`)
             return {
                 status: 400,
                 message: 'Something went wrong :( Please check the values of the customer information.'
