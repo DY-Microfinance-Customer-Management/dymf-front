@@ -31,11 +31,9 @@ export async function createCustomerAction(_: any, formData: FormData): Promise<
         image: "empty"
     }
 
-    console.log(1)
-    
     const file = formData.get('image') as File;
     if (file.size !== 0) {
-        
+
         if (file && file instanceof File) {
             const response = await fetch(`${process.env.API_SERVER_URL}/common`, {
                 method: 'POST',
@@ -46,8 +44,6 @@ export async function createCustomerAction(_: any, formData: FormData): Promise<
             })
             const responseData = await response.json();
             const image_address = responseData.url;
-            console.log(`[Create Customer Image1]: ${responseData}`)
-            console.log(2)
             
             const extractFileName = (image_address: string): string | null => {
                 const regex = /\/([^\/?]+\.jpg)/;
@@ -68,8 +64,7 @@ export async function createCustomerAction(_: any, formData: FormData): Promise<
                     }
                 })
             }
-            
-            console.log(3)
+
         }
     }
     
@@ -81,13 +76,11 @@ export async function createCustomerAction(_: any, formData: FormData): Promise<
         },
         body: JSON.stringify(data), // 1MB 넘어가면 Error
     });
-    
-    console.log(4)
+
     if (!response.ok) {
         const status = response.status;
 
         if (status === 400) {
-            console.log(`[Create Customer Action]: ${JSON.stringify(response)}`)
             return {
                 status: 400,
                 message: 'Something went wrong :( Please check the values of the customer information.'
