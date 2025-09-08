@@ -199,7 +199,7 @@ export default function Page() {
                                     ) : (
                                         <TableRow>
                                             <TableCell colSpan={3} className="text-center">
-                                                No users found.f
+                                                No users found
                                             </TableCell>
                                         </TableRow>
                                     )}

@@ -81,7 +81,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	});
 
 	const filteredMenus = data.menus.filter(
-		menu => userRole !== 1 || !["User", "HR", "Report"].includes(menu.name)
+		menu => userRole !== 1 || !["User", "HR", "Report", "Fixed Assets"].includes(menu.name)
 	);
 
 	return (
