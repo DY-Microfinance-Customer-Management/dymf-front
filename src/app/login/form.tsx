@@ -19,7 +19,10 @@ export function LoginForm() {
         if (state?.status === 200) {
             console.log('pass');
         } else {
-            toast.error(`${state?.message}`);
+            const message = state?.message;
+            if (message != undefined) {
+                toast.error(`${state?.message}`);
+            }
         }
     }, [state]);
 
