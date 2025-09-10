@@ -117,7 +117,7 @@ export default function LoanCalculationTab({ selectedCustomer, setIsCalculated, 
                         </div>
                         <div className="col-span-1">
                             <Label>Loan Type</Label>
-                            <Input disabled name="loanType" value={selectedCustomer.loan_type ? 'Special Loan' : 'Group Loan'} type="text" />
+                            <Input disabled name="loanType" value={selectedCustomer.loan_type ? 'Group Loan' : 'Special Loan'} type="text" />
                         </div>
                         <div className="col-span-1"></div>
                         <div className="col-span-1">
