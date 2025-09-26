@@ -63,9 +63,10 @@ export default function Page() {
                 const unique = Array.from(new Map(merged.map(cp => [cp.id, cp])).values());
                 return unique;
             });
-            setCursor(data.nextCursor ?? null);
         }
-
+        
+        console.log("nextCursor 업데이트:", data.nextCursor);
+        setCursor(data.nextCursor);
         setLoading(false);
     };
 
