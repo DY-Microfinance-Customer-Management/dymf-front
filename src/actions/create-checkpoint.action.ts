@@ -27,7 +27,7 @@ export async function createCheckPointAction(_: any, formData: FormData): Promis
         body: JSON.stringify(data),
     });
     
-    console.log(`response; ${await response.text()}`)
+    // console.log(`response; ${await response.text()}`)
     if (!response.ok) {
         const status = response.status;
         
