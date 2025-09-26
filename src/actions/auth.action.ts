@@ -11,13 +11,9 @@ import { redirect } from "next/navigation";
 export async function login(_: any, formData: FormData): Promise<serverActionMessage> {
     const id = formData.get('id');
     const password = formData.get('password');
-    console.log(`id: ${id}`)
-    console.log(`password: ${password}`)
 
     const credentials = btoa(`${id}:${password}`);
-
     
-    console.log(`path: ${process.env.API_SERVER_URL}`)
     const response = await fetch(`${process.env.API_SERVER_URL}/auth/login`, {
         method: 'POST',
         headers: {
@@ -27,7 +23,7 @@ export async function login(_: any, formData: FormData): Promise<serverActionMes
         credentials: 'include',
     });
 
-    console.log(`response: ${await response.text()}`)
+    // console.log(`response: ${await response.text()}`)
     if (!response.ok) {
         return {
             status: 500,
