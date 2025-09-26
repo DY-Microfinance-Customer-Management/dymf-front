@@ -25,7 +25,7 @@ export async function login(_: any, formData: FormData): Promise<serverActionMes
         credentials: 'include',
     });
 
-    console.log(`response: ${response.text()}`)
+    console.log(`response: ${JSON.stringify(response)}`)
     if (!response.ok) {
         return {
             status: 500,
