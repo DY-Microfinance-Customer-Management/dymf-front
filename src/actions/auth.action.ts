@@ -16,6 +16,8 @@ export async function login(_: any, formData: FormData): Promise<serverActionMes
 
     const credentials = btoa(`${id}:${password}`);
 
+    
+    console.log(`path: ${process.env.API_SERVER_URL}`)
     const response = await fetch(`${process.env.API_SERVER_URL}/auth/login`, {
         method: 'POST',
         headers: {
@@ -25,7 +27,7 @@ export async function login(_: any, formData: FormData): Promise<serverActionMes
         credentials: 'include',
     });
 
-    console.log(`response: ${JSON.stringify(response)}`)
+    console.log(`response: ${await response.text()}`)
     if (!response.ok) {
         return {
             status: 500,
