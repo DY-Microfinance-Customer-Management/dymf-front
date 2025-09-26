@@ -45,7 +45,7 @@ export default function Page() {
         setLoading(true);
 
         const params = new URLSearchParams({
-            order: "sc",
+            order: "asc",
             goBack: "false",
         });
 
