@@ -38,7 +38,6 @@ export default function Page() {
     const { username, userRole } = useUser();
 
     // Server Action
-    const router = useRouter();
     const [state, formAction, isPending] = useActionState(createCheckPointAction, null);
 
     const fetchCpNumbers = async (nextCursor: string | null = null) => {
@@ -167,6 +166,8 @@ export default function Page() {
 
     // Scroll Handler
     const scrollHandler = (event: React.UIEvent<HTMLDivElement>) => {
+        if (!hasMore || loading) return;
+        
         const target = event.target as HTMLDivElement;
         const scrollTop = target.scrollTop;
         const scrollHeight = target.scrollHeight;
