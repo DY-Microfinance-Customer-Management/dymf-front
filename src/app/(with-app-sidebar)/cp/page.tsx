@@ -47,6 +47,7 @@ export default function Page() {
         const params = new URLSearchParams({
             order: "id_ASC",
             goBack: "false",
+            take: '20',
         });
 
         if (nextCursor) params.append("cursor", nextCursor);
@@ -54,7 +55,6 @@ export default function Page() {
         const res = await fetch(`/api/getCpNumbers?${params.toString()}`);
         const data = await res.json();
 
-        console.log(data)
         if (data.count === 0 || data.cpNumbers.length === 0) {
             setHasMore(false);
         } else {
@@ -65,7 +65,6 @@ export default function Page() {
             });
         }
         
-        console.log("nextCursor 업데이트:", data.nextCursor);
         setCursor(data.nextCursor);
         setLoading(false);
     };
