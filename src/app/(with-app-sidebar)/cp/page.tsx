@@ -54,6 +54,7 @@ export default function Page() {
         const res = await fetch(`/api/getCpNumbers?${params.toString()}`);
         const data = await res.json();
 
+        console.log(data)
         if (data.count === 0 || data.cpNumbers.length === 0) {
             setHasMore(false);
         } else {
@@ -167,7 +168,7 @@ export default function Page() {
     // Scroll Handler
     const scrollHandler = (event: React.UIEvent<HTMLDivElement>) => {
         if (!hasMore || loading) return;
-        
+
         const target = event.target as HTMLDivElement;
         const scrollTop = target.scrollTop;
         const scrollHeight = target.scrollHeight;
