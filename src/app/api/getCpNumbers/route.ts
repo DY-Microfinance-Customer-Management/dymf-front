@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
     const nextCursor = searchParams.get('cursor');
     const order = searchParams.getAll('order[]');
     const goBack = searchParams.get('goBack') ?? 'false';
-    const take = searchParams.get('take') ?? '20';
+    const take = searchParams.get('take') ?? '1000';
 
     let apiUrl = `${process.env.API_SERVER_URL}/personnel/cpnumber`;
 
