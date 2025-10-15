@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     let apiUrl = `${process.env.API_SERVER_URL}/personnel/cpnumber`;
 
     if (nextCursor) {
-        apiUrl += `?cursor=${encodeURIComponent(nextCursor)}&take=20`;
+        apiUrl += `?cursor=${encodeURIComponent(nextCursor)}&take=1000`;
     } else {
         const query = new URLSearchParams();
         if (order.length > 0) {
