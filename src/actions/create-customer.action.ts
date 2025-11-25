@@ -31,6 +31,8 @@ export async function createCustomerAction(_: any, formData: FormData): Promise<
         image: "empty"
     }
 
+    console.log(`Customer Registration Data: ${data}`)
+
     // const file = formData.get('image') as File;
     // if (file.size !== 0) {
 
@@ -110,6 +112,6 @@ export async function createCustomerAction(_: any, formData: FormData): Promise<
 
     return {
         status: 999,
-        message: 'Testing'
+        message: `${data}`
     }
 }
