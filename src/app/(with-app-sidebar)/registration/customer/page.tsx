@@ -105,6 +105,8 @@ export default function FormPage() {
             router.refresh();
         } else if (state?.status === 404) {
             toast.error(state?.message);
+        } else if (state?.status === 999) {
+            toast.error(state?.message);
         }
     }, [state]);
 
