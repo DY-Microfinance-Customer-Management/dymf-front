@@ -112,6 +112,6 @@ export async function createCustomerAction(_: any, formData: FormData): Promise<
 
     return {
         status: 999,
-        message: `${data}`
+        message: `${JSON.stringify(data)}`
     }
 }
