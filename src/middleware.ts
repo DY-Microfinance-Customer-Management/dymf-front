@@ -4,7 +4,7 @@ import { JwtData } from "@/types";
 import { jwtDecode } from "jwt-decode";
 
 export async function middleware(request: NextRequest) {
-    console.log("Middleware: start");
+    // console.log("Middleware: start");
     const cookieStore = await cookies();
 
     const accessToken = request.cookies.get("access_token")?.value;
@@ -41,7 +41,7 @@ export async function middleware(request: NextRequest) {
         }
     } else if (refreshToken) {
         const success = await rotateAccessToken(refreshToken);
-        console.log(1)
+        // console.log(1)
         if (!success) {
             console.log("Token rotation failed. Redirecting to login.");
             cookieStore.delete('access_token');
@@ -55,7 +55,7 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL("/login", request.url));
     }
 
-    console.log("Middleware: end");
+    // console.log("Middleware: end");
     return NextResponse.next();
 }
 
