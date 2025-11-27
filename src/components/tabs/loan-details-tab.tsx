@@ -26,7 +26,6 @@ export default function LoanDetailsTab({ selectedLoan }: {
             const response = await fetch(`/api/getOneLoan?loanId=${selectedLoan.id}&overdueStatus=0`);
             const data = await response.json();
             const loanSchedule = data.loanData;
-            console.log(loanSchedule)
 
             setLoanSchedules(loanSchedule.loan_schedules);
         } catch (error) {

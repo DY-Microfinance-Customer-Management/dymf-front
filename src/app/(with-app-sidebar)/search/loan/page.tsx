@@ -167,6 +167,7 @@ function SelectLoanPage({ onConfirm }: { onConfirm: (loan: GetLoanSchema) => voi
 }
 
 function LoanDetailsPage({ selectedLoan, onBack }: { selectedLoan: GetLoanSchema; onBack: () => void; }) {
+    console.log(selectedLoan)
     // Context
     const { username, userRole } = useUser();
 
