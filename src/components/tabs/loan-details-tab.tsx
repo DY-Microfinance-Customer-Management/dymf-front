@@ -91,7 +91,7 @@ export default function LoanDetailsTab({ selectedLoan }: {
                         </div>
                         <div className="col-span-1">
                             <Label>Loan Type</Label>
-                            <Input disabled value={selectedLoan.customer.loan_type ? 'Special Loan' : 'Group Loan'} type="text" />
+                            <Input disabled value={selectedLoan.customer.loan_type === 0 ? 'Special Loan' : 'Group Loan'} type="text" />
                         </div>
                         <div className="col-span-1"></div>
                         <div className="col-span-1">
