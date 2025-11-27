@@ -31,8 +31,6 @@ export async function createCustomerAction(_: any, formData: FormData): Promise<
         image: "empty"
     }
 
-    console.log(`Customer Registration Data: ${JSON.stringify(data)}`)
-
     const file = formData.get('image') as File;
     if (file.size !== 0) {
 
@@ -109,9 +107,4 @@ export async function createCustomerAction(_: any, formData: FormData): Promise<
         status: 200,
         message: 'Customer successfully registered.'
     };
-
-    // return {
-    //     status: 999,
-    //     message: `${JSON.stringify(data)}`
-    // }
 }
