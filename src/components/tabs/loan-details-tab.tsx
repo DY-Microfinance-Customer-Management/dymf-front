@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 // Types
-import { GetLoanSchema, RepaymentMethodEnum } from "@/types";
+import { GetLoanSchema, RepaymentMethodEnum, LoanTypeEnum } from "@/types";
 
 // Loan Calculation Component
 export default function LoanDetailsTab({ selectedLoan }: {
@@ -69,6 +69,15 @@ export default function LoanDetailsTab({ selectedLoan }: {
         [RepaymentMethodEnum.Bullet]: "Bullet",
     };
 
+    const loanTypeMap: Record<LoanTypeEnum, string> = {
+        [LoanTypeEnum.special_loan]: "Special Loan",
+        [LoanTypeEnum.group_loan]: "Group Loan",
+        [LoanTypeEnum.etc]: "Etc",
+    };
+
+    console.log("loan_type value:", selectedLoan.customer.loan_type);
+    console.log("loan_type type:", typeof selectedLoan.customer.loan_type);
+
     return (
         <div className="space-y-2">
             <Card>
@@ -91,7 +100,7 @@ export default function LoanDetailsTab({ selectedLoan }: {
                         </div>
                         <div className="col-span-1">
                             <Label>Loan Type</Label>
-                            <Input disabled value={selectedLoan.customer.loan_type === 0 ? 'Special Loan' : 'Group Loan'} type="text" />
+                            <Input disabled value={loanTypeMap[selectedLoan.customer.loan_type]} type="text" />
                         </div>
                         <div className="col-span-1"></div>
                         <div className="col-span-1">
